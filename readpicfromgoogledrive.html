@@ -3,175 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แสดงรูปภาพจาก Google Drive</title>
+    <title>แปลงลิงก์ Google Drive เป็นรูปภาพ</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: "Inter", sans-serif;
-            background-color: #f0f4f8; /* Light blue-gray background */
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            margin: 0;
             padding: 20px;
             box-sizing: border-box;
         }
         .container {
             background-color: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
+            padding: 32px;
+            border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
+            max-width: 500px;
             width: 100%;
             text-align: center;
         }
-        .image-display-area {
-            min-height: 200px;
-            background-color: #e2e8f0; /* Lighter blue-gray */
-            border-radius: 10px;
+        textarea { /* Changed input to textarea for multi-line input */
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            min-height: 100px; /* Make it a multi-line input */
+            resize: vertical; /* Allow vertical resizing */
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .message {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #ef4444;
+        }
+        .info-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
+        .results-output-area { /* Container for all results */
+            margin-top: 32px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Space between each complete entry */
+        }
+        .processed-entry { /* Container for each text + image block */
+            text-align: left;
+            word-break: break-word;
+            padding-bottom: 10px; /* Small padding at bottom of each entry */
+            border-bottom: 1px dashed #e2e8f0; /* Subtle separator between entries */
+        }
+        .processed-entry:last-child {
+            border-bottom: none; /* No border for the last one */
+        }
+        .entry-text {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 10px; /* Reduced margin */
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        .entry-image-container {
+            margin-top: 0px; /* No top margin here, already handled by text margin-bottom */
+            padding: 5px; /* Reduced padding */
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            border: 1px solid #dbeafe;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #64748b; /* Darker blue-gray text */
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-top: 20px;
-            border: 2px dashed #94a3b8; /* Dashed border */
-            overflow: hidden; /* Ensure image doesn't overflow */
+            min-height: 120px;
+            overflow: hidden;
+            flex-direction: column;
         }
-        .image-display-area img {
+        .entry-image-container img {
             max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* Ensure image fits within the container */
-            border-radius: 8px; /* Slightly rounded corners for the image */
+            height: auto;
+            border-radius: 6px;
+            display: block;
+            margin-bottom: 5px; /* Reduced space */
         }
-        .error-message {
-            color: #ef4444; /* Red color for error messages */
-            font-size: 0.9rem;
-            margin-top: 10px;
+        .entry-image-placeholder {
+            color: #94a3b8;
+            font-style: italic;
+            font-size: 14px;
         }
     </style>
 </head>
-<body class="antialiased">
+<body>
     <div class="container">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">การแสดงรูปภาพจาก Google Drive บนหน้าเว็บ</h1>
-        <p class="text-gray-700 mb-4">
-            สวัสดีครับ! คุณต้องการแสดงรูปภาพจาก Google Drive บนหน้าเว็บใช่ไหมครับ?
-            โดยปกติแล้ว การแสดงรูปภาพจากลิงก์โฟลเดอร์ Google Drive โดยตรง (เช่น ลิงก์ที่คุณให้มา) บนหน้าเว็บนั้นทำได้ยากครับ
-            เนื่องจาก Google Drive มีมาตรการรักษาความปลอดภัยและการอนุญาตการเข้าถึงที่เข้มงวด
-            ลิงก์โฟลเดอร์จะนำไปยังหน้า Google Drive ไม่ใช่ URL ของรูปภาพโดยตรงที่เบราว์เซอร์สามารถแสดงได้ทันทีครับ
-        </p>
-        <p class="text-gray-700 mb-4">
-            หากคุณต้องการแสดงรูปภาพจาก Google Drive บนหน้าเว็บ คุณจะต้อง:
-        </p>
-        <ol class="list-decimal list-inside text-left text-gray-700 mb-6 space-y-2">
-            <li>
-                <span class="font-semibold">แชร์รูปภาพแต่ละรูป:</span> ไปที่ Google Drive ของคุณ คลิกขวาที่รูปภาพที่คุณต้องการแสดง
-                เลือก "รับลิงก์" (Get link) จากนั้นเปลี่ยนการตั้งค่าการแชร์เป็น "ทุกคนที่มีลิงก์" (Anyone with the link)
-                หรือ "สาธารณะ" (Public) เพื่อให้รูปภาพสามารถเข้าถึงได้จากภายนอก Google Drive ครับ
-            </li>
-            <li>
-                <span class="font-semibold">รับลิงก์ URL โดยตรง:</span> หลังจากแชร์รูปภาพแล้ว คุณจะต้องแก้ไขลิงก์ที่ได้รับมา
-                ตัวอย่างเช่น หากลิงก์ที่ได้มามีรูปแบบ:
-                <code class="bg-gray-100 p-1 rounded text-sm text-red-600 break-all">https://drive.google.com/file/d/YOUR_FILE_ID/view?usp=sharing</code>
-                คุณสามารถเปลี่ยนให้เป็นลิงก์สำหรับแสดงผลโดยตรงได้โดยใช้รูปแบบ:
-                <code class="bg-gray-100 p-1 rounded text-sm text-green-600 break-all">https://drive.google.com/uc?export=view&id=YOUR_FILE_ID</code>
-                โดยแทนที่ <code class="bg-gray-100 p-1 rounded text-sm text-red-600">YOUR_FILE_ID</code> ด้วย ID ของไฟล์รูปภาพของคุณครับ
-            </li>
-            <li>
-                <span class="font-semibold">เพิ่มรูปภาพลงใน HTML:</span> เมื่อคุณมีลิงก์ URL โดยตรงแล้ว คุณสามารถใช้แท็ก <code class="bg-gray-100 p-1 rounded text-sm">&lt;img&gt;</code>
-                ใน HTML ของคุณเพื่อแสดงรูปภาพได้
-            </li>
-        </ol>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">แปลงลิงก์ Google Drive</h1>
+        <p class="text-gray-600 mb-6">วางข้อความและลิงก์ Google Drive ของคุณที่นี่เพื่อแสดงผล</p>
 
-        <div class="mt-8 p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">ลองแสดงรูปภาพของคุณที่นี่!</h2>
-            <p class="text-gray-700 mb-4">
-                กรุณาวางลิงก์ URL โดยตรงของรูปภาพจาก Google Drive (ที่ผ่านการแก้ไขแล้ว) ลงในช่องด้านล่างนี้:
-            </p>
-            <input type="text" id="imageUrlInput" placeholder="วางลิงก์ URL รูปภาพ Google Drive ที่นี่ (เช่น https://drive.google.com/uc?export=view&id=YOUR_FILE_ID)"
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 mb-4"
-                   value="https://drive.google.com/uc?export=view&id=15hO3oZoXZZt_5zz-kPuajqK2ISHQ4Mlp">
-            <button id="displayImageBtn"
-                    class="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-bold hover:bg-blue-700 transition duration-300 transform hover:scale-105 shadow-lg">
-                แสดงรูปภาพ
-            </button>
-            <div id="errorMessage" class="error-message hidden"></div>
+        <textarea id="driveLinkInput" placeholder="เช่น
+lekk_nipaporn17/7/202514:35:006000https://drive.google.com/open?id=1-769HVeg4kGXxMvaN-cdjV0Eh6OXxXDj0
+062109352017/7/202514:42:006000https://drive.google.com/open?id=1klQ03PcsAaexZaOcGkD5XXJpvqoWZruGS
+sarapha28217/7/202518:59:006,000https://drive.google.com/open?id=19inRR6QqSt7bMtgUwroM8E-S7Ymh0pJH
+... (แต่ละบรรทัดสำหรับหนึ่งรายการ)"></textarea>
+        <p class="info-text">
+            <strong>โปรดวางลิงก์ Google Drive ต้นฉบับเท่านั้น</strong> (เช่น `drive.google.com/file/d/...` หรือ `drive.google.com/open?id=...`) 
+            หรือลิงก์ Google Docs, Sheets, Slides (เช่น `docs.google.com/.../d/...`)
+            <br>
+            <strong>ไม่รองรับลิงก์โฟลเดอร์, ลิงก์จาก Google Photos หรือลิงก์ที่แปลงแล้ว (lh3.googleusercontent.com)</strong>
+            <br>
+            <em>รูปภาพจะแสดงที่ความกว้าง 400 พิกเซล หากต้องการปรับขนาด สามารถแก้ไขค่า `w400` ในโค้ดได้</em>
+        </p>
+        
+        <button id="convertButton">แสดงผล</button>
+
+        <div id="loadingSpinner" class="loading-spinner"></div>
+
+        <div id="resultsOutput" class="results-output-area">
+            <!-- Processed results will be appended here -->
         </div>
 
-        <div id="imageDisplayArea" class="image-display-area">
-            <p id="imagePlaceholderText">
-                [พื้นที่สำหรับแสดงรูปภาพ]<br>
-                เมื่อคุณใส่ลิงก์ URL โดยตรงและกด "แสดงรูปภาพ" รูปภาพจะปรากฏที่นี่ครับ
-            </p>
-        </div>
-
-        <p class="text-gray-600 mt-6 text-sm">
-            ฉันไม่สามารถเข้าถึงเนื้อหาใน Google Drive ของคุณได้โดยตรงเพื่อดึงรูปภาพมาแสดงให้ครับ
-            ดังนั้น คุณจะต้องดำเนินการตามขั้นตอนข้างต้นเพื่อรับลิงก์ URL โดยตรงของรูปภาพด้วยตนเองครับ
-        </p>
+        <p id="messageDisplay" class="message"></p>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const imageUrlInput = document.getElementById('imageUrlInput');
-            const displayImageBtn = document.getElementById('displayImageBtn');
-            const imageDisplayArea = document.getElementById('imageDisplayArea');
-            const imagePlaceholderText = document.getElementById('imagePlaceholderText');
-            const errorMessage = document.getElementById('errorMessage');
+            const driveLinkInput = document.getElementById('driveLinkInput');
+            const convertButton = document.getElementById('convertButton');
+            const messageDisplay = document.getElementById('messageDisplay');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const resultsOutput = document.getElementById('resultsOutput'); // Main container for all results
 
-            // Function to display the image
-            const displayImage = () => {
-                const imageUrl = imageUrlInput.value.trim();
-                errorMessage.classList.add('hidden'); // Hide previous errors
-
-                if (imageUrl === '') {
-                    errorMessage.textContent = 'กรุณาวางลิงก์ URL รูปภาพก่อนครับ';
-                    errorMessage.classList.remove('hidden');
-                    return;
-                }
-
-                // Basic validation for Google Drive direct link format
-                // This check ensures the link starts with the expected direct export format.
-                if (!imageUrl.startsWith('https://drive.google.com/uc?export=view&id=')) {
-                    errorMessage.textContent = 'ลิงก์ URL ดูเหมือนจะไม่ใช่รูปแบบที่ถูกต้องสำหรับ Google Drive Direct Link (ควรเริ่มต้นด้วย https://drive.google.com/uc?export=view&id=...)';
-                    errorMessage.classList.remove('hidden');
-                    return;
-                }
-
-                // Clear previous content and placeholder text
-                imageDisplayArea.innerHTML = '';
-                imagePlaceholderText.classList.add('hidden');
-
-                const imgElement = document.createElement('img');
-                imgElement.src = imageUrl;
-                imgElement.alt = 'รูปภาพจาก Google Drive';
-                imgElement.className = 'w-full h-auto rounded-lg shadow-md'; // Apply Tailwind classes for styling
-
-                // Error handling for image loading
-                imgElement.onerror = () => {
-                    imageDisplayArea.innerHTML = `<p class="text-red-500">ไม่สามารถโหลดรูปภาพได้ กรุณาตรวจสอบลิงก์ URL และการตั้งค่าการแชร์ (ต้องเป็น "ทุกคนที่มีลิงก์")</p>`;
-                    errorMessage.textContent = 'ไม่สามารถโหลดรูปภาพได้ กรุณาตรวจสอบลิงก์ URL และการตั้งค่าการแชร์ (ต้องเป็น "ทุกคนที่มีลิงก์")';
-                    errorMessage.classList.remove('hidden');
-                    imagePlaceholderText.classList.remove('hidden'); // Show placeholder text again
-                };
-
-                imgElement.onload = () => {
-                    // Once loaded, ensure the placeholder text is hidden
-                    imagePlaceholderText.classList.add('hidden');
-                };
-
-                imageDisplayArea.appendChild(imgElement);
-            };
-
-            displayImageBtn.addEventListener('click', displayImage);
-
-            // Automatically display the image on page load if the input field has a value
-            // This is useful for pre-filling the link as we did here.
-            if (imageUrlInput.value.trim() !== '') {
-                displayImage();
+            // Function to show messages (errors or success)
+            function showMessage(msg, isError = true) {
+                messageDisplay.textContent = msg;
+                messageDisplay.style.color = isError ? '#ef4444' : '#10b981';
+                messageDisplay.classList.remove('hidden');
             }
+
+            // Function to hide messages
+            function hideMessage() {
+                messageDisplay.classList.add('hidden');
+                messageDisplay.textContent = '';
+            }
+
+            // Function to show loading spinner
+            function showLoading() {
+                loadingSpinner.style.display = 'block';
+                convertButton.disabled = true;
+                resultsOutput.innerHTML = ''; // Clear previous results
+                hideMessage();
+            }
+
+            // Function to hide loading spinner
+            function hideLoading() {
+                loadingSpinner.style.display = 'none';
+                convertButton.disabled = false;
+            }
+
+            convertButton.addEventListener('click', () => {
+                const fullInput = driveLinkInput.value.trim();
+                showLoading();
+
+                if (!fullInput) {
+                    hideLoading();
+                    showMessage('กรุณาวางข้อความและ/หรือลิงก์ Google Drive', true);
+                    return;
+                }
+
+                const lines = fullInput.split('\n').filter(line => line.trim() !== ''); // Split by newline and filter empty lines
+
+                if (lines.length === 0) {
+                    hideLoading();
+                    showMessage('ไม่พบข้อมูลที่ถูกต้องในช่องป้อนข้อมูล', true);
+                    return;
+                }
+
+                let processedCount = 0;
+                let errorCount = 0;
+
+                lines.forEach(line => {
+                    let fileId = '';
+                    let textPart = '';
+                    // Regex to find Google Drive/Docs link anywhere in the string
+                    const driveLinkRegex = /(https?:\/\/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)|docs\.google\.com\/(?:document|presentation|spreadsheets)\/d\/)([a-zA-Z0-9_-]+))/;
+                    
+                    const match = line.match(driveLinkRegex);
+
+                    // Create a new processed entry container for each line
+                    const processedEntry = document.createElement('div');
+                    processedEntry.className = 'processed-entry';
+                    resultsOutput.appendChild(processedEntry);
+
+                    const textElement = document.createElement('p');
+                    textElement.className = 'entry-text';
+                    processedEntry.appendChild(textElement);
+
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'entry-image-container';
+                    processedEntry.appendChild(imageContainer);
+
+                    const imgElement = document.createElement('img');
+                    imgElement.className = 'hidden'; // Hidden by default
+                    imageContainer.appendChild(imgElement);
+
+                    const imagePlaceholder = document.createElement('span');
+                    imagePlaceholder.className = 'entry-image-placeholder';
+                    imagePlaceholder.textContent = 'กำลังโหลดรูปภาพ...';
+                    imageContainer.appendChild(imagePlaceholder);
+
+                    // Removed imageInstruction and copyButton creation/appending here
+
+                    if (match) {
+                        const driveLink = match[1];
+                        fileId = match[2];
+                        textPart = line.substring(0, match.index).trim();
+                        if (match.index + match[0].length < line.length) {
+                            textPart += ' ' + line.substring(match.index + match[0].length).trim();
+                        }
+
+                        textElement.textContent = textPart || 'ไม่มีข้อความนำหน้า'; // Display extracted text or a default
+                        
+                        const directLink = `https://lh3.googleusercontent.com/d/${fileId}=w400`; 
+                        
+                        imgElement.src = directLink;
+                        imgElement.alt = "รูปภาพที่แปลงแล้วจาก Google Drive";
+                        imgElement.classList.remove('hidden');
+                        imagePlaceholder.classList.add('hidden');
+
+                        imgElement.onload = () => {
+                            // Removed copyButton and imageInstruction logic here
+                            processedCount++;
+                            checkAllProcessed();
+                        };
+
+                        imgElement.onerror = () => {
+                            imgElement.classList.add('hidden');
+                            imagePlaceholder.classList.remove('hidden');
+                            imagePlaceholder.textContent = 'ไม่สามารถโหลดรูปภาพได้ (ไฟล์ไม่ใช่รูปภาพ หรือการตั้งค่าการแชร์ไม่ถูกต้อง)';
+                            // Removed copyButton and imageInstruction logic here
+                            errorCount++;
+                            checkAllProcessed();
+                        };
+
+                    } else {
+                        // If no valid Google Drive link is found in the line
+                        textElement.textContent = line; // Display the whole line as text
+                        imageContainer.classList.add('hidden'); // Hide image container
+                        // Removed copyButton logic here
+                        errorCount++;
+                        checkAllProcessed();
+                    }
+                });
+
+                function checkAllProcessed() {
+                    if (processedCount + errorCount === lines.length) {
+                        hideLoading();
+                        if (processedCount > 0) {
+                            showMessage(`ประมวลผลสำเร็จ ${processedCount} รายการ${errorCount > 0 ? ` และมีข้อผิดพลาด ${errorCount} รายการ` : ''}`, errorCount > 0);
+                        } else {
+                            showMessage('ไม่พบลิงก์ Google Drive ต้นฉบับที่ถูกต้องในข้อมูลที่ป้อน', true);
+                        }
+                    }
+                }
+
+                driveLinkInput.value = ''; // Clear input field after processing
+            });
+
+            // Add event listener for 'keydown' on the input field
+            driveLinkInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && !event.shiftKey) { // Allow Shift+Enter for new line
+                    event.preventDefault();
+                    convertButton.click();
+                }
+            });
         });
     </script>
 </body>
