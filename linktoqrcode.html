@@ -3,136 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator</title>
-    <!-- Tailwind CSS CDN -->
+    <title>ตัวแปลงลิงก์เป็น QR Code</title>
+    <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter -->
+    <!-- Google Fonts - Inter for consistent typography -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Custom styles for the body and container */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Light gray background */
+            background-color: #f0f4f8; /* Light background color */
+        }
+        .container {
+            max-width: 600px;
+        }
+        .qr-code-container {
+            min-height: 200px; /* Minimum height for QR Code container */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            padding: 1.5rem; /* p-6 */
         }
     </style>
-    <!-- QR Code library - Moved back to head to ensure it's loaded as early as possible -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">สร้าง QR Code</h1>
+    <div class="container bg-white p-8 rounded-xl shadow-lg text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">ตัวแปลงลิงก์เป็น QR Code</h1>
 
         <div class="mb-6">
-            <label for="urlInput" class="block text-gray-700 text-sm font-medium mb-2">ป้อนลิงก์ (URL) ของคุณ:</label>
-            <input
-                type="url"
-                id="urlInput"
-                placeholder="https://example.com"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
-            />
+            <label for="urlInput" class="block text-gray-700 text-lg font-medium mb-2 text-left">ป้อน URL ที่นี่:</label>
+            <input type="url" id="urlInput" placeholder="เช่น https://www.example.com"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
         </div>
 
-        <button
-            id="generateBtn"
-            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out font-semibold text-lg"
-        >
+        <button id="generateBtn"
+                class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg">
             สร้าง QR Code
         </button>
 
-        <div id="qrcode" class="mt-8 flex justify-center items-center p-4 border border-gray-200 rounded-lg bg-gray-50 min-h-[200px]">
-            <!-- QR Code will be displayed here -->
-            <p class="text-gray-500">QR Code ของคุณจะปรากฏที่นี่</p>
+        <div class="mt-8 qr-code-container" id="qrCodeContainer">
+            <!-- Canvas for QR code will be inserted here by JavaScript -->
+            <canvas id="qrCodeCanvas" width="300" height="300" class="hidden"></canvas>
+            <p id="placeholderText" class="text-gray-500">QR Code ของคุณจะปรากฏที่นี่</p>
         </div>
 
-        <div id="messageBox" class="hidden mt-4 p-3 rounded-lg text-sm" role="alert"></div>
+        <div id="actionButtons" class="mt-4 flex flex-col sm:flex-row justify-center gap-4 hidden">
+            <button id="copyImageBtn"
+                    class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                คัดลอกรูปภาพ
+            </button>
+            <button id="downloadImageBtn"
+                    class="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-purple-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                ดาวน์โหลดรูปภาพ
+            </button>
+        </div>
+
+        <div id="statusMessage" class="text-sm text-gray-600 mt-4 hidden"></div>
+        <div id="errorMessage" class="text-red-600 mt-4 hidden"></div>
     </div>
 
+    <!-- QR Code Library CDN (qrious) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <script>
-        // Ensure all resources are fully loaded before running the script
-        window.onload = () => {
-            // Get references to DOM elements
+        // Ensure the DOM is fully loaded before running the script
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get references to HTML elements
             const urlInput = document.getElementById('urlInput');
             const generateBtn = document.getElementById('generateBtn');
-            const qrcodeDiv = document.getElementById('qrcode');
-            const messageBox = document.getElementById('messageBox');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrCodeCanvas = document.getElementById('qrCodeCanvas');
+            const placeholderText = document.getElementById('placeholderText');
+            const actionButtons = document.getElementById('actionButtons');
+            const copyImageBtn = document.getElementById('copyImageBtn');
+            const downloadImageBtn = document.getElementById('downloadImageBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            const errorMessage = document.getElementById('errorMessage');
 
-            let qrCodeInstance = null; // To store the QR code instance
+            // Function to display temporary status messages (like a toast)
+            const showStatusMessage = (message, isError = false) => {
+                statusMessage.textContent = message;
+                statusMessage.classList.remove('hidden');
+                statusMessage.classList.toggle('text-red-600', isError);
+                statusMessage.classList.toggle('text-gray-600', !isError); // Default to gray for success
+                setTimeout(() => {
+                    statusMessage.classList.add('hidden');
+                }, 3000); // Hide after 3 seconds
+            };
 
-            // Function to show messages to the user
-            function showMessage(message, type = 'info') {
-                messageBox.textContent = message;
-                messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-                if (type === 'error') {
-                    messageBox.classList.add('bg-red-100', 'text-red-700');
-                } else if (type === 'success') {
-                    messageBox.classList.add('bg-green-100', 'text-green-700');
-                } else {
-                    messageBox.classList.add('bg-blue-100', 'text-blue-700');
+            // Function to display error messages permanently until cleared
+            const showErrorMessage = (message) => {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+            };
+
+            // Function to hide all messages
+            const clearMessages = () => {
+                statusMessage.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+            };
+
+            // Basic URL validation function
+            const isValidUrl = (string) => {
+                try {
+                    const urlObj = new URL(string);
+                    return urlObj.protocol === "http:" || urlObj.protocol === "https:";
+                } catch (_) {
+                    return false;
                 }
-                messageBox.classList.remove('hidden');
-            }
+            };
 
-            // Function to hide messages
-            function hideMessage() {
-                messageBox.classList.add('hidden');
-            }
-
-            // IMPORTANT: Check if QRCode is defined after the library is expected to be loaded
-            if (typeof QRCode === 'undefined') {
-                showMessage('ข้อผิดพลาด: ไลบรารี QR Code โหลดไม่สำเร็จ กรุณาลองโหลดหน้าใหม่ หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต', 'error');
-                console.error("QRCode library is not defined. It might not have loaded correctly.");
-                generateBtn.disabled = true; // Disable button if library isn't loaded
-                // Do not return here to allow other parts of the script to initialize if possible
-            }
-
-
-            // Event listener for the generate button
-            generateBtn.addEventListener('click', () => {
-                // Check again if QRCode is defined before attempting to use it
-                if (typeof QRCode === 'undefined') {
-                    showMessage('ข้อผิดพลาด: ไลบรารี QR Code ยังไม่พร้อมใช้งาน กรุณารอสักครู่แล้วลองใหม่', 'error');
-                    return; // Prevent further execution if library is not ready
-                }
-
-                const url = urlInput.value.trim(); // Get the URL and remove leading/trailing whitespace
-
-                hideMessage(); // Hide any previous messages
+            // Function to generate the QR code
+            const generateQRCode = () => {
+                const url = urlInput.value.trim();
+                clearMessages(); // Clear any previous messages
+                actionButtons.classList.add('hidden'); // Hide action buttons initially
 
                 if (!url) {
-                    showMessage('กรุณาป้อนลิงก์ (URL) ก่อน', 'error');
+                    showErrorMessage('กรุณาป้อน URL');
+                    qrCodeCanvas.classList.add('hidden');
+                    placeholderText.classList.remove('hidden');
                     return;
                 }
 
-                // Clear previous QR code if it exists
-                qrcodeDiv.innerHTML = '';
-                qrCodeInstance = null; // Reset the instance
+                if (!isValidUrl(url)) {
+                    showErrorMessage('กรุณาป้อน URL ที่ถูกต้อง (เช่น https://www.example.com)');
+                    qrCodeCanvas.classList.add('hidden');
+                    placeholderText.classList.remove('hidden');
+                    return;
+                }
+
+                // Ensure QRious library is loaded
+                if (typeof window.QRious === 'undefined') {
+                    showErrorMessage('ไลบรารี QR Code ไม่พร้อมใช้งาน โปรดลองโหลดหน้าเว็บใหม่');
+                    return;
+                }
+
+                // Hide placeholder and show canvas
+                placeholderText.classList.add('hidden');
+                qrCodeCanvas.classList.remove('hidden');
 
                 try {
-                    // Create a new QR code instance
-                    qrCodeInstance = new QRCode(qrcodeDiv, {
-                        text: url,
-                        width: 200,
-                        height: 200,
-                        colorDark : "#000000",
-                        colorLight : "#ffffff",
-                        correctLevel : QRCode.CorrectLevel.H // High error correction level
+                    // Create a new QRious instance to draw on the canvas
+                    new window.QRious({
+                        element: qrCodeCanvas,
+                        value: url,
+                        size: 300, // Size of the QR code in pixels
+                        level: 'H', // Error correction level (L, M, Q, H)
+                        background: 'white', // Background color
+                        foreground: 'black' // Foreground color
                     });
-                    showMessage('สร้าง QR Code สำเร็จ!', 'success');
-                } catch (error) {
-                    console.error("Error generating QR code:", error);
-                    showMessage('เกิดข้อผิดพลาดในการสร้าง QR Code กรุณาลองใหม่อีกครั้ง', 'error');
-                }
-            });
 
-            // Optional: Generate QR code on Enter key press in the input field
+                    // Show action buttons after successful generation
+                    actionButtons.classList.remove('hidden');
+                    showStatusMessage('สร้าง QR Code สำเร็จแล้ว!');
+                } catch (error) {
+                    console.error("Failed to generate QR code:", error);
+                    showErrorMessage('ไม่สามารถสร้าง QR Code ได้ กรุณาลองใหม่');
+                    qrCodeCanvas.classList.add('hidden');
+                    placeholderText.classList.remove('hidden');
+                }
+            };
+
+            // Event listener for the "สร้าง QR Code" button click
+            generateBtn.addEventListener('click', generateQRCode);
+
+            // Event listener for Enter key press in the URL input field
             urlInput.addEventListener('keypress', (event) => {
                 if (event.key === 'Enter') {
-                    generateBtn.click();
+                    generateQRCode();
                 }
             });
 
-            // Initial message for user guidance
-            showMessage('ป้อนลิงก์ของคุณแล้วกด "สร้าง QR Code" เพื่อเริ่มต้น', 'info');
-        };
+            // Event listener for the "คัดลอกรูปภาพ" button
+            copyImageBtn.addEventListener('click', async () => { // Made async for navigator.clipboard.write
+                if (!qrCodeCanvas.classList.contains('hidden')) { // Check if QR code is visible
+                    try {
+                        const imageDataUrl = qrCodeCanvas.toDataURL('image/png');
+                        const response = await fetch(imageDataUrl);
+                        const blob = await response.blob();
+
+                        // Attempt to copy the image blob directly to clipboard
+                        await navigator.clipboard.write([
+                            new ClipboardItem({
+                                [blob.type]: blob,
+                            }),
+                        ]);
+                        showStatusMessage('คัดลอกรูปภาพ QR Code ไปยังคลิปบอร์ดแล้ว', false);
+                    } catch (err) {
+                        console.error('Failed to copy image to clipboard:', err);
+                        // Provide specific message for permission issues
+                        if (err.name === 'NotAllowedError') {
+                            showStatusMessage('ไม่สามารถคัดลอกรูปภาพได้: เบราว์เซอร์บล็อกการเข้าถึงคลิปบอร์ด (ลองใช้ปุ่มดาวน์โหลดแทน)', true);
+                        } else {
+                            showStatusMessage('ไม่สามารถคัดลอกรูปภาพได้ กรุณาลองใหม่', true);
+                        }
+                    }
+                } else {
+                    showStatusMessage('ยังไม่มี QR Code ให้คัดลอก', true);
+                }
+            });
+
+            // Event listener for the "ดาวน์โหลดรูปภาพ" button
+            downloadImageBtn.addEventListener('click', () => {
+                if (!qrCodeCanvas.classList.contains('hidden')) { // Check if QR code is visible
+                    const imageDataUrl = qrCodeCanvas.toDataURL('image/png');
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = imageDataUrl;
+                    downloadLink.download = 'qrcode.png'; // Default filename for download
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click(); // Programmatically click the link to trigger download
+                    document.body.removeChild(downloadLink); // Remove the temporary link
+                    showStatusMessage('ดาวน์โหลดรูปภาพ QR Code แล้ว', false);
+                } else {
+                    showStatusMessage('ยังไม่มี QR Code ให้ดาวน์โหลด', true);
+                }
+            });
+        });
     </script>
 </body>
 </html>
