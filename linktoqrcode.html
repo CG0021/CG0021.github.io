@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+    </style>
+    <!-- QR Code library - Moved back to head to ensure it's loaded as early as possible -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">สร้าง QR Code</h1>
+
+        <div class="mb-6">
+            <label for="urlInput" class="block text-gray-700 text-sm font-medium mb-2">ป้อนลิงก์ (URL) ของคุณ:</label>
+            <input
+                type="url"
+                id="urlInput"
+                placeholder="https://example.com"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+            />
+        </div>
+
+        <button
+            id="generateBtn"
+            class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 ease-in-out font-semibold text-lg"
+        >
+            สร้าง QR Code
+        </button>
+
+        <div id="qrcode" class="mt-8 flex justify-center items-center p-4 border border-gray-200 rounded-lg bg-gray-50 min-h-[200px]">
+            <!-- QR Code will be displayed here -->
+            <p class="text-gray-500">QR Code ของคุณจะปรากฏที่นี่</p>
+        </div>
+
+        <div id="messageBox" class="hidden mt-4 p-3 rounded-lg text-sm" role="alert"></div>
+    </div>
+
+    <script>
+        // Ensure all resources are fully loaded before running the script
+        window.onload = () => {
+            // Get references to DOM elements
+            const urlInput = document.getElementById('urlInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const qrcodeDiv = document.getElementById('qrcode');
+            const messageBox = document.getElementById('messageBox');
+
+            let qrCodeInstance = null; // To store the QR code instance
+
+            // Function to show messages to the user
+            function showMessage(message, type = 'info') {
+                messageBox.textContent = message;
+                messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+                if (type === 'error') {
+                    messageBox.classList.add('bg-red-100', 'text-red-700');
+                } else if (type === 'success') {
+                    messageBox.classList.add('bg-green-100', 'text-green-700');
+                } else {
+                    messageBox.classList.add('bg-blue-100', 'text-blue-700');
+                }
+                messageBox.classList.remove('hidden');
+            }
+
+            // Function to hide messages
+            function hideMessage() {
+                messageBox.classList.add('hidden');
+            }
+
+            // IMPORTANT: Check if QRCode is defined after the library is expected to be loaded
+            if (typeof QRCode === 'undefined') {
+                showMessage('ข้อผิดพลาด: ไลบรารี QR Code โหลดไม่สำเร็จ กรุณาลองโหลดหน้าใหม่ หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต', 'error');
+                console.error("QRCode library is not defined. It might not have loaded correctly.");
+                generateBtn.disabled = true; // Disable button if library isn't loaded
+                // Do not return here to allow other parts of the script to initialize if possible
+            }
+
+
+            // Event listener for the generate button
+            generateBtn.addEventListener('click', () => {
+                // Check again if QRCode is defined before attempting to use it
+                if (typeof QRCode === 'undefined') {
+                    showMessage('ข้อผิดพลาด: ไลบรารี QR Code ยังไม่พร้อมใช้งาน กรุณารอสักครู่แล้วลองใหม่', 'error');
+                    return; // Prevent further execution if library is not ready
+                }
+
+                const url = urlInput.value.trim(); // Get the URL and remove leading/trailing whitespace
+
+                hideMessage(); // Hide any previous messages
+
+                if (!url) {
+                    showMessage('กรุณาป้อนลิงก์ (URL) ก่อน', 'error');
+                    return;
+                }
+
+                // Clear previous QR code if it exists
+                qrcodeDiv.innerHTML = '';
+                qrCodeInstance = null; // Reset the instance
+
+                try {
+                    // Create a new QR code instance
+                    qrCodeInstance = new QRCode(qrcodeDiv, {
+                        text: url,
+                        width: 200,
+                        height: 200,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H // High error correction level
+                    });
+                    showMessage('สร้าง QR Code สำเร็จ!', 'success');
+                } catch (error) {
+                    console.error("Error generating QR code:", error);
+                    showMessage('เกิดข้อผิดพลาดในการสร้าง QR Code กรุณาลองใหม่อีกครั้ง', 'error');
+                }
+            });
+
+            // Optional: Generate QR code on Enter key press in the input field
+            urlInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    generateBtn.click();
+                }
+            });
+
+            // Initial message for user guidance
+            showMessage('ป้อนลิงก์ของคุณแล้วกด "สร้าง QR Code" เพื่อเริ่มต้น', 'info');
+        };
+    </script>
+</body>
+</html>
