@@ -19,7 +19,6 @@
             min-height: 100vh;
             padding: 20px;
             box-sizing: border-box;
-            /* Removed position: relative from body as developer-info is now inside container */
         }
         .container {
             background-color: #ffffff;
@@ -96,6 +95,11 @@
             max-width: 400px;
             width: 90%;
             text-align: center;
+            opacity: 0; /* Start hidden for fade-in */
+            transition: opacity 0.3s ease-in-out; /* Smooth fade */
+        }
+        .message-box.show {
+            opacity: 1; /* Fade in */
         }
         .message-box-overlay {
             position: fixed;
@@ -106,8 +110,13 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
             display: none; /* Hidden by default */
+            opacity: 0; /* Start hidden for fade-in */
+            transition: opacity 0.3s ease-in-out; /* Smooth fade */
         }
-        .message-box button {
+        .message-box-overlay.show {
+            opacity: 1; /* Fade in */
+        }
+        .message-box button { /* Removed this button from HTML, but keeping style in case needed later */
             background-color: #3b82f6;
             color: white;
             padding: 8px 15px;
@@ -267,7 +276,7 @@
     <div id="messageBoxOverlay" class="message-box-overlay"></div>
     <div id="messageBox" class="message-box">
         <p id="messageBoxContent" class="text-gray-800 text-lg"></p>
-        <button onclick="hideMessageBox()">ตกลง</button>
+        <!-- Removed the "ตกลง" button -->
     </div>
 
     <script>
@@ -287,17 +296,41 @@
         const cvdGroupButtonsContainer = document.getElementById('cvdGroupButtons');
         let selectedGroup = 'C'; // Default selected group
 
+        // Variable to hold the timeout for auto-hiding message box
+        let messageBoxTimeout;
+
         // Function to show custom message box
         function showMessageBox(message) {
+            // Clear any existing timeout to prevent premature hiding
+            clearTimeout(messageBoxTimeout);
+
             messageBoxContent.textContent = message;
             messageBox.style.display = 'block';
             messageBoxOverlay.style.display = 'block';
+
+            // Add 'show' class for fade-in effect
+            setTimeout(() => {
+                messageBox.classList.add('show');
+                messageBoxOverlay.classList.add('show');
+            }, 10); // Small delay to ensure display property takes effect before transition
+
+            // Set timeout to hide the message box after 3 seconds
+            messageBoxTimeout = setTimeout(() => {
+                hideMessageBox();
+            }, 3000); // Hide after 3 seconds
         }
 
         // Function to hide custom message box
         function hideMessageBox() {
-            messageBox.style.display = 'none';
-            messageBoxOverlay.style.display = 'none';
+            // Remove 'show' class for fade-out effect
+            messageBox.classList.remove('show');
+            messageBoxOverlay.classList.remove('show');
+
+            // Hide display property after transition completes
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+                messageBoxOverlay.style.display = 'none';
+            }, 300); // Match CSS transition duration
         }
 
         // Helper function to create a paragraph element with strong label
@@ -440,25 +473,21 @@
 
         // Event listener for the search button
         searchButton.addEventListener('click', async () => {
-            // selectedGroup is already updated by the button click listener
             const searchCode = searchCodeInput.value.trim();
 
-            // Clear previous results
             resultsDiv.innerHTML = '';
-            initialMessage.style.display = 'none'; // Hide initial message during search
+            initialMessage.style.display = 'none';
 
             if (searchCode === '') {
                 showMessageBox('กรุณาป้อนรหัสที่ต้องการค้นหา');
-                initialMessage.style.display = 'block'; // Show initial message if input is empty
+                initialMessage.style.display = 'block';
                 return;
             }
 
-            // Show loading spinner
             loadingSpinner.style.display = 'block';
-            searchButton.disabled = true; // Disable button while loading
+            searchButton.disabled = true;
 
             try {
-                // Fetch data from Google Apps Script API
                 const response = await fetch(APPS_SCRIPT_WEB_APP_URL);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -475,85 +504,104 @@
                     return;
                 }
 
-                let filteredResults;
+                let foundExactMatchInAnyGroup = null;
 
-                if (selectedGroup === 'C') {
+                // First, try to find an exact match for the searchCode across ALL groups
+                for (const row of data.data) {
+                    const rowCode = String(row['รหัส']).trim();
+                    if (rowCode === searchCode) {
+                        foundExactMatchInAnyGroup = row;
+                        break; // Found an exact match, use this to potentially switch group
+                    }
+                }
+
+                let currentFilteredResults = [];
+                let groupToFilterBy = selectedGroup; // Start with the currently selected group
+
+                if (foundExactMatchInAnyGroup) {
+                    // If an exact match was found, switch to its group
+                    groupToFilterBy = String(foundExactMatchInAnyGroup['CVD']).trim();
+                    
+                    // Update selectedGroup and the active button visually
+                    if (groupToFilterBy !== selectedGroup) {
+                        selectedGroup = groupToFilterBy; // Update the global selectedGroup
+                        document.querySelectorAll('.group-button').forEach(button => {
+                            button.classList.remove('selected-group-button');
+                            if (button.dataset.value === selectedGroup) {
+                                button.classList.add('selected-group-button');
+                            }
+                        });
+                    }
+                }
+
+                // Now, filter based on the (potentially updated) groupToFilterBy and its specific rules
+                if (groupToFilterBy === 'C') {
                     const isNumeric = /^\d+$/.test(searchCode);
                     
                     if (isNumeric && searchCode.length >= 3) {
                         // For numeric codes >= 3 digits, perform partial match (includes)
-                        filteredResults = data.data.filter(row => {
+                        currentFilteredResults = data.data.filter(row => {
                             const cvdValue = String(row['CVD']).trim();
                             const codeValue = String(row['รหัส']).trim();
-                            return cvdValue === selectedGroup && codeValue.includes(searchCode);
+                            return cvdValue === groupToFilterBy && codeValue.includes(searchCode);
                         });
                     } else {
                         // For non-numeric codes, or numeric codes < 3 digits, perform exact match
-                        filteredResults = data.data.filter(row => {
+                        currentFilteredResults = data.data.filter(row => {
                             const cvdValue = String(row['CVD']).trim();
                             const codeValue = String(row['รหัส']).trim();
-                            return cvdValue === selectedGroup && codeValue === searchCode;
+                            return cvdValue === groupToFilterBy && codeValue === searchCode;
                         });
                     }
 
-                    if (filteredResults.length === 1) {
-                        // If exactly one result, display it directly
-                        const singleResult = renderSingleResultCard(filteredResults[0]);
+                    if (currentFilteredResults.length === 1) {
+                        const singleResult = renderSingleResultCard(currentFilteredResults[0]);
                         resultsDiv.appendChild(singleResult);
-                    } else if (filteredResults.length > 1) {
-                        // If multiple results, display as accordion items
-                        filteredResults.forEach(result => {
+                    } else if (currentFilteredResults.length > 1) {
+                        currentFilteredResults.forEach(result => {
                             const accordionItem = renderResultAsAccordionItem(result);
                             resultsDiv.appendChild(accordionItem);
                         });
                     } else {
-                        // If no result, show not found message
                         resultsDiv.innerHTML = '<p class="text-center text-gray-600">ไม่พบข้อมูลสำหรับรหัสและกลุ่มที่เลือก</p>';
                     }
-                } else {
-                    // For 'Verify' and 'Deny' groups, perform partial match and use accordion
-                    filteredResults = data.data.filter(row => {
+                } else { // Verify or Deny - Now also check for single vs multiple results
+                    currentFilteredResults = data.data.filter(row => {
                         const cvdValue = String(row['CVD']).trim();
                         const codeValue = String(row['รหัส']).trim();
                         
-                        // Check if CVD group matches
-                        const isCvdMatch = cvdValue === selectedGroup;
+                        const isCvdMatch = cvdValue === groupToFilterBy;
 
-                        // Check for partial code match (case-insensitive)
                         let isCodeMatch = false;
                         const lowerCaseSearchCode = searchCode.toLowerCase();
                         const lowerCaseCodeValue = codeValue.toLowerCase();
 
-                        // If searchCode is purely numeric and 2 or 3 digits long
                         if (/^\d{2,3}$/.test(searchCode)) {
-                            // If numeric and 2 or 3 digits, check if codeValue ends with searchCode
                             isCodeMatch = lowerCaseCodeValue.endsWith(lowerCaseSearchCode);
                         } else {
-                            // If alphanumeric or single digit numeric, perform exact match (case-insensitive)
                             isCodeMatch = lowerCaseCodeValue === lowerCaseSearchCode;
                         }
 
                         return isCvdMatch && isCodeMatch;
                     });
 
-                    if (filteredResults.length > 0) {
-                        // Display each matching result as an accordion item
-                        filteredResults.forEach(result => {
+                    if (currentFilteredResults.length === 1) { // If only one result, render as single card
+                        const singleResult = renderSingleResultCard(currentFilteredResults[0]);
+                        resultsDiv.appendChild(singleResult);
+                    } else if (currentFilteredResults.length > 1) { // If multiple results, render as accordion
+                        currentFilteredResults.forEach(result => {
                             const accordionItem = renderResultAsAccordionItem(result);
                             resultsDiv.appendChild(accordionItem);
                         });
                     } else {
-                        // No results found
                         resultsDiv.innerHTML = '<p class="text-center text-gray-600">ไม่พบข้อมูลสำหรับรหัสและกลุ่มที่เลือก</p>';
                     }
                 }
 
             } catch (error) {
-                // Handle any network or parsing errors
                 console.error('Error fetching data:', error);
                 showMessageBox(`เกิดข้อผิดพลาดในการดึงข้อมูล: ${error.message}`);
             } finally {
-                // Hide loading spinner and re-enable button
                 loadingSpinner.style.display = 'none';
                 searchButton.disabled = false;
             }
