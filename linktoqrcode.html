@@ -161,7 +161,8 @@
                     showStatusMessage('สร้าง QR Code สำเร็จแล้ว!');
                 } catch (error) {
                     console.error("Failed to generate QR code:", error);
-                    showErrorMessage('ไม่สามารถสร้าง QR Code ได้ กรุณาลองใหม่');
+                    // Provide a more specific error message to the user
+                    showErrorMessage('ไม่สามารถสร้าง QR Code ได้ กรุณาลองใหม่ ตรวจสอบให้แน่ใจว่า URL ถูกต้องและไม่ยาวเกินไป');
                     qrCodeCanvas.classList.add('hidden');
                     placeholderText.classList.remove('hidden');
                 }
