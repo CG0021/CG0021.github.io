@@ -1,1 +1,563 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบค้นหา CVD ของ สปสช.</title>
+    <!-- Google Fonts - Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the app */
+        body {
+            font-family: 'Kanit', sans-serif; /* Using Kanit font as per user request */
+            background-color: #f0f4f8; /* Light background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to start to prevent content from being too centered vertically on small screens */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            /* Removed position: relative from body as developer-info is now inside container */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px; /* Rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Soft shadow */
+            max-width: 900px; /* Max width for better readability */
+            width: 100%;
+            margin-top: 20px; /* Add some top margin */
+            display: flex; /* Added for flex layout */
+            flex-direction: column; /* Stack children vertically */
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #334155; /* Darker text for labels */
+        }
+        .input-field, .select-field {
+            border: 1px solid #cbd5e1; /* Light border */
+            border-radius: 8px; /* Rounded corners for inputs */
+            padding: 10px 15px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus, .select-field:focus {
+            outline: none;
+            border-color: #3b82f6; /* Blue border on focus */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); /* Light blue shadow on focus */
+        }
+        .btn-primary {
+            background-color: #3b82f6; /* Blue button */
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* Darker blue on hover */
+            transform: translateY(-1px); /* Slight lift on hover */
+        }
+        .btn-primary:active {
+            transform: translateY(0); /* Reset on click */
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message-box {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none; /* Hidden by default */
+        }
+        .message-box button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .message-box button:hover {
+            background-color: #2563eb;
+        }
 
+        /* Accordion specific styles */
+        .accordion-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* Ensures rounded corners apply to content */
+        }
+        .accordion-header {
+            background-color: #f8fafc;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: #1e293b;
+            transition: background-color 0.2s;
+        }
+        .accordion-header:hover {
+            background-color: #edf2f7;
+        }
+        .accordion-header .arrow {
+            transition: transform 0.3s ease-in-out;
+        }
+        .accordion-header.expanded .arrow {
+            transform: rotate(90deg);
+        }
+        .accordion-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+        .accordion-content.expanded {
+            max-height: 9999px; /* Adjusted to a very large value to accommodate all content */
+            padding: 20px;
+        }
+        .accordion-content p {
+            margin-bottom: 5px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        .accordion-content p strong {
+            color: #1e293b;
+        }
+        /* Style for direct display of single result */
+        .single-result-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        .single-result-card h3 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .single-result-card p {
+            margin-bottom: 5px;
+            color: #475569;
+            line-height: 1.5;
+        }
+        .single-result-card p strong {
+            color: #1e293b;
+        }
+
+        /* Styles for group selection buttons */
+        .group-button {
+            background-color: #e2e8f0; /* Light gray background for unselected */
+            color: #475569; /* Darker text */
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+            border: 1px solid #cbd5e1;
+            flex: 1; /* Make buttons take equal width within flex container */
+        }
+        .group-button:hover {
+            background-color: #cbd5e1;
+        }
+        .group-button.selected-group-button {
+            background-color: #3b82f6; /* Blue background for selected */
+            color: white;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+        .group-button.selected-group-button:hover {
+            background-color: #2563eb; /* Darker blue on hover for selected */
+        }
+        /* Developer info styling - now inside the container */
+        .developer-info {
+            margin-top: 20px; /* Space from content above */
+            padding-top: 15px; /* Padding above the text */
+            border-top: 1px solid #e2e8f0; /* Separator line */
+            color: #6b7280; /* Gray text */
+            font-size: 0.75rem; /* text-xs equivalent */
+            text-align: right; /* Align text to the right */
+        }
+        .developer-info p {
+            margin-bottom: 0; /* Remove default paragraph margin */
+            line-height: 1.4; /* Adjust line height for readability */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">แนวทางแก้ไขรหัส C, V, Deny สปสช.</h2>
+
+        <div class="mb-6">
+            <label class="block text-sm mb-2">เลือกกลุ่ม CVD:</label>
+            <div id="cvdGroupButtons" class="flex gap-4">
+                <button type="button" class="group-button selected-group-button" data-value="C">C</button>
+                <button type="button" class="group-button" data-value="Verify">Verify</button>
+                <button type="button" class="group-button" data-value="Deny">Deny</button>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm mb-2" for="searchCode">รหัส:</label>
+            <input type="text" id="searchCode" class="input-field" placeholder="ป้อนรหัสที่ต้องการค้นหา">
+        </div>
+
+        <button id="searchButton" class="btn-primary w-full">ค้นหา</button>
+
+        <div id="loadingSpinner" class="loading-spinner"></div>
+
+        <div id="results" class="mt-8 space-y-4">
+            <!-- Search results will be displayed here -->
+            <p class="text-center text-gray-500" id="initialMessage">ป้อนรหัสและกด 'ค้นหา' เพื่อดูผลลัพธ์</p>
+        </div>
+
+        <!-- Developer Information inside the container, at the bottom right -->
+        <div class="developer-info">
+            <p>พัฒนาโดย <strong>ดร.นพ.ชุมพล นุชผ่อง</strong><br>รองผู้อำนวยการกองเศรษฐกิจสุขภาพและหลักประกันสุขภาพ</p>
+        </div>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="messageBoxOverlay" class="message-box-overlay"></div>
+    <div id="messageBox" class="message-box">
+        <p id="messageBoxContent" class="text-gray-800 text-lg"></p>
+        <button onclick="hideMessageBox()">ตกลง</button>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace this with your actual Google Apps Script Web App URL
+        // Make sure the URL ends with /exec
+        const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzBmDG3S-E0k88rhEdyXdURz3xD5K_z0RO4c11cifhG0-A14GzZSVWaPrauv4Uan8POnA/exec';
+
+        // Get references to DOM elements
+        const searchButton = document.getElementById('searchButton');
+        const searchCodeInput = document.getElementById('searchCode');
+        const resultsDiv = document.getElementById('results');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const initialMessage = document.getElementById('initialMessage');
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+        const messageBoxOverlay = document.getElementById('messageBoxOverlay');
+        const cvdGroupButtonsContainer = document.getElementById('cvdGroupButtons');
+        let selectedGroup = 'C'; // Default selected group
+
+        // Function to show custom message box
+        function showMessageBox(message) {
+            messageBoxContent.textContent = message;
+            messageBox.style.display = 'block';
+            messageBoxOverlay.style.display = 'block';
+        }
+
+        // Function to hide custom message box
+        function hideMessageBox() {
+            messageBox.style.display = 'none';
+            messageBoxOverlay.style.display = 'none';
+        }
+
+        // Helper function to create a paragraph element with strong label
+        function createInfoParagraph(label, value) {
+            if (value !== null && value !== undefined && String(value).trim() !== '') {
+                const p = document.createElement('p');
+                // Replace newline characters with <br> tags to preserve line breaks
+                p.innerHTML = `<strong>${label}:</strong> ${String(value).replace(/\n/g, '<br>')}`;
+                return p;
+            }
+            return null;
+        }
+
+        // Function to render a single result as a direct display card (for exact match)
+        function renderSingleResultCard(result) {
+            const singleResultCard = document.createElement('div');
+            singleResultCard.className = 'single-result-card'; // Use a distinct class for single results
+
+            // Combined header for "รหัส C : [เลขรหัส]"
+            const combinedHeader = document.createElement('h3');
+            combinedHeader.className = 'text-xl font-bold text-gray-800 mb-4'; // Styling for the combined header
+            combinedHeader.innerHTML = `รหัส <span class="text-blue-700">${result['CVD'] || 'ไม่ระบุ'}</span> : <span class="text-blue-600">${result['รหัส'] || 'ไม่ระบุ'}</span>`; // Changed to "รหัส C : 151" format
+            singleResultCard.appendChild(combinedHeader);
+
+            // รายละเอียด (Details) as a subheading
+            const details = String(result['รายละเอียด']).trim();
+            if (details !== '') {
+                const detailsParagraph = document.createElement('p');
+                detailsParagraph.innerHTML = `<strong>รายละเอียด:</strong> ${details.replace(/\n/g, '<br>')}`;
+                singleResultCard.appendChild(detailsParagraph);
+            }
+
+            // Add other fields as paragraphs
+            const fieldsToDisplay = [
+                'วิธีปฏิบัติ/แนวทางการแก้ไข',
+                'แนวทางแก้ไข C เบื้องต้น',
+                'แฟ้มที่เกี่ยวข้อง',
+                'รายละเอียดประกอบการแก้ไข 16 แฟ้ม',
+                'รายละเอียดประกอบการแก้ไข สิทธิประโยชน์',
+                'วิธีส่งเบิกซ้ำ (UUC=1,UUC=2)',
+                'การป้องกัน'
+            ];
+
+            fieldsToDisplay.forEach(field => {
+                const p = createInfoParagraph(field, result[field]);
+                if (p) singleResultCard.appendChild(p);
+            });
+
+            return singleResultCard;
+        }
+
+
+        // Function to render a single result as an accordion item (for partial match)
+        function renderResultAsAccordionItem(result) {
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'accordion-item';
+
+            const accordionHeader = document.createElement('div');
+            accordionHeader.className = 'accordion-header';
+            accordionHeader.innerHTML = `<span>รหัส: ${result['รหัส'] || 'ไม่ระบุ'}</span><span class="arrow">&#9658;</span>`; // Right arrow
+            accordionItem.appendChild(accordionHeader);
+
+            const accordionContent = document.createElement('div');
+            accordionContent.className = 'accordion-content';
+
+            // รายละเอียด (Details) as a subheading
+            const details = String(result['รายละเอียด']).trim();
+            if (details !== '') {
+                const detailsParagraph = document.createElement('p');
+                detailsParagraph.innerHTML = `<strong>รายละเอียด:</strong> ${details.replace(/\n/g, '<br>')}`;
+                accordionContent.appendChild(detailsParagraph);
+            }
+
+            // Add other fields as paragraphs
+            const fieldsToDisplay = [
+                'วิธีปฏิบัติ/แนวทางการแก้ไข',
+                'แนวทางแก้ไข C เบื้องต้น',
+                'แฟ้มที่เกี่ยวข้อง',
+                'รายละเอียดประกอบการแก้ไข 16 แฟ้ม',
+                'รายละเอียดประกอบการแก้ไข สิทธิประโยชน์',
+                'วิธีส่งเบิกซ้ำ (UUC=1,UUC=2)',
+                'การป้องกัน'
+            ];
+
+            fieldsToDisplay.forEach(field => {
+                const p = createInfoParagraph(field, result[field]);
+                if (p) accordionContent.appendChild(p);
+            });
+
+            accordionItem.appendChild(accordionContent);
+
+            // Add click event listener to toggle accordion
+            accordionHeader.addEventListener('click', () => {
+                // Collapse all other accordion items
+                document.querySelectorAll('.accordion-content.expanded').forEach(content => {
+                    if (content !== accordionContent) { // Don't collapse the current one
+                        content.style.maxHeight = "0";
+                        content.classList.remove('expanded');
+                        content.previousElementSibling.classList.remove('expanded'); // Remove expanded from header
+                    }
+                });
+
+                // Toggle the current accordion item
+                accordionHeader.classList.toggle('expanded');
+                accordionContent.classList.toggle('expanded');
+                if (accordionContent.classList.contains('expanded')) {
+                    // Set max-height to a very large value directly from CSS for smooth expansion
+                    // No need to calculate scrollHeight here, as CSS handles the max-height
+                    // This ensures content is not cut off due to incorrect scrollHeight
+                    accordionContent.style.maxHeight = "9999px";
+                } else {
+                    accordionContent.style.maxHeight = "0";
+                }
+            });
+
+            return accordionItem;
+        }
+
+        // Event listener for group selection buttons
+        cvdGroupButtonsContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('group-button')) {
+                // Remove 'selected-group-button' class from all buttons
+                document.querySelectorAll('.group-button').forEach(button => {
+                    button.classList.remove('selected-group-button');
+                });
+                // Add 'selected-group-button' class to the clicked button
+                event.target.classList.add('selected-group-button');
+                // Update the selectedGroup variable
+                selectedGroup = event.target.dataset.value;
+            }
+        });
+
+        // Event listener for the search input field to trigger search on Enter key press
+        searchCodeInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.keyCode === 13) {
+                event.preventDefault(); // Prevent default form submission behavior
+                searchButton.click(); // Trigger the click event on the search button
+            }
+        });
+
+        // Event listener for the search button
+        searchButton.addEventListener('click', async () => {
+            // selectedGroup is already updated by the button click listener
+            const searchCode = searchCodeInput.value.trim();
+
+            // Clear previous results
+            resultsDiv.innerHTML = '';
+            initialMessage.style.display = 'none'; // Hide initial message during search
+
+            if (searchCode === '') {
+                showMessageBox('กรุณาป้อนรหัสที่ต้องการค้นหา');
+                initialMessage.style.display = 'block'; // Show initial message if input is empty
+                return;
+            }
+
+            // Show loading spinner
+            loadingSpinner.style.display = 'block';
+            searchButton.disabled = true; // Disable button while loading
+
+            try {
+                // Fetch data from Google Apps Script API
+                const response = await fetch(APPS_SCRIPT_WEB_APP_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.error) {
+                    showMessageBox(`ข้อผิดพลาดจาก API: ${data.error}`);
+                    return;
+                }
+
+                if (!data.data || data.data.length === 0) {
+                    showMessageBox('ไม่พบข้อมูลจาก Google Sheet');
+                    return;
+                }
+
+                let filteredResults;
+
+                if (selectedGroup === 'C') {
+                    const isNumeric = /^\d+$/.test(searchCode);
+                    
+                    if (isNumeric && searchCode.length >= 3) {
+                        // For numeric codes >= 3 digits, perform partial match (includes)
+                        filteredResults = data.data.filter(row => {
+                            const cvdValue = String(row['CVD']).trim();
+                            const codeValue = String(row['รหัส']).trim();
+                            return cvdValue === selectedGroup && codeValue.includes(searchCode);
+                        });
+                    } else {
+                        // For non-numeric codes, or numeric codes < 3 digits, perform exact match
+                        filteredResults = data.data.filter(row => {
+                            const cvdValue = String(row['CVD']).trim();
+                            const codeValue = String(row['รหัส']).trim();
+                            return cvdValue === selectedGroup && codeValue === searchCode;
+                        });
+                    }
+
+                    if (filteredResults.length === 1) {
+                        // If exactly one result, display it directly
+                        const singleResult = renderSingleResultCard(filteredResults[0]);
+                        resultsDiv.appendChild(singleResult);
+                    } else if (filteredResults.length > 1) {
+                        // If multiple results, display as accordion items
+                        filteredResults.forEach(result => {
+                            const accordionItem = renderResultAsAccordionItem(result);
+                            resultsDiv.appendChild(accordionItem);
+                        });
+                    } else {
+                        // If no result, show not found message
+                        resultsDiv.innerHTML = '<p class="text-center text-gray-600">ไม่พบข้อมูลสำหรับรหัสและกลุ่มที่เลือก</p>';
+                    }
+                } else {
+                    // For 'Verify' and 'Deny' groups, perform partial match and use accordion
+                    filteredResults = data.data.filter(row => {
+                        const cvdValue = String(row['CVD']).trim();
+                        const codeValue = String(row['รหัส']).trim();
+                        
+                        // Check if CVD group matches
+                        const isCvdMatch = cvdValue === selectedGroup;
+
+                        // Check for partial code match (case-insensitive)
+                        let isCodeMatch = false;
+                        const lowerCaseSearchCode = searchCode.toLowerCase();
+                        const lowerCaseCodeValue = codeValue.toLowerCase();
+
+                        // If searchCode is purely numeric and 2 or 3 digits long
+                        if (/^\d{2,3}$/.test(searchCode)) {
+                            // If numeric and 2 or 3 digits, check if codeValue ends with searchCode
+                            isCodeMatch = lowerCaseCodeValue.endsWith(lowerCaseSearchCode);
+                        } else {
+                            // If alphanumeric or single digit numeric, perform exact match (case-insensitive)
+                            isCodeMatch = lowerCaseCodeValue === lowerCaseSearchCode;
+                        }
+
+                        return isCvdMatch && isCodeMatch;
+                    });
+
+                    if (filteredResults.length > 0) {
+                        // Display each matching result as an accordion item
+                        filteredResults.forEach(result => {
+                            const accordionItem = renderResultAsAccordionItem(result);
+                            resultsDiv.appendChild(accordionItem);
+                        });
+                    } else {
+                        // No results found
+                        resultsDiv.innerHTML = '<p class="text-center text-gray-600">ไม่พบข้อมูลสำหรับรหัสและกลุ่มที่เลือก</p>';
+                    }
+                }
+
+            } catch (error) {
+                // Handle any network or parsing errors
+                console.error('Error fetching data:', error);
+                showMessageBox(`เกิดข้อผิดพลาดในการดึงข้อมูล: ${error.message}`);
+            } finally {
+                // Hide loading spinner and re-enable button
+                loadingSpinner.style.display = 'none';
+                searchButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
