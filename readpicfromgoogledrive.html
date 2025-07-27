@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แสดงรูปภาพจาก Google Drive</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        .image-display-area {
+            min-height: 200px;
+            background-color: #e2e8f0; /* Lighter blue-gray */
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #64748b; /* Darker blue-gray text */
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-top: 20px;
+            border: 2px dashed #94a3b8; /* Dashed border */
+            overflow: hidden; /* Ensure image doesn't overflow */
+        }
+        .image-display-area img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* Ensure image fits within the container */
+            border-radius: 8px; /* Slightly rounded corners for the image */
+        }
+        .error-message {
+            color: #ef4444; /* Red color for error messages */
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">การแสดงรูปภาพจาก Google Drive บนหน้าเว็บ</h1>
+        <p class="text-gray-700 mb-4">
+            สวัสดีครับ! คุณต้องการแสดงรูปภาพจาก Google Drive บนหน้าเว็บใช่ไหมครับ?
+            โดยปกติแล้ว การแสดงรูปภาพจากลิงก์โฟลเดอร์ Google Drive โดยตรง (เช่น ลิงก์ที่คุณให้มา) บนหน้าเว็บนั้นทำได้ยากครับ
+            เนื่องจาก Google Drive มีมาตรการรักษาความปลอดภัยและการอนุญาตการเข้าถึงที่เข้มงวด
+            ลิงก์โฟลเดอร์จะนำไปยังหน้า Google Drive ไม่ใช่ URL ของรูปภาพโดยตรงที่เบราว์เซอร์สามารถแสดงได้ทันทีครับ
+        </p>
+        <p class="text-gray-700 mb-4">
+            หากคุณต้องการแสดงรูปภาพจาก Google Drive บนหน้าเว็บ คุณจะต้อง:
+        </p>
+        <ol class="list-decimal list-inside text-left text-gray-700 mb-6 space-y-2">
+            <li>
+                <span class="font-semibold">แชร์รูปภาพแต่ละรูป:</span> ไปที่ Google Drive ของคุณ คลิกขวาที่รูปภาพที่คุณต้องการแสดง
+                เลือก "รับลิงก์" (Get link) จากนั้นเปลี่ยนการตั้งค่าการแชร์เป็น "ทุกคนที่มีลิงก์" (Anyone with the link)
+                หรือ "สาธารณะ" (Public) เพื่อให้รูปภาพสามารถเข้าถึงได้จากภายนอก Google Drive ครับ
+            </li>
+            <li>
+                <span class="font-semibold">รับลิงก์ URL โดยตรง:</span> หลังจากแชร์รูปภาพแล้ว คุณจะต้องแก้ไขลิงก์ที่ได้รับมา
+                ตัวอย่างเช่น หากลิงก์ที่ได้มามีรูปแบบ:
+                <code class="bg-gray-100 p-1 rounded text-sm text-red-600 break-all">https://drive.google.com/file/d/YOUR_FILE_ID/view?usp=sharing</code>
+                คุณสามารถเปลี่ยนให้เป็นลิงก์สำหรับแสดงผลโดยตรงได้โดยใช้รูปแบบ:
+                <code class="bg-gray-100 p-1 rounded text-sm text-green-600 break-all">https://drive.google.com/uc?export=view&id=YOUR_FILE_ID</code>
+                โดยแทนที่ <code class="bg-gray-100 p-1 rounded text-sm text-red-600">YOUR_FILE_ID</code> ด้วย ID ของไฟล์รูปภาพของคุณครับ
+            </li>
+            <li>
+                <span class="font-semibold">เพิ่มรูปภาพลงใน HTML:</span> เมื่อคุณมีลิงก์ URL โดยตรงแล้ว คุณสามารถใช้แท็ก <code class="bg-gray-100 p-1 rounded text-sm">&lt;img&gt;</code>
+                ใน HTML ของคุณเพื่อแสดงรูปภาพได้
+            </li>
+        </ol>
+
+        <div class="mt-8 p-6 bg-gray-50 rounded-xl shadow-md border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">ลองแสดงรูปภาพของคุณที่นี่!</h2>
+            <p class="text-gray-700 mb-4">
+                กรุณาวางลิงก์ URL โดยตรงของรูปภาพจาก Google Drive (ที่ผ่านการแก้ไขแล้ว) ลงในช่องด้านล่างนี้:
+            </p>
+            <input type="text" id="imageUrlInput" placeholder="วางลิงก์ URL รูปภาพ Google Drive ที่นี่ (เช่น https://drive.google.com/uc?export=view&id=YOUR_FILE_ID)"
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 mb-4"
+                   value="https://drive.google.com/uc?export=view&id=15hO3oZoXZZt_5zz-kPuajqK2ISHQ4Mlp">
+            <button id="displayImageBtn"
+                    class="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-bold hover:bg-blue-700 transition duration-300 transform hover:scale-105 shadow-lg">
+                แสดงรูปภาพ
+            </button>
+            <div id="errorMessage" class="error-message hidden"></div>
+        </div>
+
+        <div id="imageDisplayArea" class="image-display-area">
+            <p id="imagePlaceholderText">
+                [พื้นที่สำหรับแสดงรูปภาพ]<br>
+                เมื่อคุณใส่ลิงก์ URL โดยตรงและกด "แสดงรูปภาพ" รูปภาพจะปรากฏที่นี่ครับ
+            </p>
+        </div>
+
+        <p class="text-gray-600 mt-6 text-sm">
+            ฉันไม่สามารถเข้าถึงเนื้อหาใน Google Drive ของคุณได้โดยตรงเพื่อดึงรูปภาพมาแสดงให้ครับ
+            ดังนั้น คุณจะต้องดำเนินการตามขั้นตอนข้างต้นเพื่อรับลิงก์ URL โดยตรงของรูปภาพด้วยตนเองครับ
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const imageUrlInput = document.getElementById('imageUrlInput');
+            const displayImageBtn = document.getElementById('displayImageBtn');
+            const imageDisplayArea = document.getElementById('imageDisplayArea');
+            const imagePlaceholderText = document.getElementById('imagePlaceholderText');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Function to display the image
+            const displayImage = () => {
+                const imageUrl = imageUrlInput.value.trim();
+                errorMessage.classList.add('hidden'); // Hide previous errors
+
+                if (imageUrl === '') {
+                    errorMessage.textContent = 'กรุณาวางลิงก์ URL รูปภาพก่อนครับ';
+                    errorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                // Basic validation for Google Drive direct link format
+                // This check ensures the link starts with the expected direct export format.
+                if (!imageUrl.startsWith('https://drive.google.com/uc?export=view&id=')) {
+                    errorMessage.textContent = 'ลิงก์ URL ดูเหมือนจะไม่ใช่รูปแบบที่ถูกต้องสำหรับ Google Drive Direct Link (ควรเริ่มต้นด้วย https://drive.google.com/uc?export=view&id=...)';
+                    errorMessage.classList.remove('hidden');
+                    return;
+                }
+
+                // Clear previous content and placeholder text
+                imageDisplayArea.innerHTML = '';
+                imagePlaceholderText.classList.add('hidden');
+
+                const imgElement = document.createElement('img');
+                imgElement.src = imageUrl;
+                imgElement.alt = 'รูปภาพจาก Google Drive';
+                imgElement.className = 'w-full h-auto rounded-lg shadow-md'; // Apply Tailwind classes for styling
+
+                // Error handling for image loading
+                imgElement.onerror = () => {
+                    imageDisplayArea.innerHTML = `<p class="text-red-500">ไม่สามารถโหลดรูปภาพได้ กรุณาตรวจสอบลิงก์ URL และการตั้งค่าการแชร์ (ต้องเป็น "ทุกคนที่มีลิงก์")</p>`;
+                    errorMessage.textContent = 'ไม่สามารถโหลดรูปภาพได้ กรุณาตรวจสอบลิงก์ URL และการตั้งค่าการแชร์ (ต้องเป็น "ทุกคนที่มีลิงก์")';
+                    errorMessage.classList.remove('hidden');
+                    imagePlaceholderText.classList.remove('hidden'); // Show placeholder text again
+                };
+
+                imgElement.onload = () => {
+                    // Once loaded, ensure the placeholder text is hidden
+                    imagePlaceholderText.classList.add('hidden');
+                };
+
+                imageDisplayArea.appendChild(imgElement);
+            };
+
+            displayImageBtn.addEventListener('click', displayImage);
+
+            // Automatically display the image on page load if the input field has a value
+            // This is useful for pre-filling the link as we did here.
+            if (imageUrlInput.value.trim() !== '') {
+                displayImage();
+            }
+        });
+    </script>
+</body>
+</html>
