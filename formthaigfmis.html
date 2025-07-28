@@ -1,0 +1,691 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+// Mocking shadcn/ui components and lucide-react icons for self-contained example
+// In a real project, you would import these from their respective libraries.
+
+// Mock Card Component
+const Card = ({ children, className = '' }) => (
+  <div className={`bg-[hsl(var(--card))] rounded-[var(--radius)] border border-[hsl(var(--border))] ${className}`}>
+    {children}
+  </div>
+);
+
+const CardHeader = ({ children, className = '' }) => (
+  <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>
+    {children}
+  </div>
+);
+
+const CardTitle = ({ children, className = '' }) => (
+  <h3 className={`text-2xl font-semibold leading-none tracking-tight text-[hsl(var(--card-foreground))] ${className}`}>
+    {children}
+  </h3>
+);
+
+const CardContent = ({ children, className = '' }) => (
+  <div className={`p-6 pt-0 ${className}`}>
+    {children}
+  </div>
+);
+
+// Mock Button Component
+const Button = ({ children, className = '', type = 'button', disabled = false, onClick }) => (
+  <button
+    type={type}
+    className={`inline-flex items-center justify-center whitespace-nowrap rounded-[calc(var(--radius)*2)] text-sm font-medium
+                ring-offset-[hsl(var(--background))] transition-colors focus-visible:outline-none focus-visible:ring-2
+                focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50
+                bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary-hover))]
+                ${className}`}
+    disabled={disabled}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
+
+// Mock Input Component
+const Input = ({ className = '', type = 'text', ...props }) => (
+  <input
+    type={type}
+    className={`flex h-10 w-full rounded-[var(--radius)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm
+                ring-offset-[hsl(var(--background))] file:border-0 file:bg-transparent file:text-sm file:font-medium
+                placeholder:text-[hsl(var(--muted-foreground))] focus-visible:outline-none focus-visible:ring-2
+                focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
+                shadow-sm /* Added shadow-sm for UI kit look */
+                ${className}`}
+    {...props}
+  />
+);
+
+// Mock Label Component
+const Label = ({ children, htmlFor, className = '' }) => (
+  <label htmlFor={htmlFor} className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}>
+    {children}
+  </label>
+);
+
+// Mock useToast hook
+const useToast = () => {
+  const toast = ({ title, description, variant }) => {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `fixed bottom-4 right-4 p-4 rounded-lg shadow-lg z-50
+                            ${variant === 'destructive' ? 'bg-[hsl(var(--destructive))] text-[hsl(var(--destructive-foreground))]' : 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'}`;
+    messageDiv.innerHTML = `<strong>${title}</strong><p>${description}</p>`;
+    document.body.appendChild(messageDiv);
+    setTimeout(() => {
+      messageDiv.remove();
+    }, 3000);
+  };
+  return { toast };
+};
+
+// Mock Icons (using inline SVG for simplicity or Font Awesome if preferred)
+const HospitalIcon = ({ className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 6V2H8c-2.8 0-5 2.2-5 5v3c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V7c0-2.8-2.2-5-5-5h-4v4"></path>
+    <path d="M12 18v4"></path>
+    <path d="M12 12v6"></path>
+    <path d="M16 16h-4"></path>
+    <path d="M8 16h4"></path>
+  </svg>
+);
+
+const UserIcon = ({ className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+    <circle cx="12" cy="7" r="4"></circle>
+  </svg>
+);
+
+const SendIcon = ({ className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m22 2-7 20-4-9-9-4Z"></path>
+    <path d="M22 2 11 13"></path>
+  </svg>
+);
+
+const Loader2Icon = ({ className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+  </svg>
+);
+
+// Custom Dropdown Component
+const CustomDropdown = ({ options, value, onValueChange, placeholder, className = '', error = false }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const handleSelect = (optionValue) => {
+    onValueChange(optionValue);
+    setIsOpen(false);
+  };
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const displayValue = value || placeholder;
+
+  return (
+    <div className={`relative inline-block text-left w-full ${className}`} ref={dropdownRef}>
+      <div>
+        <button
+          type="button"
+          className={`inline-flex w-full justify-between items-center rounded-md bg-[hsl(var(--card))] px-3 py-2 text-sm font-semibold
+                      text-[hsl(var(--foreground))] shadow-sm ring-1 ring-inset ring-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]
+                      focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:ring-offset-2 h-10
+                      ${error ? 'border-[hsl(var(--destructive))] ring-[hsl(var(--destructive))]' : ''}`}
+          id="menu-button"
+          aria-expanded={isOpen}
+          aria-haspopup="true"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {displayValue}
+          <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" className="-mr-1 size-5 text-[hsl(var(--muted-foreground))]">
+            <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" fillRule="evenodd" />
+          </svg>
+        </button>
+      </div>
+
+      {isOpen && (
+        <div
+          className="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-[hsl(var(--card))] shadow-lg ring-1 ring-black/5
+                     focus:outline-hidden transition-all duration-100 ease-out transform scale-100 opacity-100"
+          role="menu"
+          aria-orientation="vertical"
+          aria-labelledby="menu-button"
+          tabIndex="-1"
+        >
+          <div className="py-1 divide-y divide-[hsl(var(--border))]" role="none">
+            {options.map((option, index) => (
+              <a
+                key={index}
+                href="#"
+                onClick={(e) => { e.preventDefault(); handleSelect(option); }}
+                className="block px-4 py-2 text-sm text-[hsl(var(--foreground))] hover:bg-[hsl(var(--muted))] hover:text-[hsl(var(--foreground))] focus:bg-[hsl(var(--muted))] focus:text-[hsl(var(--foreground))] focus:outline-none"
+                role="menuitem"
+                tabIndex="-1"
+              >
+                {option}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+// Main React App Component
+const App = () => {
+  const [formData, setFormData] = useState({
+    hcode: '',
+    hospitalName: '',
+    unitType: '',
+    healthZone: '',
+    province: '',
+    bedCount: '',
+    hospitalSize: '',
+    username: '',
+    password: '',
+    prefix: '',
+    firstName: '',
+    lastName: '',
+    position: '',
+    workGroup: ''
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [existingUsernames, setExistingUsernames] = useState([]);
+  const [errors, setErrors] = useState({});
+  const { toast } = useToast();
+
+  const unitTypes = [
+    'รพศ.', 'รพท.', 'รพช.', 'รพ.สต.', 'สสจ.', 'สสอ.', 'เขต', 'ส่วนกลาง'
+  ];
+
+  const healthZones = Array.from({ length: 12 }, (_, i) => `เขต ${i + 1}`);
+
+  const hospitalSizes = ['A', 'S', 'M1', 'M2', 'F1', 'F2', 'F3'];
+
+  const workGroups = [
+    'กลุ่มงานการพยาบาลผู้ป่วยอุบัติเหตุและฉุกเฉิน', 'กลุ่มงานบริหารทั่วไป', 'กลุ่มงานเวชศษสตร์ฉุกเฉิน',
+    'กลุ่มงานสารสนเทศทางการแพทย์', 'ศูนย์แพทยศาสตรชั้นคลินิก', 'กลุ่มงานผู้ป่วยนอก',
+    'กลุ่มงานฝึกอบรมพัฒนาบุคคลากรทางการแพทย์', 'กลุ่มงานการพยาบาลผู้ป่วยนอก', 'กลุ่มงานอายุรกรรม',
+    'กลุ่มงานการแพทย์แผนไทยและการแพทย์ทางเลือก', 'กลุ่มงานพัสดุ', 'กลุ่มงานประกันสุขภาพ',
+    'กลุ่มงานยุทธศาสตร์และแผนงานโครงการ', 'กลุ่มงานเวชกรรมสังคม', 'กลุ่มงานโครงสร้างพื้นฐานและวิศวกรรมทางการแพทย์',
+    'กลุ่มงานการพยาบาลผู้ป่วยหนัก', 'กลุ่มงานศัลยกรรม', 'กลุ่มงานพัฒนาทรัพยากรบุคคล',
+    'กลุ่มงานการพยาบาลผู้คลอด', 'กลุ่มงานทรัพยากรบุคคล', 'กลุ่มงานศัลยกรรมออร์โธปิดิกส์',
+    'กลุ่มงานสุขศึกษา', 'กลุ่มงานการเงิน', 'กลุ่มงานกุมารเวชกรรม',
+    'กลุ่มงานการพยาบาลผู้ป่วยห้องผ่าตัด', 'กลุ่มงานอาชีวเวชกรรม', 'กลุ่มงานพัฒนาคุณภาพ บริการและมาตรฐาน',
+    'กลุ่มงานบัญชี', 'กลุ่มงานนิติเวช', 'กลุ่มงานการพยาบาลวิสัญญี',
+    'กลุ่มงานการพยาบาลชุมชน', 'กลุ่มงานจักษุวิทยา', 'กลุ่มงานการพยาบาลผู้ป่วยอายุรกรรม',
+    'กลุ่มงานโสต ศอ นาสิก', 'กลุ่มงานการพยาบาลผู้ป่วยศัลยกรรม', 'กลุ่มงานโภชนศาสตร์',
+    'กลุ่มงานการพยาบาลผู้ป่วยสูติ-นรีเวช', 'กลุ่มงานพยาธิวิทยากายวิภาค', 'กลุ่มงานการพยาบาลจิตเวช',
+    'กลุ่มงาานสูติ-นรีเวชกรรม', 'กลุ่มงานการพยาบาลผู้ป่วยกุมารเวชกรรม', 'กลุ่มงานวิสัญญีวิทยา',
+    'กลุ่มงานการพยาบาลผู้ป่วยออร์โธปิดิกส์', 'กลุ่มงานการพยาบาลผู้ป่วยโสด ศอ นาสิก จักษุ',
+    'กลุ่มงานจิตเวชและยาเสพติด', 'กลุ่มงานการพยาบาลด้านการควบคุมและป้องกันการติดเชื้อ',
+    'กลุ่มงานทันตกรรม', 'กลุ่มงานการพยาบาลตรวจรักษาพิเศษ', 'กลุ่มงานรังสีวิทยา',
+    'กลุ่มงานวิจัยและพัฒนาการพยาบาล', 'กลุ่มงานเทคนิคการแพทย์และพยาธิวิทยาคลินิก',
+    'กลุ่มงานเวชกรรมฟื้นฟู', 'กลุ่มงานสังคมสงเคราะห์', 'กลุ่มงานเภสัชกรรม'
+  ];
+
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQO8kGyo1SqDAzzFE7Qe0JWVGU1GRK0wLXic0ypZ-stLkUYOc8ljPk8dV-5GavTle0YA/exec';
+
+
+  const fetchExistingUsernames = async () => {
+    try {
+      const url = `${SCRIPT_URL}?action=getUsernames&cachebuster=${new Date().getTime()}`;
+      const response = await fetch(url, { method: 'GET', mode: 'cors' });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = await response.json();
+      if (data.result === 'error') throw new Error(data.message);
+
+      setExistingUsernames(data);
+    } catch (error) {
+      console.error('Error fetching existing usernames:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดึงรายการชื่อผู้ใช้ได้ กรุณาลองใหม่ภายหลัง",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchExistingUsernames();
+  }, []);
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // HCODE validation
+    if (!formData.hcode || !/^\d{5}$/.test(formData.hcode)) {
+      newErrors.hcode = 'กรุณากรอกรหัส HCODE 5 หลัก';
+    }
+
+    // Username validation
+    if (!formData.username) {
+      newErrors.username = 'กรุณากรอกชื่อผู้ใช้';
+    } else if (existingUsernames.includes(formData.username.toLowerCase())) {
+      newErrors.username = 'ชื่อผู้ใช้นี้มีผู้ใช้งานแล้ว กรุณาใช้ชื่อผู้ใช้อื่น';
+    }
+
+    // Required fields
+    const requiredFields = [
+      'hospitalName', 'unitType', 'healthZone', 'province', 'bedCount',
+      'hospitalSize', 'password', 'firstName', 'lastName', 'position', 'workGroup'
+    ];
+
+    requiredFields.forEach(field => {
+      if (!formData[field]) {
+        newErrors[field] = 'กรุณากรอกข้อมูลในช่องนี้';
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      toast({
+        title: "ข้อมูลไม่ครบถ้วน",
+        description: "กรุณาตรวจสอบและแก้ไขข้อมูลที่ผิดพลาด",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const submissionData = {
+        'HCODE(รหัส 5 หลัก)': formData.hcode,
+        'ชื่อโรงพยาบาล': formData.hospitalName,
+        'ประเภทหน่วยงาน': formData.unitType,
+        'เขตสุขภาพ': formData.healthZone,
+        'จังหวัด': formData.province,
+        'จำนวนเตียงตามกรอบ': formData.bedCount,
+        'ขนาดโรงพยาบาล': formData.hospitalSize,
+        'Username': formData.username,
+        'Password': formData.password,
+        'คำนำหน้าชื่อ': formData.prefix,
+        'ชื่อ': formData.firstName,
+        'นามสกุล': formData.lastName,
+        'ตำแหน่ง': formData.position,
+        'กลุ่มงาน': formData.workGroup,
+      };
+
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submissionData),
+      });
+
+      // Updated success toast message
+      toast({
+        title: "ลงชื่อแล้ว",
+        description: "รอระบบประมวลผลข้อมูล และเข้าใช้ได้",
+      });
+
+      // Reset form
+      setFormData({
+        hcode: '',
+        hospitalName: '',
+        unitType: '',
+        healthZone: '',
+        province: '',
+        bedCount: '',
+        hospitalSize: '',
+        username: '',
+        password: '',
+        prefix: '',
+        firstName: '',
+        lastName: '',
+        position: '',
+        workGroup: ''
+      });
+
+      fetchExistingUsernames();
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถส่งแบบฟอร์มได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))] py-8 px-4">
+      <style>
+        {`
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
+
+        /* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
+        All colors MUST be HSL.
+        */
+
+        :root {
+            /* Medical theme with turquoise/teal palette */
+            --background: 158 31% 94%; /* E4F9F5 */
+            --foreground: 160 12% 28%; /* 40514E */
+
+            --card: 158 50% 99%; /* F7FCFB */
+            --card-foreground: 160 12% 28%; /* 40514E */
+
+            --popover: 158 50% 99%;
+            --popover-foreground: 160 12% 28%; /* 40514E */
+
+            --primary: 174 78% 34%; /* 11999E */
+            --primary-foreground: 158 50% 98%;
+            --primary-hover: 174 78% 28%; /* Slightly darker primary for hover */
+
+
+            --secondary: 158 20% 95%;
+            --secondary-foreground: 160 12% 40%; /* Slightly lighter version of 40514E for secondary text */
+
+            --muted: 158 15% 94%;
+            --muted-foreground: 160 10% 50%;
+
+            --accent: 174 76% 54%; /* 30E3CA */
+            --accent-foreground: 160 12% 28%; /* Same as foreground for contrast on accent */
+
+            --destructive: 0 84% 60%;
+            --destructive-foreground: 158 50% 98%;
+
+            --border: 158 15% 88%;
+            --input: 158 15% 94%;
+            --ring: 174 78% 34%; /* Same as primary */
+
+            --radius: 0.5rem;
+        }
+
+        /* Beautiful gradients and effects for medical theme */
+        .gradient-medical {
+            background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+        }
+        
+        .gradient-subtle {
+            background: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+        }
+        
+        .shadow-medical {
+            box-shadow: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+        }
+        
+        .shadow-gentle {
+            box-shadow: 0 4px 20px -4px hsl(var(--primary) / 0.1);
+        }
+
+        /* Ensure Kanit font is applied globally */
+        html, body, * {
+            font-family: 'Kanit', sans-serif !important; /* Apply Kanit to all elements with !important */
+        }
+        `}
+      </style>
+      <div className="max-w-4xl mx-auto relative"> {/* Added relative for positioning the button */}
+        <div className="text-center mb-8">
+          {/* Button to access the program */}
+          <a
+            href="https://app.thaigfmis.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-0 right-0 px-4 py-2 text-sm font-semibold bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] rounded-md shadow-sm hover:bg-[hsl(var(--primary-hover))] transition-colors duration-200 text-center" /* Added text-center */
+          >
+            เข้าสู่โปรแกรม <br /> app.thaigfmis.com
+          </a>
+          <h1 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-2">แบบฟอร์มขอใช้โปรแกรม </h1>
+          <p className="text-[hsl(var(--muted-foreground))]">กรุณากรอกข้อมูลให้ครบถ้วนเพื่อลงทะเบียนใช้งานโปรแกรม</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Organization Information */}
+          <Card className="shadow-gentle">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-[hsl(var(--primary))]">
+                ข้อมูลหน่วยงาน
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="hcode">HCODE (รหัส 5 หลัก)</Label>
+                  <Input
+                    id="hcode"
+                    value={formData.hcode}
+                    onChange={(e) => handleInputChange('hcode', e.target.value)}
+                    placeholder="10045"
+                    maxLength={5}
+                    className={errors.hcode ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.hcode && <p className="text-xs text-[hsl(var(--destructive))]">{errors.hcode}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="hospitalName">ชื่อโรงพยาบาล</Label>
+                  <Input
+                    id="hospitalName"
+                    value={formData.hospitalName}
+                    onChange={(e) => handleInputChange('hospitalName', e.target.value)}
+                    placeholder="โรงพยาบาลลำปาง"
+                    className={errors.hospitalName ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.hospitalName && <p className="text-xs text-[hsl(var(--destructive))]">{errors.hospitalName}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="unitType">ประเภทหน่วยงาน</Label>
+                  <CustomDropdown
+                    options={unitTypes}
+                    value={formData.unitType}
+                    onValueChange={(value) => handleInputChange('unitType', value)}
+                    placeholder="เลือกประเภทหน่วยงาน"
+                    error={!!errors.unitType}
+                  />
+                  {errors.unitType && <p className="text-xs text-[hsl(var(--destructive))]">{errors.unitType}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="healthZone">เขตสุขภาพ</Label>
+                  <CustomDropdown
+                    options={healthZones}
+                    value={formData.healthZone}
+                    onValueChange={(value) => handleInputChange('healthZone', value)}
+                    placeholder="เลือกเขตสุขภาพ"
+                    error={!!errors.healthZone}
+                  />
+                  {errors.healthZone && <p className="text-xs text-[hsl(var(--destructive))]">{errors.healthZone}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="province">จังหวัด</Label>
+                  <Input
+                    id="province"
+                    value={formData.province}
+                    onChange={(e) => handleInputChange('province', e.target.value)}
+                    placeholder="ลำปาง"
+                    className={errors.province ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.province && <p className="text-xs text-[hsl(var(--destructive))]">{errors.province}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bedCount">จำนวนเตียงตามกรอบ</Label>
+                  <Input
+                    id="bedCount"
+                    type="number"
+                    value={formData.bedCount}
+                    onChange={(e) => handleInputChange('bedCount', e.target.value)}
+                    placeholder="200"
+                    min="0"
+                    className={errors.bedCount ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.bedCount && <p className="text-xs text-[hsl(var(--destructive))]">{errors.bedCount}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="hospitalSize">ขนาดโรงพยาบาล</Label>
+                <CustomDropdown
+                  options={hospitalSizes}
+                  value={formData.hospitalSize}
+                  onValueChange={(value) => handleInputChange('hospitalSize', value)}
+                  placeholder="เลือกขนาดโรงพยาบาล"
+                  error={!!errors.hospitalSize}
+                  className="md:w-1/2"
+                />
+                {errors.hospitalSize && <p className="text-xs text-[hsl(var(--destructive))]">{errors.hospitalSize}</p>}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Personal Information */}
+          <Card className="shadow-gentle">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-[hsl(var(--primary))]">
+                <UserIcon className="w-5 h-5" />
+                ข้อมูลส่วนตัว
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    value={formData.username}
+                    onChange={(e) => handleInputChange('username', e.target.value)}
+                    placeholder="ชื่อผู้ใช้"
+                    className={errors.username ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.username && <p className="text-xs text-[hsl(var(--destructive))]">{errors.username}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    placeholder="รหัสผ่าน"
+                    className={errors.password ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.password && <p className="text-xs text-[hsl(var(--destructive))]">{errors.password}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="prefix">คำนำหน้าชื่อ</Label>
+                  <Input
+                    id="prefix"
+                    value={formData.prefix}
+                    onChange={(e) => handleInputChange('prefix', e.target.value)}
+                    placeholder="นาย, นาง, นางสาว, อื่นๆ"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">ชื่อ</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                    placeholder="ชื่อจริง"
+                    className={errors.firstName ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.firstName && <p className="text-xs text-[hsl(var(--destructive))]">{errors.firstName}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">นามสกุล</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    placeholder="นามสกุล"
+                    className={errors.lastName ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.lastName && <p className="text-xs text-[hsl(var(--destructive))]">{errors.lastName}</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="position">ตำแหน่ง</Label>
+                  <Input
+                    id="position"
+                    value={formData.position}
+                    onChange={(e) => handleInputChange('position', e.target.value)}
+                    placeholder="นักวิชาการสาธารณสุข"
+                    className={errors.position ? 'border-[hsl(var(--destructive))]' : ''}
+                  />
+                  {errors.position && <p className="text-xs text-[hsl(var(--destructive))]">{errors.position}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="workGroup">กลุ่มงาน</Label>
+                <CustomDropdown
+                  options={workGroups}
+                  value={formData.workGroup}
+                  onValueChange={(value) => handleInputChange('workGroup', value)}
+                  placeholder="เลือกกลุ่มงาน"
+                  error={!!errors.workGroup}
+                />
+                {errors.workGroup && <p className="text-xs text-[hsl(var(--destructive))]">{errors.workGroup}</p>}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-center pt-4">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="px-12 py-6 text-lg font-semibold bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary-hover))] rounded-[calc(var(--radius)*2)] shadow-sm"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2Icon className="mr-2 h-5 w-5 animate-spin" />
+                  กำลังส่งข้อมูล...
+                </>
+              ) : (
+                <>
+                  <SendIcon className="mr-2 h-5 w-5" />
+                  ส่งแบบฟอร์ม
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default App;
