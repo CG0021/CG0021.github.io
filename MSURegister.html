@@ -51,19 +51,6 @@
             color: #45474B; /* New dark text for modal */
             position: relative;
         }
-        .modal-close-button {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: #F4CE14; /* New accent color */
-            cursor: pointer;
-            padding: 0.25rem;
-            line-height: 1;
-        }
-
         /* Fade-in animation for main content */
         .fade-in {
             animation: fadeIn 1s ease-out forwards;
@@ -121,8 +108,6 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Removed sticky-header as navigation is no longer sticky */
     </style>
 </head>
 <body class="bg-[#F5F7F8] min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8">
@@ -272,27 +257,49 @@
     </div>
 
     <!-- Course Detail Modal -->
-    <div id="courseDetailModal" class="modal-overlay hidden">
-        <div class="modal-content w-full md:w-3/4 lg:w-1/2">
-            <button class="modal-close-button" onclick="closeCourseModal()">&times;</button>
-            <h3 id="modalCourseName" class="text-xl sm:text-2xl font-bold text-[#45474B] mb-4"></h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm sm:text-base text-[#45474B]">
-                <div><strong>รายละเอียดย่อย:</strong> <span id="modalCourseSubDetail"></span></div>
-                <div><strong>หัวข้อการอบรม:</strong> <span id="modalCourseTopics"></span></div>
-                <div><strong>รอบการอบรม:</strong> <span id="modalCourseRounds"></span></div>
-                <div><strong>สถานที่จัดอบรม:</strong> <span id="modalCourseLocation"></span></div>
-                <div class="col-span-1 sm:col-span-2"><strong>หนังสือโครงการอบรม:</strong> <span id="modalCourseProjectBook"></span></div>
+    <div id="courseDetailModal" class="modal-overlay fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 relative m-4 md:m-0">
+            <button onclick="closeCourseModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <h2 id="modalCourseName" class="text-2xl font-bold text-[#45474B] mb-4 border-b pb-2"></h2>
+            <div class="space-y-4 text-base text-[#45474B]">
+                <div>
+                    <h3 class="font-semibold text-lg text-[#45474B]">รายละเอียด</h3>
+                    <p id="modalCourseSubDetail" class="text-gray-700"></p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-[#45474B]">หัวข้อการอบรม</h3>
+                    <p id="modalCourseTopics" class="text-gray-700"></p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-[#45474B]">รอบการอบรม</h3>
+                    <p id="modalCourseRounds" class="text-gray-700"></p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-[#45474B]">สถานที่จัดอบรม</h3>
+                    <p id="modalCourseLocation" class="text-gray-700"></p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-[#45474B]">หนังสือโครงการ</h3>
+                    <p id="modalCourseProjectBook" class="text-gray-700"></p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Payment Detail Modal -->
-    <div id="paymentDetailModal" class="modal-overlay hidden">
-        <div class="modal-content w-full md:w-3/4 lg:w-1/2">
-            <button class="modal-close-button" onclick="closePaymentModal()">&times;</button>
-            <!-- Changed heading here -->
-            <h3 class="text-xl sm:text-2xl font-bold text-[#45474B] mb-4">เลือกวิธีชำระเงิน</h3>
-            <div class="text-[#45474B] text-sm leading-relaxed">
+    <!-- Payment Method Modal -->
+    <div id="paymentDetailModal" class="modal-overlay fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 relative m-4 md:m-0">
+            <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <h2 class="text-2xl font-bold text-[#45474B] mb-4">ช่องทางการชำระเงิน</h2>
+            <div class="payment-details-container space-y-4">
                 <!-- Payment Method 1: Bank Transfer -->
                 <details class="mb-4 p-3 rounded-lg border border-gray-200 bg-[#F5F7F8] payment-detail-item">
                     <summary class="text-lg sm:text-xl font-semibold text-[#45474B] flex items-center">
@@ -367,67 +374,13 @@
 
         let courseDetailsData = []; // Stores fetched course details data
 
-        // Robust function to parse CSV text into an array of objects (kept for potential future use, but not used for course details anymore)
-        function parseCsv(csvText, sheetName = 'Unknown Sheet') {
-            const data = [];
-            let headers = [];
-            let inQuote = false;
-            let currentField = '';
-            let currentRow = [];
-            let charIndex = 0;
-            
-            csvText = csvText.trim() + '\n'; 
-            const len = csvText.length;
-
-            while (charIndex < len) {
-                const char = csvText[charIndex];
-                const nextChar = csvText[charIndex + 1];
-
-                if (char === '"') {
-                    if (inQuote && nextChar === '"') {
-                        currentField += '"';
-                        charIndex++;
-                    } else {
-                        inQuote = !inQuote;
-                    }
-                } else if (char === ',' && !inQuote) {
-                    currentRow.push(currentField);
-                    currentField = '';
-                } else if ((char === '\n' || char === '\r') && !inQuote) {
-                    currentRow.push(currentField);
-                    currentField = '';
-
-                    if (headers.length === 0) {
-                        headers = currentRow.map(h => h.trim());
-                        console.log(`[${sheetName}] Parsed Headers:`, headers);
-                    } else {
-                        const rowObject = {};
-                        headers.forEach((header, index) => {
-                            rowObject[header] = currentRow[index] !== undefined ? currentRow[index] : '';
-                        });
-                        data.push(rowObject);
-                    }
-                    currentRow = [];
-
-                    if (char === '\r' && nextChar === '\n') {
-                        charIndex++;
-                    }
-                } else {
-                    currentField += char;
-                }
-                charIndex++;
-            }
-            console.log(`[${sheetName}] Final Parsed Data:`, data);
-            return data;
-        }
-
         // Function to fetch course details from the new Google Apps Script URL
         async function fetchCourseDetails() {
             const courseLoadingMessageDiv = document.getElementById('courseLoadingMessage');
             const courseErrorMessageDiv = document.getElementById('courseErrorMessage');
             const courseListDiv = document.getElementById('courseList');
 
-            courseLoadingMessageDiv.textContent = 'กำลังค้นหาข้อมูลหลักสูตร...'; 
+            courseLoadingMessageDiv.textContent = 'กำลังค้นหาข้อมูลหลักสูตร...';
             courseLoadingMessageDiv.classList.remove('hidden');
             courseErrorMessageDiv.classList.add('hidden');
             courseListDiv.innerHTML = ''; // Clear previous list
@@ -471,26 +424,44 @@
             }
         }
 
-        // Function to render the course list
+        // Function to render the course list, now with grouping
         function renderCourseList() {
             const courseListDiv = document.getElementById('courseList');
             courseListDiv.innerHTML = ''; // Clear existing cards
 
-            courseDetailsData.forEach(course => {
-                const courseCard = document.createElement('div');
-                // Updated border color to #495E57
-                courseCard.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'border', 'border-[#495E57]', 'cursor-pointer', 'hover:shadow-lg', 'hover:translate-y-[-2px]', 'transition-all', 'duration-200');
-                
-                // Use the actual column names from the sheet
-                const courseName = course['ชื่อหลักสูตร'] || 'ไม่ระบุชื่อหลักสูตร';
-                const subDetail = course['รายละเอียดย่อย'] || '';
+            // Group courses by the 'กลุ่ม' (Group) property
+            const groupedCourses = courseDetailsData.reduce((acc, course) => {
+                const groupName = course['กลุ่ม'] && course['กลุ่ม'].trim() !== '' ? course['กลุ่ม'] : 'ไม่มีกลุ่ม';
+                if (!acc[groupName]) {
+                    acc[groupName] = [];
+                }
+                acc[groupName].push(course);
+                return acc;
+            }, {});
 
-                courseCard.innerHTML = `
-                    <h3 class="text-lg font-semibold text-[#45474B] mb-2">${courseName}</h3>
-                    <p class="text-sm text-[#45474B]">${subDetail}</p>
-                `;
-                courseCard.addEventListener('click', () => openCourseModal(course));
-                courseListDiv.appendChild(courseCard);
+            // Render each group and its courses
+            Object.keys(groupedCourses).forEach(groupName => {
+                const groupHeader = document.createElement('h3');
+                groupHeader.classList.add('col-span-1', 'md:col-span-2', 'lg:col-span-3', 'text-xl', 'font-bold', 'text-[#495E57]', 'mt-6', 'mb-2', 'border-b-2', 'border-[#495E57]', 'pb-1');
+                groupHeader.textContent = groupName;
+                courseListDiv.appendChild(groupHeader);
+
+                groupedCourses[groupName].forEach(course => {
+                    const courseCard = document.createElement('div');
+                    // Updated border color to #495E57
+                    courseCard.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'border', 'border-[#495E57]', 'cursor-pointer', 'hover:shadow-lg', 'hover:translate-y-[-2px]', 'transition-all', 'duration-200');
+                    
+                    // Use the actual column names from the sheet
+                    const courseName = course['ชื่อหลักสูตร'] || 'ไม่ระบุชื่อหลักสูตร';
+                    const subDetail = course['รายละเอียดย่อย'] || '';
+
+                    courseCard.innerHTML = `
+                        <h3 class="text-lg font-semibold text-[#45474B] mb-2">${courseName}</h3>
+                        <p class="text-sm text-[#45474B]">${subDetail}</p>
+                    `;
+                    courseCard.addEventListener('click', () => openCourseModal(course));
+                    courseListDiv.appendChild(courseCard);
+                });
             });
         }
 
@@ -581,7 +552,7 @@
             const searchResultsDiv = document.getElementById('searchResults');
             const resultsContainer = document.getElementById('resultsContainer');
             const errorMessageDiv = document.getElementById('errorMessage');
-            const loadingMessageDiv = document.getElementById('loadingMessage'); 
+            const loadingMessageDiv = document.getElementById('loadingMessage');
 
             // Clear previous results and hide sections
             resultsContainer.innerHTML = '';
@@ -598,8 +569,6 @@
 
             try {
                 // Construct the URL for the Apps Script API call
-                // The Apps Script is currently returning all data, so we don't need to pass nationalId as a query param for filtering on server side.
-                // We will assume the Apps Script returns the full dataset and filter client-side.
                 const url = APPS_SCRIPT_WEB_APP_URL; // Use the base URL to get all data
                 console.log('Fetching all registration data from URL:', url); // Log the URL being fetched
 
