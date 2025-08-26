@@ -65,21 +65,21 @@
 
         <div id="data-table" class="hidden">
             <div class="overflow-hidden rounded-2xl shadow-lg border border-gray-200">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 table-fixed">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-1/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 <button id="sort-priority" class="sort-button">
                                     <span>Priority</span>
                                 </button>
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-2/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 ชื่อโปรเจกต์
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-2/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 รายละเอียด
                             </th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-1/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 ลิงก์
                             </th>
                         </tr>
@@ -196,12 +196,12 @@
                     newRow.appendChild(priorityCell);
 
                     const projectNameCell = document.createElement('td');
-                    projectNameCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-gray-500');
+                    projectNameCell.classList.add('px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
                     projectNameCell.textContent = item.projectName;
                     newRow.appendChild(projectNameCell);
 
                     const detailsCell = document.createElement('td');
-                    detailsCell.classList.add('px-6', 'py-4', 'text-sm', 'text-gray-500');
+                    detailsCell.classList.add('px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
                     detailsCell.textContent = item.details;
                     newRow.appendChild(detailsCell);
 
