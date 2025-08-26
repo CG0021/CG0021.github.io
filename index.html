@@ -3,161 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>โปรเจกต์ของฉัน</title>
-    <!-- Tailwind CSS CDN -->
+    <title>ข้อมูลโปรเจกต์จาก Google Sheet</title>
+    <!-- Kanit Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* กำหนดฟอนต์ Inter ทั่วทั้งหน้า */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* สีพื้นหลังอ่อนๆ */
-            display: flex;
+            font-family: 'Kanit', sans-serif;
+            background-color: #e5e7eb;
+            background: linear-gradient(135deg, #f3e8ff 0%, #dbeafe 100%);
+        }
+        .container {
+            max-width: 1000px;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #4f46e5;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .table-row-link {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .table-row-link:hover {
+            transform: scale(1.01);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .sort-button {
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            align-items: flex-start; /* จัดให้อยู่ด้านบนเล็กน้อย */
-            min-height: 100vh; /* ความสูงเต็มหน้าจอ */
-            padding: 2rem; /* เพิ่ม padding รอบๆ */
-            box-sizing: border-box;
+            background: none;
+            border: none;
+            padding: 0;
+            color: inherit;
+            cursor: pointer;
+            font: inherit;
         }
     </style>
 </head>
-<body>
-    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg max-w-4xl w-full">
-        <!-- ส่วนหัวของหน้า -->
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
-                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                    โปรเจกต์ของฉัน
-                </span>
-            </h1>
-            <p class="text-lg text-gray-600">
-                รวมลิงก์ไปยังงานทดลองที่ฉันสร้างไว้
-            </p>
-        </header>
+<body class="flex items-center justify-center min-h-screen p-4">
 
-        <!-- ส่วนของลิงก์โปรเจกต์ -->
-        <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- การ์ดสำหรับโปรเจกต์ "Change the date" -->
-            <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-                    <!-- แก้ไข href ให้มี https:// นำหน้า -->
-                    <a href="https://CG0021.github.io/changethedate.html" class="text-blue-700 hover:text-blue-900">
-                        🔗 Change the date
-                    </a>
-                </h2>
-                <p class="text-gray-600 mb-4">
-                    ระบบแปลงวันที่เป็นรูปแบบวันที่ช่วย PASADHU
-                </p>
-                <div class="flex justify-end">
-                    <!-- แก้ไข href ให้มี https:// นำหน้า -->
-                    <a href="https://CG0021.github.io/changethedate.html" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
-                        ดูโปรเจกต์
-                        <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </a>
-                </div>
-            </div>
+    <div class="container bg-white shadow-2xl rounded-3xl p-6 md:p-10 w-full mt-8 md:mt-16">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-2 drop-shadow-sm">ข้อมูลโปรเจกต์</h1>
+            <p class="text-gray-500 text-lg">ที่ดึงมาจาก Google Sheet</p>
+        </div>
 
-            <!-- การ์ดสำหรับโปรเจกต์ "ระบบลงทะเบียน MSU" -->
-            <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/MSURegister.html" class="text-purple-700 hover:text-purple-900">
-                        🔗 ระบบลงทะเบียน MSU (งานทดลอง)
-                    </a>
-                </h2>
-                <p class="text-gray-600 mb-4">
-                    งานทดลองสร้างระบบลงทะเบียนสำหรับมหาวิทยาลัยมหาสารคาม (MSU) 
-                </p>
-                <div class="flex justify-end">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/MSURegister.html" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors duration-200">
-                        ดูโปรเจกต์
-                        <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </a>
-                </div>
-            </div>
+        <div id="loading" class="flex flex-col items-center py-12">
+            <div class="loading-spinner mb-4"></div>
+            <p class="ml-4 text-gray-600 font-medium">กำลังโหลดข้อมูล... โปรดรอสักครู่</p>
+        </div>
 
-            <!-- โปรเจกต์ ส่งสลิป MSU -->
-            <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/readpicfromgoogledrive.html" class="text-green-700 hover:text-green-900">
-                        🔗 โปรเจกต์ ส่งสลิป MSU
-                    </a>
-                </h2>
-                <p class="text-gray-600 mb-4">
-                    ข้อมูลจาก excel ที่มีรายชื่อและ Link รูปสลิปโอนเงินแสดงออกมา
-                </p>
-                <div class="flex justify-end">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                   <a href="https://cg0021.github.io/readpicfromgoogledrive.html" class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200">
-                        ดูโปรเจกต์
-                        <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </a>
-                </div>
+        <div id="data-table" class="hidden">
+            <div class="overflow-hidden rounded-2xl shadow-lg border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <button id="sort-priority" class="sort-button">
+                                    <span>Priority</span>
+                                </button>
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                ชื่อโปรเจกต์
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                รายละเอียด
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                ลิงก์
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
             </div>
-            <!-- CVD search -->
-            <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/cvdsearch.html" class="text-green-700 hover:text-green-900">
-                        🔗 แนวทางแก้ไขรหัส C, V, Deny สปสช.
-                    </a>
-                </h2>
-                <p class="text-gray-600 mb-4">
-                    ค้นหารหัสติด C, V, Deny และแนวทางแก้ไข
-                </p>
-                <div class="flex justify-end">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                   <a href="https://cg0021.github.io/cvdsearch.html" class="inline-flex items-center px-4 py-2 bg-green-600 text-white font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200">
-                        ดูโปรเจกต์
-                        <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </a>
-                </div>
-            </div>
-            <!-- โปรเจกต์ LINK เป็น QR CODE -->
-            <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/linktoqrcode.html" class="text-red-700 hover:text-red-900">
-                        🔗 เปลี่ยน LINK เป็น QR CODE
-                    </a>
-                </h2>
-                <p class="text-gray-600 mb-4">
-                    Coppy > press > QRCODE > Coppy!!
-                </p>
-                <div class="flex justify-end">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/linktoqrcode.html" class="inline-flex items-center px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200">
-                        ดูโปรเจกต์
-                        <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </a>
-                </div>
-            </div>
-            <!-- โปรเจกต์ ฟอร์มกรอก app.thaigfmis.com -->
-            <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-2">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/formthaigfmis.html" class="text-red-700 hover:text-red-900">
-                        🔗 ฟอร์มกรอก app.thaigfmis.com
-                    </a>
-                </h2>
-                <p class="text-gray-600 mb-4">
-                    ฟอร์มกรอก app.thaigfmis.com
-                </p>
-                <div class="flex justify-end">
-                    <!-- ตัวอย่าง: เปลี่ยน # เป็น URL จริงของโปรเจกต์ -->
-                    <a href="https://cg0021.github.io/formthaigfmis.html" class="inline-flex items-center px-4 py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200">
-                        ดูโปรเจกต์
-                        <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    </a>
-                </div>
-            </div>
-        </main>
+        </div>
 
-        <!-- ส่วนท้ายของหน้า (ถ้าต้องการ) -->
-        <footer class="text-center mt-10 text-gray-500 text-sm">
-            <p>&copy; 2025 โปรเจกต์ของฉัน. สงวนลิขสิทธิ์.</p>
-        </footer>
+        <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mt-6" role="alert">
+            <strong class="font-bold block mb-1">เกิดข้อผิดพลาด!</strong>
+            <span class="block text-sm sm:inline">ไม่สามารถโหลดข้อมูลจาก Google Sheet ได้ กรุณาตรวจสอบลิงก์และสิทธิ์การเข้าถึง</span>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzOYXJfz9KNdBbGFzbNH2zeBW9XN9w_Y3u5SsjPxY7a47APWwSBXwDs8fFPaa3dcOZIQ0mT7PhRGGx/pub?output=csv';
+
+            const loadingEl = document.getElementById('loading');
+            const dataTableEl = document.getElementById('data-table');
+            const tableBodyEl = document.getElementById('table-body');
+            const errorEl = document.getElementById('error-message');
+            const sortButton = document.getElementById('sort-priority');
+
+            let allData = [];
+            let isAscending = true;
+
+            const fetchData = () => {
+                fetch(sheetUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(csvText => {
+                        loadingEl.classList.add('hidden');
+                        dataTableEl.classList.remove('hidden');
+                        allData = parseCSV(csvText);
+                        // Initial sort by priority in ascending order
+                        const sortedData = [...allData].sort((a, b) => a.priority - b.priority);
+                        renderTable(sortedData);
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                        loadingEl.classList.add('hidden');
+                        errorEl.classList.remove('hidden');
+                    });
+            };
+
+            const parseCSV = (csv) => {
+                const rows = csv.split('\n').map(row => row.trim()).filter(row => row.length > 0);
+                const dataRows = rows.slice(1);
+                
+                const parseRow = (row) => {
+                    const columns = [];
+                    let inQuote = false;
+                    let currentColumn = '';
+                    
+                    for (let i = 0; i < row.length; i++) {
+                        const char = row[i];
+                        if (char === '"' && (i === 0 || row[i-1] === ',')) {
+                            inQuote = !inQuote;
+                        } else if (char === ',' && !inQuote) {
+                            columns.push(currentColumn.trim());
+                            currentColumn = '';
+                        } else {
+                            currentColumn += char;
+                        }
+                    }
+                    columns.push(currentColumn.trim());
+                    return columns;
+                };
+
+                return dataRows.map(row => {
+                    const columns = parseRow(row);
+                    if (columns.length < 4) {
+                        console.warn('Skipping row due to insufficient columns:', row);
+                        return null;
+                    }
+                    // Count the number of filled stars for sorting
+                    const starString = columns[0] || '';
+                    const filledStarsCount = (starString.match(/★/g) || []).length;
+                    
+                    return {
+                        priority: filledStarsCount,
+                        starDisplay: starString,
+                        projectName: columns[1] || '',
+                        details: columns[2] || '',
+                        link: columns[3] || ''
+                    };
+                }).filter(data => data !== null);
+            };
+
+            const renderTable = (data) => {
+                tableBodyEl.innerHTML = '';
+                data.forEach(item => {
+                    const newRow = document.createElement('tr');
+                    newRow.classList.add('table-row-link', 'hover:bg-indigo-50');
+                    newRow.dataset.link = item.link;
+
+                    newRow.addEventListener('click', () => {
+                        if (item.link) {
+                            window.open(item.link, '_blank');
+                        }
+                    });
+
+                    const priorityCell = document.createElement('td');
+                    priorityCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'font-medium', 'text-gray-900');
+                    priorityCell.textContent = item.starDisplay;
+                    newRow.appendChild(priorityCell);
+
+                    const projectNameCell = document.createElement('td');
+                    projectNameCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-gray-500');
+                    projectNameCell.textContent = item.projectName;
+                    newRow.appendChild(projectNameCell);
+
+                    const detailsCell = document.createElement('td');
+                    detailsCell.classList.add('px-6', 'py-4', 'text-sm', 'text-gray-500');
+                    detailsCell.textContent = item.details;
+                    newRow.appendChild(detailsCell);
+
+                    const linkCell = document.createElement('td');
+                    linkCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-blue-500', 'hover:underline');
+                    linkCell.textContent = 'ดูโปรเจกต์';
+                    newRow.appendChild(linkCell);
+
+                    tableBodyEl.appendChild(newRow);
+                });
+            };
+
+            sortButton.addEventListener('click', () => {
+                isAscending = !isAscending;
+                const sortedData = [...allData].sort((a, b) => {
+                    if (isAscending) {
+                        return a.priority - b.priority;
+                    } else {
+                        return b.priority - a.priority;
+                    }
+                });
+                renderTable(sortedData);
+            });
+
+            fetchData();
+        });
+    </script>
+
 </body>
 </html>
