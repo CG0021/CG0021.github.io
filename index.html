@@ -3,40 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ข้อมูลโปรเจกต์จาก Google Sheet</title>
+    <title>Project Data</title>
     <!-- Kanit Font -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ไลบรารี QR Code สำหรับสร้างรูป SVG -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodegen@1.8.0/js/qrcodegen.js"></script>
     <style>
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: #e5e7eb;
-            background: linear-gradient(135deg, #f3e8ff 0%, #dbeafe 100%);
+            background-color: #f0f4f8;
+            background: linear-gradient(135deg, #e0f2fe 0%, #d1e5f4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
         }
+
         .container {
             max-width: 1000px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), inset 0 0 10px rgba(255, 255, 255, 0.5);
         }
+
         .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
+            border: 4px solid rgba(147, 197, 253, 0.2);
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            border-left-color: #4f46e5;
+            border-top-color: #3b82f6;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
         .table-row-link {
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
+
         .table-row-link:hover {
-            transform: scale(1.01);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+        
         .sort-button {
             display: inline-flex;
             align-items: center;
@@ -47,58 +66,112 @@
             color: inherit;
             cursor: pointer;
             font: inherit;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .sort-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* สไตล์สำหรับป๊อปอัพ QR Code */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            text-align: center;
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
         }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4">
 
-    <div class="container bg-white shadow-2xl rounded-3xl p-6 md:p-10 w-full mt-8 md:mt-16">
+    <div class="container p-6 md:p-10 w-full mt-8 md:mt-16">
         <div class="text-center mb-8">
-            <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-2 drop-shadow-sm">ข้อมูลโปรเจกต์</h1>
-            <p class="text-gray-500 text-lg">ที่ดึงมาจาก Google Sheet</p>
+            <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-2 drop-shadow-lg">ข้อมูลโปรเจกต์</h1>
         </div>
 
         <div id="loading" class="flex flex-col items-center py-12">
             <div class="loading-spinner mb-4"></div>
-            <p class="ml-4 text-gray-600 font-medium">กำลังโหลดข้อมูล... โปรดรอสักครู่</p>
+            <p class="ml-4 text-gray-600 font-medium">กำลังโหลดข้อมูล...</p>
         </div>
 
         <div id="data-table" class="hidden">
             <div class="overflow-hidden rounded-2xl shadow-lg border border-gray-200">
                 <table class="min-w-full divide-y divide-gray-200 table-fixed">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-gray-50 bg-opacity-70">
                         <tr>
-                            <th class="w-1/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-1/12 px-2 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 <button id="sort-priority" class="sort-button">
                                     <span>Priority</span>
+                                    <svg class="ml-2 w-4 h-4 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
                                 </button>
                             </th>
-                            <th class="w-2/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-3/12 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 ชื่อโปรเจกต์
                             </th>
-                            <th class="w-2/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-5/12 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 รายละเอียด
                             </th>
-                            <th class="w-1/6 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-1/12 px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 ลิงก์
+                            </th>
+                            <th class="w-1/12 px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                QR Code
                             </th>
                         </tr>
                     </thead>
-                    <tbody id="table-body" class="bg-white divide-y divide-gray-200">
+                    <tbody id="table-body" class="bg-white bg-opacity-50 divide-y divide-gray-200">
                         <!-- Data will be populated here -->
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mt-6" role="alert">
+        <div id="error-message" class="hidden bg-red-100 bg-opacity-80 border border-red-400 text-red-700 px-6 py-4 rounded-xl relative mt-6" role="alert">
             <strong class="font-bold block mb-1">เกิดข้อผิดพลาด!</strong>
             <span class="block text-sm sm:inline">ไม่สามารถโหลดข้อมูลจาก Google Sheet ได้ กรุณาตรวจสอบลิงก์และสิทธิ์การเข้าถึง</span>
         </div>
     </div>
 
+    <!-- ป๊อปอัพสำหรับแสดง QR Code -->
+    <div id="qr-modal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <button class="close-button" onclick="document.getElementById('qr-modal').classList.add('hidden')">&times;</button>
+            <div id="qrcode" class="p-2 bg-white rounded-lg inline-block"></div>
+        </div>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        window.onload = () => {
             const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzOYXJfz9KNdBbGFzbNH2zeBW9XN9w_Y3u5SsjPxY7a47APWwSBXwDs8fFPaa3dcOZIQ0mT7PhRGGx/pub?output=csv';
 
             const loadingEl = document.getElementById('loading');
@@ -106,9 +179,13 @@
             const tableBodyEl = document.getElementById('table-body');
             const errorEl = document.getElementById('error-message');
             const sortButton = document.getElementById('sort-priority');
+            // อ้างอิงองค์ประกอบสำหรับป๊อปอัพ QR Code
+            const qrModal = document.getElementById('qr-modal');
+            const qrcodeContainer = document.getElementById('qrcode');
 
             let allData = [];
-            let isAscending = true;
+            let originalDataOrder = [];
+            let sortState = 0; // 0: initial, 1: ascending, 2: descending
 
             const fetchData = () => {
                 fetch(sheetUrl)
@@ -122,9 +199,8 @@
                         loadingEl.classList.add('hidden');
                         dataTableEl.classList.remove('hidden');
                         allData = parseCSV(csvText);
-                        // Initial sort by priority in ascending order
-                        const sortedData = [...allData].sort((a, b) => a.priority - b.priority);
-                        renderTable(sortedData);
+                        originalDataOrder = [...allData]; // เก็บข้อมูลตามลำดับเดิม
+                        renderTable(allData); // แสดงผลตามลำดับเดิม
                     })
                     .catch(error => {
                         console.error('Fetch error:', error);
@@ -163,7 +239,7 @@
                         console.warn('Skipping row due to insufficient columns:', row);
                         return null;
                     }
-                    // Count the number of filled stars for sorting
+                    // นับจำนวนดาวที่ถูกเติมสำหรับเรียงลำดับ
                     const starString = columns[0] || '';
                     const filledStarsCount = (starString.match(/★/g) || []).length;
                     
@@ -176,58 +252,104 @@
                     };
                 }).filter(data => data !== null);
             };
-
+            
             const renderTable = (data) => {
                 tableBodyEl.innerHTML = '';
                 data.forEach(item => {
                     const newRow = document.createElement('tr');
-                    newRow.classList.add('table-row-link', 'hover:bg-indigo-50');
-                    newRow.dataset.link = item.link;
-
-                    newRow.addEventListener('click', () => {
-                        if (item.link) {
-                            window.open(item.link, '_blank');
-                        }
-                    });
-
+                    newRow.classList.add('table-row-link');
+                    
+                    // เซลล์ Priority
                     const priorityCell = document.createElement('td');
                     priorityCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'font-medium', 'text-gray-900');
                     priorityCell.textContent = item.starDisplay;
                     newRow.appendChild(priorityCell);
 
+                    // เซลล์ชื่อโปรเจกต์
                     const projectNameCell = document.createElement('td');
                     projectNameCell.classList.add('px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
                     projectNameCell.textContent = item.projectName;
                     newRow.appendChild(projectNameCell);
 
+                    // เซลล์รายละเอียด
                     const detailsCell = document.createElement('td');
                     detailsCell.classList.add('px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
                     detailsCell.textContent = item.details;
                     newRow.appendChild(detailsCell);
 
+                    // เซลล์ลิงก์
                     const linkCell = document.createElement('td');
-                    linkCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-blue-500', 'hover:underline');
-                    linkCell.textContent = 'ดูโปรเจกต์';
+                    linkCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-center');
+                    const linkButton = document.createElement('button');
+                    linkButton.classList.add('text-blue-500', 'hover:text-blue-700');
+                    linkButton.innerHTML = `
+                        <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656-5.656l-4.243 4.243a4 4 0 000 5.656l4.243 4.243a4 4 0 005.656 0m-5.656-5.656l5.656 5.656a4 4 0 005.656-5.656l-4.243-4.243a4 4 0 00-5.656 0"></path>
+                        </svg>`;
+                    linkButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (item.link) {
+                            window.open(item.link, '_blank');
+                        }
+                    });
+                    linkCell.appendChild(linkButton);
                     newRow.appendChild(linkCell);
+
+                    // เซลล์ QR Code
+                    const qrCell = document.createElement('td');
+                    qrCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-center');
+                    const qrButton = document.createElement('button');
+                    qrButton.classList.add('text-blue-500', 'hover:text-blue-700');
+                    qrButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mx-auto"><rect width="8" height="8" x="2" y="2" rx="2"/><path d="M14 2h6a2 2 0 0 1 2 2v6"/><path d="M22 14v6a2 2 0 0 1-2 2h-6"/><path d="M14 10v4a2 2 0 0 0 2 2h4"/></svg>
+                    `;
+                    qrButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (item.link) {
+                            // เพิ่มการตรวจสอบว่าไลบรารี qrcodegen โหลดสมบูรณ์แล้ว
+                            if (typeof qrcodegen !== 'undefined') {
+                                try {
+                                    // สร้าง QR Code เป็น SVG
+                                    const qr0 = qrcodegen.QrCode.encodeText(item.link, qrcodegen.QrCode.Ecc.HIGH);
+                                    const svg = qr0.toSvgString(4);
+                                    qrcodeContainer.innerHTML = svg;
+                                    qrModal.classList.remove('hidden'); // แสดงป๊อปอัพ
+                                } catch (error) {
+                                    console.error('Error generating QR code:', error);
+                                }
+                            } else {
+                                console.error('Error: qrcodegen library is not defined. It may not have loaded correctly.');
+                            }
+                        }
+                    });
+                    qrCell.appendChild(qrButton);
+                    newRow.appendChild(qrCell);
 
                     tableBodyEl.appendChild(newRow);
                 });
             };
 
             sortButton.addEventListener('click', () => {
-                isAscending = !isAscending;
-                const sortedData = [...allData].sort((a, b) => {
-                    if (isAscending) {
-                        return a.priority - b.priority;
-                    } else {
-                        return b.priority - a.priority;
-                    }
-                });
+                sortState = (sortState + 1) % 3;
+                let sortedData = [];
+                let sortIcon = sortButton.querySelector('svg');
+
+                if (sortState === 1) { // เรียงลำดับจากน้อยไปมาก
+                    sortedData = [...allData].sort((a, b) => a.priority - b.priority);
+                    sortIcon.style.transform = "rotate(180deg)";
+                } else if (sortState === 2) { // เรียงลำดับจากมากไปน้อย
+                    sortedData = [...allData].sort((a, b) => b.priority - a.priority);
+                    sortIcon.style.transform = "rotate(0deg)";
+                } else { // กลับสู่ลำดับเดิม
+                    sortedData = [...originalDataOrder];
+                    sortIcon.style.transform = "rotate(90deg)"; // รีเซ็ตไอคอน
+                }
+                
                 renderTable(sortedData);
             });
 
             fetchData();
-        });
+        };
     </script>
 
 </body>
