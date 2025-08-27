@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบลงทะเบียน โครงการอบรมเชิงปฏิบัติการ"การพัฒนาคุณภาพและประสิทธิภาพการเงินการคลังโรงพยาบาล"</title>
+    <title>ระบบลงทะเบียน โครงการอบรมเชิงปฏิบัติการ "การพัฒนาคุณภาพและประสิทธิภาพการเงินการคลังโรงพยาบาล"</title>
     <!-- Google Fonts - Kanit -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
@@ -12,179 +12,232 @@
         /* Custom styles for Kanit font */
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: #F5F7F8; /* New body background color */
-            scroll-behavior: smooth; /* Enable smooth scrolling for anchor links */
+            background-color: #f7f7f7; /* Lighter gray for a cleaner look */
+            scroll-behavior: smooth;
         }
-        /* Style for rotating arrow icon */
-        .arrow-icon {
-            transition: transform 0.2s ease-in-out;
+
+        /* New Color Palette */
+        :root {
+            --primary-color: #F4CE14; /* MSU Yellow */
+            --secondary-color: #495E57; /* Dark Green/Gray */
+            --accent-color: #45474B; /* Dark Gray / Black */
+            --background-color: #F5F7F8; /* Light Gray */
+            --text-color: #45474B; /* Dark Gray / Black */
+            --card-bg-color: #ffffff;
         }
-        .arrow-icon.rotate-90 {
-            transform: rotate(90deg);
+
+        /* Update background and text colors */
+        body.modal-open {
+            overflow: hidden;
         }
-        /* Ensure table cells don't force overflow unless necessary for specific content like ID */
-        .table-cell-wrap {
-            word-wrap: break-word; /* For long words */
-            overflow-wrap: break-word; /* For long words */
+
+        /* Header Styling */
+        .header {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
         }
-        /* Modal styles */
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+        }
+
+        .nav-bar a {
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-bar a:hover, .nav-bar a.active {
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Section Styling */
+        .section {
+            background-color: var(--card-bg-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: var(--secondary-color);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        /* Button Styling */
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Input Styling */
+        .input-field {
+            border-radius: 8px;
+            border: 2px solid #dce1e6;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+        }
+
+        /* Modal Styling */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
         }
+
         .modal-content {
-            background-color: #FFFFFF; /* Keep white for modal content for contrast */
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
-            max-height: 90%;
-            overflow-y: auto;
-            color: #45474B; /* New dark text for modal */
-            position: relative;
+            background-color: var(--card-bg-color);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-out;
         }
-        /* Fade-in animation for main content */
-        .fade-in {
-            animation: fadeIn 1s ease-out forwards;
-            opacity: 0; /* Start invisible */
-            transform: translateY(20px); /* Start slightly below */
+
+        .modal-content-body {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 1rem; /* Add some padding for the scrollbar */
         }
 
         @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: scale(1);
             }
         }
 
-        /* Fade-in animation for search results */
-        .search-results-fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-            opacity: 0;
-        }
-
-        /* Styles for details/summary arrow rotation */
-        details > summary {
-            list-style: none; /* Remove default marker */
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            padding: 0.5rem 0; /* Add some padding */
-        }
-        details > summary::-webkit-details-marker {
-            display: none; /* Hide default marker for Webkit browsers */
-        }
-        details > summary .details-arrow {
-            transition: transform 0.2s ease-in-out;
-            margin-right: 0.5rem;
-            color: #495E57; /* Secondary accent for arrow */
-        }
-        details[open] > summary .details-arrow {
-            transform: rotate(90deg);
-        }
-
-        /* Spinner CSS */
+        /* Spinner */
         .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #F4CE14; /* Spinner color */
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 4px solid rgba(0, 0, 0, 0.2);
+            border-left-color: var(--primary-color);
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
             display: inline-block;
             vertical-align: middle;
-            margin-right: 8px;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Accordion Styling */
+        .accordion-header {
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background-color: #f1f1f1;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            padding: 0 1rem;
+        }
+        .payment-accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
     </style>
 </head>
-<body class="bg-[#F5F7F8] min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8">
-    <div id="main-content" class="bg-white p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
+<body class="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8">
+    <div id="main-content" class="w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
         <!-- Header Section -->
-        <div class="flex flex-col items-center bg-[#F4CE14] p-6 py-8 rounded-b-lg shadow-inner mb-0"> <!-- Removed bottom margin -->
-            <!-- University Logo -->
-            <img src="https://raw.githubusercontent.com/CG0021/CG0021.github.io/refs/heads/main/%E0%B8%95%E0%B8%A3%E0%B8%B2%20%E0%B8%A1%E0%B8%A1%E0%B8%AA..png" alt="โลโก้มหาวิทยาลัยมหาสารคาม" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full mb-4 object-cover border-4 border-white"> <!-- Border changed to white for contrast -->
-            <!-- Main heading (smaller font and one line) -->
-            <h1 class="text-2xl sm:text-3xl font-bold text-[#45474B] text-center mb-3 inline-block max-w-full overflow-hidden whitespace-nowrap text-ellipsis">
-                สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม
-            </h1>
-            <!-- Added English Name -->
-            <p class="text-[#45474B] text-center text-base sm:text-lg">UNIQUEST MAHASARAKHAM UNIVERSITY</p>
-            <!-- Sub-heading (smaller) -->
-            <p class="text-[#45474B] text-center text-lg sm:text-xl mb-4">ระบบลงทะเบียนและค้นหาข้อมูล MSU</p>
+        <div class="header flex flex-col items-center p-6 py-8 mb-8">
+            <img src="https://raw.githubusercontent.com/CG0021/CG0021.github.io/refs/heads/main/%E0%B8%A3%E0%B8%B9%E0%B8%9B%20%E0%B8%95%E0%B8%A3%E0%B8%B2%20%E0%B8%A1%E0%B8%A1%E0%B8%AA..png" alt="โลโก้มหาวิทยาลัยมหาสารคาม" class="w-32 h-32 rounded-full mb-4 border-4 border-white shadow-lg">
+            <h1 class="text-center mb-3">สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</h1>
+            <p class="text-lg text-center">ระบบลงทะเบียนและค้นหาข้อมูล MSU</p>
         </div>
 
-        <!-- Navigation Bar - Moved outside the header div, directly below it -->
-        <nav class="w-full bg-[#495E57] shadow-lg rounded-md p-3 mb-6 sm:mb-8 -mt-6 sm:-mt-8"> <!-- Negative margin to pull it up -->
-            <div class="flex flex-wrap justify-center sm:justify-between gap-2 text-sm sm:text-base">
-                <a href="#courseDetailsSection" class="text-white hover:text-[#F4CE14] px-3 py-2 rounded-md transition-colors duration-200">หลักสูตร</a>
-                <a href="#registrationSection" class="text-white hover:text-[#F4CE14] px-3 py-2 rounded-md transition-colors duration-200">ลงทะเบียน</a>
-                <a href="#searchSection" class="text-white hover:text-[#F4CE14] px-3 py-2 rounded-md transition-colors duration-200">ข้อมูลลงทะเบียน</a>
-                <a href="#paymentSection" class="text-white hover:text-[#F4CE14] px-3 py-2 rounded-md transition-colors duration-200">การชำระเงิน</a>
-                <a href="#contactSection" class="text-white hover:text-[#F4CE14] px-3 py-2 rounded-md transition-colors duration-200">ติดต่อเรา</a>
+        <!-- Navigation Bar -->
+        <nav class="nav-bar w-full p-3 mb-8 -mt-16 sticky top-4 z-50">
+            <div class="flex flex-wrap justify-center sm:justify-between gap-2 text-sm sm:text-base text-white">
+                <a href="#courseDetailsSection">หลักสูตร</a>
+                <a href="#registrationSection">ลงทะเบียน</a>
+                <a href="#searchSection">ข้อมูลลงทะเบียน</a>
+                <a href="#paymentSection">การชำระเงิน</a>
+                <a href="#contactSection">ติดต่อเรา</a>
             </div>
         </nav>
 
         <!-- Course Details Section -->
-        <div id="courseDetailsSection" class="bg-white p-5 rounded-lg border border-[#F4CE14] shadow-md hover:shadow-lg transition-shadow duration-200 mb-6 sm:mb-8">
-            <h2 class="text-lg sm:text-xl font-semibold text-[#45474B] mb-4">รายละเอียดหลักสูตร</h2>
-            <div id="courseList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Course cards will be inserted here -->
+        <div id="courseDetailsSection" class="section p-6 mb-8">
+            <h2 class="text-2xl mb-4">รายละเอียดหลักสูตร</h2>
+            <div id="courseList" class="space-y-4">
+                <!-- Course groups will be inserted here -->
             </div>
-            <div id="courseLoadingMessage" class="text-[#495E57] mt-4 hidden text-sm sm:text-base flex items-center justify-center">
-                <div class="spinner"></div> กำลังค้นหาข้อมูลหลักสูตร...
-            </div>
-            <div id="courseErrorMessage" class="text-red-500 mt-4 hidden text-sm sm:text-base"></div>
+            <div id="courseLoadingMessage" class="text-center mt-4 hidden"><div class="spinner inline-block"></div> กำลังค้นหาข้อมูลหลักสูตร...</div>
+            <div id="courseErrorMessage" class="text-red-500 text-center mt-4 hidden"></div>
         </div>
 
         <!-- Registration Link Section -->
-        <div id="registrationSection" class="bg-white p-5 rounded-lg border border-[#F4CE14] shadow-md hover:shadow-lg transition-shadow duration-200 mb-6 sm:mb-8">
-            <h2 class="text-lg sm:text-xl font-semibold text-[#45474B] mb-3">ลงทะเบียนเข้าร่วมอบรม</h2>
-            <p class="text-[#45474B] text-sm sm:text-base mb-4">กรุณากรอกข้อมูลการลงทะเบียนผ่านแบบฟอร์มด้านล่าง:</p>
-            <a href="https://forms.gle/yo5WNsGtZaR1Bwap6" target="_blank" class="block w-full bg-[#F4CE14] hover:bg-[#DAB812] text-[#45474B] font-bold py-2.5 px-4 rounded-md text-center transition duration-300 ease-in-out shadow-lg text-sm sm:text-base">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
+        <div id="registrationSection" class="section p-6 mb-8">
+            <h2 class="text-2xl mb-4">ลงทะเบียนเข้าร่วมอบรม</h2>
+            <p class="mb-4">กรุณากรอกข้อมูลการลงทะเบียนผ่านแบบฟอร์มด้านล่าง:</p>
+            <a href="https://forms.gle/yo5WNsGtZaR1Bwap6" target="_blank" class="btn block w-full text-center">
                 ลงทะเบียน
             </a>
         </div>
 
         <!-- Combined Search Section -->
-        <div id="searchSection" class="bg-white p-5 rounded-lg border border-[#F4CE14] shadow-md hover:shadow-lg transition-shadow duration-200 mb-6 sm:mb-8">
-            <!-- Search Input and Button Part -->
-            <div>
-                <h2 class="text-lg sm:text-xl font-semibold text-[#45474B] mb-3">ค้นหาข้อมูลผู้ลงทะเบียน</h2>
-                <p class="text-[#45474B] text-sm sm:text-base mb-4">ค้นหาข้อมูลผู้ลงทะเบียนด้วยเลขบัตรประชาชน หรือเบอร์โทรศัพท์:</p>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <input type="text" id="searchInput" placeholder="กรอกเลขบัตรประชาชน หรือเบอร์โทรศัพท์" class="flex-grow p-3 border border-gray-300 rounded-md focus:ring-[#F4CE14] focus:border-[#F4CE14] shadow-sm bg-white text-[#45474B] placeholder-gray-500">
-                    <button id="searchButton" class="bg-[#F4CE14] hover:bg-[#DAB812] text-[#45474B] font-bold py-3 px-6 rounded-md transition duration-300 ease-in-out shadow-lg flex-shrink-0 text-sm sm:text-base">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        ค้นหา
-                    </button>
-                </div>
-                <div id="loadingMessage" class="text-[#495E57] mt-2 hidden text-sm sm:text-base flex items-center justify-center">
-                    <div class="spinner"></div> กำลังค้นหาข้อมูล...
-                </div>
-                <div id="errorMessage" class="text-red-500 mt-2 hidden text-sm sm:text-base"></div>
+        <div id="searchSection" class="section p-6 mb-8">
+            <h2 class="text-2xl mb-4">ค้นหาข้อมูลผู้ลงทะเบียน</h2>
+            <p class="mb-4">ค้นหาข้อมูลผู้ลงทะเบียนด้วยเลขบัตรประชาชน หรือเบอร์โทรศัพท์:</p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="searchInput" placeholder="กรอกเลขบัตรประชาชน หรือเบอร์โทรศัพท์" class="input-field flex-grow p-3">
+                <button id="searchButton" class="btn">
+                    ค้นหา
+                </button>
             </div>
-
-            <!-- Search Results Part (Now uses cards instead of table) -->
+            <div id="loadingMessage" class="text-center mt-4 hidden"><div class="spinner inline-block"></div> กำลังค้นหาข้อมูล...</div>
+            <div id="errorMessage" class="text-red-500 text-center mt-4 hidden"></div>
             <div id="searchResults" class="hidden mt-6">
-                <h2 class="text-lg sm:text-xl font-semibold text-[#45474B] mb-4">ผลการลงทะเบียน</h2>
+                <h2 class="text-2xl mb-4">ผลการลงทะเบียน</h2>
                 <div id="resultsContainer" class="grid grid-cols-1 gap-4">
                     <!-- Search results cards will be inserted here -->
                 </div>
@@ -192,58 +245,77 @@
         </div>
 
         <!-- Payment Options Section -->
-        <div id="paymentSection" class="bg-white p-5 rounded-lg border border-[#F4CE14] shadow-md hover:shadow-lg transition-shadow duration-200 mb-6 sm:mb-8">
-            <h2 class="text-lg sm:text-xl font-semibold text-[#45474B] mb-4">การชำระเงิน</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <!-- วิธีการชำระเงิน Card (Now triggers a modal) -->
-                <div class="p-4 rounded-lg border border-[#495E57] bg-[#F5F7F8] shadow-sm flex flex-col justify-between h-full">
-                    <h3 class="text-base sm:text-lg font-semibold text-[#45474B] mb-2">วิธีการชำระเงิน</h3>
-                    <p class="text-[#45474B] text-sm mb-4">คลิกเพื่อดูรายละเอียดวิธีการชำระเงิน:</p>
-                    <button onclick="openPaymentModal()" class="block w-full bg-[#F4CE14] hover:bg-[#DAB812] text-[#45474B] font-bold py-2.5 px-4 rounded-md text-center transition duration-300 ease-in-out shadow-lg text-sm sm:text-base">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        วิธีการชำระเงิน
-                    </button>
+        <div id="paymentSection" class="section p-6 mb-8">
+            <h2 class="text-2xl mb-4">การชำระเงิน</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4">วิธีการชำระเงิน</h3>
+                    <div class="space-y-4">
+                        <div class="payment-accordion">
+                            <div class="accordion-header flex justify-between items-center">
+                                <h4 class="text-lg font-semibold">1. โอนชำระผ่านบัญชีธนาคารกรุงไทย จำกัด</h4>
+                                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="payment-accordion-content">
+                                <div class="mt-2 pl-6 p-4">
+                                    <ul class="list-disc list-inside">
+                                        <li>สาขา : เสริมไทยคอมเพล็กซ์ มหาสารคาม</li>
+                                        <li>เลขที่ : 954-0-13891-4 ชื่อบัญชี สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</li>
+                                    </ul>
+                                    <p>หลังจากโอนเงินแล้วแนบสลิปการชำระเงินในเมนู "<a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform" target="_blank" class="text-blue-600 hover:underline">ยืนยันการชำระเงิน</a>"</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="payment-accordion">
+                            <div class="accordion-header flex justify-between items-center">
+                                <h4 class="text-lg font-semibold">2. โอนชำระด้วยวิธี “สแกน QR Code”</h4>
+                                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="payment-accordion-content">
+                                <div class="mt-2 pl-6 p-4">
+                                    <p>สแกน QR Code เพื่อชำระเงินผ่านทางแอพพลิเคชั่น Mobile Banking:</p>
+                                    <img src="https://raw.githubusercontent.com/CG0021/CG0021.github.io/refs/heads/main/%E0%B8%A3%E0%B8%B9%E0%B8%9B%20QR%20CODE%20%E0%B8%8A%E0%B8%B3%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%87%E0%B8%B4%E0%B8%99%20%E0%B8%A1%E0%B8%A1%E0%B8%AA..png" alt="QR Code ชำระเงิน" class="w-48 h-64 mx-auto my-4 border rounded-lg">
+                                    <p>เงื่อนไขการโอน</p>
+                                    <ul class="list-disc list-inside">
+                                        <li>หลังจากโอนเงินแล้วแนบสลิปการชำระเงินในเมนู "<a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform" target="_blank" class="text-blue-600 hover:underline">ยืนยันการชำระเงิน</a>"</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="payment-accordion">
+                            <div class="accordion-header flex justify-between items-center">
+                                <h4 class="text-lg font-semibold">3. โอนชำระผ่าน “ระบบ KTB corporate online”</h4>
+                                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            <div class="payment-accordion-content">
+                                <div class="mt-2 pl-6 p-4">
+                                    <p>หากต้องการชำระค่าลงทะเบียนผ่านระบบ KTB corporate online กรุณาสอบถามรายละเอียดบัญชีการโอนกับเจ้าหน้าที่ฝ่ายฝึกอบรม ก่อนการโอนชำระ ได้ที่ เบอร์โทร 06 2545 6746</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Payment Confirmation Link -->
-                <div class="p-4 rounded-lg border border-[#495E57] bg-[#F5F7F8] shadow-sm flex flex-col justify-between h-full">
-                    <h3 class="text-base sm:text-lg font-semibold text-[#45474B] mb-2">ยืนยันการชำระเงิน</h3>
-                    <p class="text-[#45474B] text-sm mb-4">หลังจากโอนเงินแล้ว กรุณายืนยันการชำระเงินที่นี่:</p>
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform?usp=header" target="_blank" class="block w-full bg-[#F4CE14] hover:bg-[#DAB812] text-[#45474B] font-bold py-2.5 px-4 rounded-md text-center transition duration-300 ease-in-out shadow-lg text-sm sm:text-base">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        ยืนยันการชำระเงิน
-                    </a>
+                <div class="p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-2">ยืนยันการชำระเงิน</h3>
+                    <p class="mb-4">หลังจากโอนเงินแล้ว กรุณายืนยันการชำระเงินที่นี่:</p>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform?usp=header" target="_blank" class="btn block w-full text-center">ยืนยันการชำระเงิน</a>
                 </div>
             </div>
         </div>
 
         <!-- Contact Options Section -->
-        <div id="contactSection" class="bg-white p-5 rounded-lg border border-[#F4CE14] shadow-md hover:shadow-lg transition-shadow duration-200">
-            <h2 class="text-lg sm:text-xl font-semibold text-[#45474B] mb-4">ติดต่อสอบถาม</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <!-- Line Group Link -->
-                <div class="p-4 rounded-lg border border-[#495E57] bg-[#F5F7F8] shadow-sm">
-                    <h3 class="text-base sm:text-lg font-semibold text-[#45474B] mb-2">กลุ่มไลน์สอบถามข้อมูล</h3>
-                    <p class="text-[#45474B] text-sm mb-4">เข้าร่วมกลุ่มไลน์เพื่อสอบถามข้อมูลเพิ่มเติม:</p>
-                    <p class="text-[#45474B] text-sm mb-4">
-                        <a href="https://drive.google.com/file/d/1TJecSsjaen5DhP5o3EsUYF0xBhAnFYEu/view?usp=drive_link" target="_blank" class="text-[#495E57] hover:underline">คลิกเพื่อดูรูป QR Code กลุ่มไลน์</a>
-                    </p>
-                    <a href="https://line.me/R/ti/g/27PU9pjBuJ" target="_blank" class="block w-full bg-[#F4CE14] hover:bg-[#DAB812] text-[#45474B] font-bold py-2.5 px-4 rounded-md text-center transition duration-300 ease-in-out shadow-lg text-sm sm:text-base">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                        เข้ากลุ่มไลน์
-                    </a>
+        <div id="contactSection" class="section p-6">
+            <h2 class="text-2xl mb-4">ติดต่อสอบถาม</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-2">กลุ่มไลน์สอบถามข้อมูล</h3>
+                    <p class="mb-4">เข้าร่วมกลุ่มไลน์เพื่อสอบถามข้อมูลเพิ่มเติม:</p>
+                    <img src="https://raw.githubusercontent.com/CG0021/CG0021.github.io/refs/heads/main/%E0%B8%A3%E0%B8%B9%E0%B8%9B%20Line%20group%2001.png" alt="QR Code กลุ่มไลน์" class="w-40 h-40 mx-auto my-4 border rounded-lg">
+                    <a href="https://line.me/R/ti/g/27PU9pjBuJ" target="_blank" class="btn block w-full text-center">เข้ากลุ่มไลน์</a>
                 </div>
-
-                <!-- Phone Contact Section -->
-                <div class="p-4 rounded-lg border border-[#495E57] bg-[#F5F7F8] shadow-sm">
-                    <h3 class="text-base sm:text-lg font-semibold text-[#45474B] mb-2">สอบถามทางโทรศัพท์</h3>
-                    <div class="text-[#45474B] text-sm">
+                <div class="p-6 rounded-lg border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-2">สอบถามทางโทรศัพท์</h3>
+                    <div class="text-base">
                         <p class="mb-2">ว่าที่ร้อยตรีหญิงเดือนเพ็ญ ดรพิลา</p>
                         <p class="ml-4">โทร. 08 2117 1663, 08 9623 4223</p>
                         <p class="mb-2 mt-2">คุณทิวากร นุ่มนิ่ม</p>
@@ -258,295 +330,136 @@
 
     <!-- Course Detail Modal -->
     <div id="courseDetailModal" class="modal-overlay fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-4">
-        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 relative m-4 md:m-0">
-            <button onclick="closeCourseModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
+        <div class="modal-content w-full max-w-4xl p-6 relative m-4 md:m-0">
+            <button onclick="closeCourseModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <h2 id="modalCourseName" class="text-2xl font-bold text-[#45474B] mb-4 border-b pb-2"></h2>
-            <div class="space-y-4 text-base text-[#45474B]">
-                <div>
-                    <h3 class="font-semibold text-lg text-[#45474B]">รายละเอียด</h3>
-                    <p id="modalCourseSubDetail" class="text-gray-700"></p>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg text-[#45474B]">หัวข้อการอบรม</h3>
-                    <p id="modalCourseTopics" class="text-gray-700"></p>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg text-[#45474B]">รอบการอบรม</h3>
-                    <p id="modalCourseRounds" class="text-gray-700"></p>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg text-[#45474B]">สถานที่จัดอบรม</h3>
-                    <p id="modalCourseLocation" class="text-gray-700"></p>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg text-[#45474B]">หนังสือโครงการ</h3>
-                    <p id="modalCourseProjectBook" class="text-gray-700"></p>
-                </div>
+            <h2 id="modalCourseName" class="text-3xl font-bold mb-4 border-b pb-2"></h2>
+            <div class="modal-content-body space-y-4 text-lg">
+                <div><h3 class="font-semibold">รายละเอียด</h3><p id="modalCourseSubDetail"></p></div>
+                <div><h3 class="font-semibold">หัวข้อการอบรม</h3><p id="modalCourseTopics"></p></div>
+                <div><h3 class="font-semibold">รอบการอบรม</h3><p id="modalCourseRounds"></p></div>
+                <div><h3 class="font-semibold">สถานที่จัดอบรม</h3><p id="modalCourseLocation"></p></div>
+                <div><h3 class="font-semibold">หนังสือโครงการ</h3><p id="modalCourseProjectBook"></p></div>
             </div>
         </div>
     </div>
-
-    <!-- Payment Method Modal -->
-    <div id="paymentDetailModal" class="modal-overlay fixed inset-0 z-50 overflow-y-auto hidden flex items-center justify-center p-4">
-        <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 relative m-4 md:m-0">
-            <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-            <h2 class="text-2xl font-bold text-[#45474B] mb-4">ช่องทางการชำระเงิน</h2>
-            <div class="payment-details-container space-y-4">
-                <!-- Payment Method 1: Bank Transfer -->
-                <details class="mb-4 p-3 rounded-lg border border-gray-200 bg-[#F5F7F8] payment-detail-item">
-                    <summary class="text-lg sm:text-xl font-semibold text-[#45474B] flex items-center">
-                        <svg class="h-5 w-5 details-arrow text-[#495E57]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                        1. โอนชำระผ่านบัญชีธนาคารกรุงไทย จำกัด
-                    </summary>
-                    <div class="mt-2 pl-6">
-                        <ul class="list-disc list-inside ml-2 mb-2">
-                            <li>สาขา : เสริมไทยคอมเพล็กซ์ มหาสารคาม</li>
-                            <li>เลขที่ : 954-0-13891-4 ชื่อบัญชี สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</li>
-                        </ul>
-                        <p class="mb-2">หลังจากโอนเงินแล้วแนบสลิปการชำระเงินในเมนู "<a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform" target="_blank" class="text-blue-600 hover:text-blue-800 underline">ยืนยันการชำระเงิน</a>"</p>
-                        <p class="mb-2 underline">กรณีสั่งจ่ายเช็ค ในนาม สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</p>
-                        <ul class="list-disc list-inside ml-2 mb-2">
-                            <li>ให้นำเช็คฝากเข้าบัญชี ไม่รับเช็คหน้างาน และให้นำใบฝากเงิน (Pay-in Slip) รับฉบับจริงเท่านั้น มายื่นต่อเจ้าหน้าที่ในวันอบรม</li>
-                        </ul>
-                    </div>
-                </details>
-
-                <!-- Payment Method 2: QR Code Scan -->
-                <details class="mb-4 p-3 rounded-lg border border-gray-200 bg-[#F5F7F8] payment-detail-item">
-                    <summary class="text-lg sm:text-xl font-semibold text-[#45474B] flex items-center">
-                        <svg class="h-5 w-5 details-arrow text-[#495E57]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                        2. โอนชำระด้วยวิธี “สแกน QR Code” ผ่านทางแอพพลิเคชั่น Mobile Banking
-                    </summary>
-                    <div class="mt-2 pl-6">
-                        <p class="mb-2">สแกน QR Code เพื่อชำระเงิน: กดเข้าลิ้ง <a href="https://drive.google.com/file/d/1Mdi2SrZQjcXUQuvUS07uT8pn-0uFBjFW/view?usp=drive_link" target="_blank" class="text-blue-600 hover:text-blue-800 underline">ที่นี่เพื่อดู QR Code ชำระเงิน</a></p>
-                        <p class="mb-2">เงื่อนไขการโอน</p>
-                        <ul class="list-disc list-inside ml-2 mb-2">
-                            <li>หลังจากโอนเงินแล้วแนบสลิปการชำระเงินในเมนู "<a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform" target="_blank" class="text-blue-600 hover:text-blue-800 underline">ยืนยันการชำระเงิน</a>"</li>
-                            <li class="list-none">หรือ</li> <!-- Changed to list-none to remove bullet -->
-                            <li>ในวันลงทะเบียนอบรม ให้ปริ้นสลิปการโอนค่าลงทะเบียน พร้อมระบุรายละเอียด ดังนี้</li>
-                            <ul class="list-circle list-inside ml-6 mb-2">
-                                <li>ชื่อโครงการ วันและสถานที่ ฝึกอบรม</li>
-                                <li>ชื่อ-สกุล ชื่อสังกัด และเบอร์ติดต่อ</li>
-                            </ul>
-                            <li>พร้อมเซ็นต์ “รับรองจ่ายจริง” นำมายื่นต่อเจ้าหน้าที่ลงทะเบียน</li>
-                        </ul>
-                    </div>
-                </details>
-
-                <!-- Payment Method 3: KTB Corporate Online -->
-                <details class="mb-4 p-3 rounded-lg border border-gray-200 bg-[#F5F7F8] payment-detail-item">
-                    <summary class="text-lg sm:text-xl font-semibold text-[#45474B] flex items-center">
-                        <svg class="h-5 w-5 details-arrow text-[#495E57]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                        3. โอนชำระผ่าน “ระบบ KTB corporate online”
-                    </summary>
-                    <div class="mt-2 pl-6">
-                        <p>หากต้องการชำระค่าลงทะเบียนผ่านระบบ KTB corporate online กรุณาสอบถามรายละเอียดบัญชีการโอนกับเจ้าหน้าที่ฝ่ายฝึกอบรม ก่อนการโอนชำระ ได้ที่ เบอร์โทร 06 2545 6746</p>
-                    </div>
-                </details>
-            </div>
-        </div>
-    </div>
-
 
     <script>
-        // Google Apps Script Web App URL for fetching registration data by ID
-        // IMPORTANT: Replace with your actual deployed Google Apps Script Web App URL for registration data.
         const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwT4bRW4HVYKNEQeAuCYMgBKHk_X7s5Ug7zOds1G-vA0zsGf0-CVkIAqtl2UUF5dEvD/exec';
+        const COURSE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyIEkXl9qujo6msk57fjgYv6jDsGVwMaUvIqeP9UDgMkPACzipTN66JRh_-6TP3WFex/exec';
+        let courseDetailsData = [];
 
-        // Google Apps Script Web App URL for fetching Course Details
-        // IMPORTANT: You MUST deploy the new Apps Script code provided above (google-apps-script-course-data)
-        // and replace this placeholder URL with its 'exec' URL.
-        const COURSE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyIEkXl9qujo6msk57fjgYv6jDsGVwMaUvIqeP9UDgMkPACzipTN66JRh_-6TP3WFex/exec'; // *** อัปเดต URL แล้ว ***
-
-        let courseDetailsData = []; // Stores fetched course details data
-
-        // Function to fetch course details from the new Google Apps Script URL
         async function fetchCourseDetails() {
             const courseLoadingMessageDiv = document.getElementById('courseLoadingMessage');
             const courseErrorMessageDiv = document.getElementById('courseErrorMessage');
             const courseListDiv = document.getElementById('courseList');
-
-            courseLoadingMessageDiv.textContent = 'กำลังค้นหาข้อมูลหลักสูตร...';
             courseLoadingMessageDiv.classList.remove('hidden');
             courseErrorMessageDiv.classList.add('hidden');
-            courseListDiv.innerHTML = ''; // Clear previous list
+            courseListDiv.innerHTML = '';
 
             try {
-                // Fetch course details from the Apps Script Web App
                 const response = await fetch(COURSE_APPS_SCRIPT_WEB_APP_URL);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('HTTP error response from Course Apps Script:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-                }
-
-                const result = await response.json(); // Expecting a direct JSON array of course objects
-                console.log('Course Apps Script response:', result);
-
-                if (Array.isArray(result)) { // Check if the result is an array
-                    courseDetailsData = result; // Assign the array directly
-                    if (courseDetailsData.length > 0) {
-                        console.log('Headers (Course Details from Apps Script):', Object.keys(courseDetailsData[0]));
-                        renderCourseList(); // Render the courses once loaded
-                    } else {
-                        courseListDiv.innerHTML = '<p class="text-[#45474B]">ไม่พบข้อมูลหลักสูตร</p>';
-                    }
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const result = await response.json();
+                if (Array.isArray(result)) {
+                    courseDetailsData = result;
+                    renderCourseList();
                 } else {
-                    // If Apps Script returns an object with status/message (e.g., error from Apps Script)
-                    if (result.status === 'error') {
-                        throw new Error(result.message);
-                    } else {
-                        throw new Error('รูปแบบข้อมูลหลักสูตรที่ได้รับจาก Apps Script ไม่ถูกต้อง');
-                    }
+                    throw new Error('Invalid data format from Apps Script');
                 }
-
                 courseLoadingMessageDiv.classList.add('hidden');
             } catch (error) {
-                console.error('เกิดข้อผิดพลาดในการโหลดรายละเอียดหลักสูตรจาก Apps Script:', error);
+                console.error('Error fetching course details:', error);
                 courseLoadingMessageDiv.classList.add('hidden');
-                courseErrorMessageDiv.textContent = `เกิดข้อผิดพลาดในการโหลดรายละเอียดหลักสูตร: ${error.message} โปรดตรวจสอบลิงก์ Apps Script และการตั้งค่าการ Deploy`;
+                courseErrorMessageDiv.textContent = `Error fetching course details: ${error.message}`;
                 courseErrorMessageDiv.classList.remove('hidden');
             }
         }
 
-        // Function to render the course list, now with grouping
         function renderCourseList() {
             const courseListDiv = document.getElementById('courseList');
-            courseListDiv.innerHTML = ''; // Clear existing cards
-
-            // Group courses by the 'กลุ่ม' (Group) property
+            courseListDiv.innerHTML = '';
             const groupedCourses = courseDetailsData.reduce((acc, course) => {
-                const groupName = course['กลุ่ม'] && course['กลุ่ม'].trim() !== '' ? course['กลุ่ม'] : 'ไม่มีกลุ่ม';
-                if (!acc[groupName]) {
-                    acc[groupName] = [];
-                }
+                const groupName = course['กลุ่ม'] || 'Other';
+                if (!acc[groupName]) acc[groupName] = [];
                 acc[groupName].push(course);
                 return acc;
             }, {});
 
-            // Render each group and its courses
-            Object.keys(groupedCourses).forEach(groupName => {
-                const groupHeader = document.createElement('h3');
-                groupHeader.classList.add('col-span-1', 'md:col-span-2', 'lg:col-span-3', 'text-xl', 'font-bold', 'text-[#495E57]', 'mt-6', 'mb-2', 'border-b-2', 'border-[#495E57]', 'pb-1');
-                groupHeader.textContent = groupName;
-                courseListDiv.appendChild(groupHeader);
+            for (const groupName in groupedCourses) {
+                const groupContainer = document.createElement('div');
+                const accordionHeader = document.createElement('div');
+                accordionHeader.className = 'accordion-header flex justify-between items-center';
+                accordionHeader.innerHTML = `<h3 class="text-xl font-bold">${groupName}</h3><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                
+                const accordionContent = document.createElement('div');
+                accordionContent.className = 'accordion-content';
 
+                const coursesGrid = document.createElement('div');
+                coursesGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4';
+                
                 groupedCourses[groupName].forEach(course => {
                     const courseCard = document.createElement('div');
-                    // Updated border color to #495E57
-                    courseCard.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'border', 'border-[#495E57]', 'cursor-pointer', 'hover:shadow-lg', 'hover:translate-y-[-2px]', 'transition-all', 'duration-200');
-                    
-                    // Use the actual column names from the sheet
-                    const courseName = course['ชื่อหลักสูตร'] || 'ไม่ระบุชื่อหลักสูตร';
-                    const subDetail = course['รายละเอียดย่อย'] || '';
-
+                    courseCard.className = 'bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow';
                     courseCard.innerHTML = `
-                        <h3 class="text-lg font-semibold text-[#45474B] mb-2">${courseName}</h3>
-                        <p class="text-sm text-[#45474B]">${subDetail}</p>
+                        <h4 class="text-xl font-semibold mb-2">${course['ชื่อหลักสูตร']}</h4>
+                        <p class="text-gray-600">${course['รายละเอียดย่อย']}</p>
                     `;
                     courseCard.addEventListener('click', () => openCourseModal(course));
-                    courseListDiv.appendChild(courseCard);
+                    coursesGrid.appendChild(courseCard);
                 });
+
+                accordionContent.appendChild(coursesGrid);
+                groupContainer.appendChild(accordionHeader);
+                groupContainer.appendChild(accordionContent);
+                courseListDiv.appendChild(groupContainer);
+
+                accordionHeader.addEventListener('click', () => {
+                    const currentlyOpen = document.querySelector('.accordion-content[style*="max-height"]');
+                    if (currentlyOpen && currentlyOpen !== accordionContent) {
+                        currentlyOpen.style.maxHeight = null;
+                        currentlyOpen.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
+                    }
+
+                    if (accordionContent.style.maxHeight) {
+                        accordionContent.style.maxHeight = null;
+                        accordionHeader.querySelector('svg').classList.remove('rotate-180');
+                    } else {
+                        accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                        accordionHeader.querySelector('svg').classList.add('rotate-180');
+                    }
+                });
+            }
+            const allAccordions = document.querySelectorAll('.accordion-content');
+            allAccordions.forEach(acc => {
+                acc.style.maxHeight = null;
+                acc.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
             });
         }
 
-        // Function to handle closing course modal by clicking outside or 'x' button
-        function closeCourseModal() {
-            const courseDetailModal = document.getElementById('courseDetailModal');
-            courseDetailModal.classList.add('hidden');
-            // Remove event listener to prevent multiple listeners accumulating
-            courseDetailModal.removeEventListener('click', handleCourseModalOutsideClick);
-        }
-
-        // Event handler for clicking outside the course modal content
-        function handleCourseModalOutsideClick(event) {
-            const modalContent = document.querySelector('#courseDetailModal .modal-content');
-            // Check if the click occurred outside the modal content
-            if (event.target === this && !modalContent.contains(event.target)) {
-                closeCourseModal();
-            }
-        }
-
-        // Functions for the Course Detail Modal
         function openCourseModal(course) {
-            console.log('Opening modal for course:', course); // Log the course object being used
-
             document.getElementById('modalCourseName').textContent = course['ชื่อหลักสูตร'] || '-';
-            // Use innerHTML and replace newlines with <br> for multi-line content
             document.getElementById('modalCourseSubDetail').innerHTML = (course['รายละเอียดย่อย'] || '-').replace(/\n/g, '<br>');
             document.getElementById('modalCourseTopics').innerHTML = (course['หัวข้อการอบรม'] || '-').replace(/\n/g, '<br>');
             document.getElementById('modalCourseRounds').innerHTML = (course['รอบการอบรม'] || '-').replace(/\n/g, '<br>');
             document.getElementById('modalCourseLocation').innerHTML = (course['สถานที่จัดอบรม'] || '-').replace(/\n/g, '<br>');
-            
             const projectBookLink = course['หนังสือโครงการอบรม'];
             const projectBookSpan = document.getElementById('modalCourseProjectBook');
             if (projectBookLink && projectBookLink !== '-') {
-                projectBookSpan.innerHTML = `<a href="${projectBookLink}" target="_blank" class="text-[#495E57] hover:underline">ดูหนังสือโครงการ</a>`;
+                projectBookSpan.innerHTML = `<a href="${projectBookLink}" target="_blank" class="text-blue-600 hover:underline">ดูหนังสือโครงการ</a>`;
             } else {
                 projectBookSpan.textContent = '-';
             }
-
-            const courseDetailModal = document.getElementById('courseDetailModal');
-            courseDetailModal.classList.remove('hidden');
-            // Add event listener to the overlay to close when clicking outside
-            courseDetailModal.addEventListener('click', handleCourseModalOutsideClick);
+            document.getElementById('courseDetailModal').classList.remove('hidden');
+            document.body.classList.add('modal-open');
         }
 
-        // Function to handle closing payment modal by clicking outside or 'x' button
-        function closePaymentModal() {
-            const paymentDetailModal = document.getElementById('paymentDetailModal');
-            paymentDetailModal.classList.add('hidden');
-            // Remove event listener to prevent multiple listeners accumulating
-            paymentDetailModal.removeEventListener('click', handlePaymentModalOutsideClick);
+        function closeCourseModal() {
+            document.getElementById('courseDetailModal').classList.add('hidden');
+            document.body.classList.remove('modal-open');
         }
 
-        // Event handler for clicking outside the payment modal content
-        function handlePaymentModalOutsideClick(event) {
-            const modalContent = document.querySelector('#paymentDetailModal .modal-content');
-            // Check if the click occurred outside the modal content
-            if (event.target === this && !modalContent.contains(event.target)) {
-                closePaymentModal();
-            }
-        }
-
-        // Function to open payment modal and attach outside click listener
-        function openPaymentModal() {
-            const paymentDetailModal = document.getElementById('paymentDetailModal');
-            paymentDetailModal.classList.remove('hidden');
-            // Add event listener to the overlay to close when clicking outside
-            paymentDetailModal.addEventListener('click', handlePaymentModalOutsideClick);
-
-            // Add accordion behavior to payment details
-            const detailsElements = paymentDetailModal.querySelectorAll('.payment-detail-item');
-            detailsElements.forEach(details => {
-                details.addEventListener('toggle', (event) => {
-                    if (details.open) {
-                        detailsElements.forEach(otherDetails => {
-                            if (otherDetails !== details && otherDetails.open) {
-                                otherDetails.open = false;
-                            }
-                        });
-                    }
-                });
-            });
-        }
-
-        // Function to execute search logic (now uses Google Apps Script API)
         async function executeSearch() {
             const searchInput = document.getElementById('searchInput').value.trim();
             const searchResultsDiv = document.getElementById('searchResults');
@@ -554,152 +467,107 @@
             const errorMessageDiv = document.getElementById('errorMessage');
             const loadingMessageDiv = document.getElementById('loadingMessage');
 
-            // Clear previous results and hide sections
             resultsContainer.innerHTML = '';
-            searchResultsDiv.classList.add('hidden', 'search-results-fade-in'); // Add fade-in class initially
+            searchResultsDiv.classList.add('hidden');
             errorMessageDiv.classList.add('hidden');
-            loadingMessageDiv.classList.remove('hidden'); // Show loading message
+            loadingMessageDiv.classList.remove('hidden');
 
             if (searchInput === '') {
-                loadingMessageDiv.classList.add('hidden'); // Hide loading if input is empty
-                errorMessageDiv.textContent = 'กรุณากรอกเลขบัตรประชาชน หรือเบอร์โทรศัพท์ เพื่อค้นหา';
+                loadingMessageDiv.classList.add('hidden');
+                errorMessageDiv.textContent = 'กรุณากรอกเลขบัตรประชาชน หรือเบอร์โทรศัพท์';
                 errorMessageDiv.classList.remove('hidden');
                 return;
             }
 
             try {
-                // Construct the URL for the Apps Script API call
-                const url = APPS_SCRIPT_WEB_APP_URL; // Use the base URL to get all data
-                console.log('Fetching all registration data from URL:', url); // Log the URL being fetched
+                const response = await fetch(APPS_SCRIPT_WEB_APP_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const allRegistrationData = await response.json();
+                loadingMessageDiv.classList.add('hidden');
 
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('HTTP error response from Apps Script:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-                }
-
-                const allRegistrationData = await response.json(); // Now, result is directly the array of objects
-                console.log('Apps Script returned all data:', allRegistrationData); // Log the full response from Apps Script
-
-                loadingMessageDiv.classList.add('hidden'); // Hide loading message
-
-                // Client-side filtering
-                let foundUsers = [];
-                for (let i = 0; i < allRegistrationData.length; i++) {
-                    const user = allRegistrationData[i];
-                    // Normalize inputs for comparison (e.g., convert to string and trim)
-                    const nationalId = String(user["เลขบัตรประชาชน"]).trim();
-                    const phoneNumber = String(user["เบอร์โทรศัพท์"]).trim();
-                    
-                    if (nationalId === searchInput || phoneNumber === searchInput) {
-                        foundUsers.push(user);
-                    }
-                }
+                const foundUsers = allRegistrationData.filter(user => 
+                    String(user["เลขบัตรประชาชน"]).trim() === searchInput || 
+                    String(user["เบอร์โทรศัพท์"]).trim() === searchInput
+                );
 
                 if (foundUsers.length > 0) {
                     searchResultsDiv.classList.remove('hidden');
-                    searchResultsDiv.classList.add('search-results-fade-in'); // Trigger fade-in animation
-
-                    foundUsers.forEach((foundUser, index) => {
-                        let statusClass = '';
-                        let statusText = foundUser['สถานะการโอนเงิน'] || '-'; // Use actual column name
-                        if (statusText === 'ชำระเงินแล้ว') {
-                            statusClass = 'bg-green-100 text-green-800';
-                        } else if (statusText === 'รอตรวจสอบข้อมูล 1-2 วัน') { // Ensure exact match for status
-                            statusClass = 'bg-yellow-100 text-yellow-800';
-                        } else if (statusText === 'ไม่พบข้อมูลการชำระเงิน') {
-                            statusClass = 'bg-red-100 text-red-800';
-                        } else {
-                            statusClass = 'bg-gray-100 text-gray-800';
-                        }
-
-                        let paymentProofHtml = '';
-                        // Use actual column name 'หลักฐานการโอนเงิน'
-                        if (foundUser['สถานะการโอนเงิน'] !== 'ไม่พบข้อมูลการชำระเงิน') {
-                            paymentProofHtml = `
-                                <div><strong>หลักฐานการโอนเงิน:</strong>
-                                    ${foundUser['หลักฐานการโอนเงิน'] && foundUser['หลักฐานการโอนเงิน'] !== '' && foundUser['หลักฐานการโอนเงิน'] !== 'ไม่พบข้อมูลการชำระเงิน' ? `<a href="${foundUser['หลักฐานการโอนเงิน']}" target="_blank" class="text-[#495E57] hover:underline">ดูหลักฐาน</a>` : '-'}
-                                </div>
-                            `;
-                        } else {
-                            paymentProofHtml = `<div><strong>หลักฐานการโอนเงิน:</strong> -</div>`;
-                        }
-
+                    foundUsers.forEach(user => {
                         const resultCard = document.createElement('div');
-                        resultCard.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'border', 'border-gray-200', 'hover:shadow-lg', 'hover:translate-y-[-2px]', 'transition-all', 'duration-200');
-                        
+                        resultCard.className = 'bg-white p-6 rounded-lg shadow-md';
                         resultCard.innerHTML = `
-                            <div class="flex items-start justify-between cursor-pointer summary-header">
-                                <div class="flex items-start flex-grow">
-                                    <svg class="h-4 w-4 mt-1 mr-2 transform transition-transform arrow-icon text-[#495E57]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                    <div class="flex-grow">
-                                        <p class="font-semibold text-[#45474B] text-base sm:text-lg">${foundUser['เลือกหลักสูตรที่ลงทะเบียน'] || '-'}</p>
-                                        <p class="text-sm text-[#45474B]"><strong>วันที่เข้าอบรม:</strong> ${foundUser['วันที่เข้าอบรม'] || '-'}</p>
-                                        <p class="text-sm text-[#45474B]"><strong>ชื่อ:</strong> ${foundUser['ชื่อ'] || '-'}</p>
-                                    </div>
-                                </div>
-                                <span class="${statusClass} px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-medium ml-4 flex-shrink-0">
-                                    ${statusText}
-                                </span>
-                            </div>
-                            <div class="detail-content hidden mt-4 border-t border-gray-200 pt-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-[#45474B]">
-                                    <div><strong>วันที่เข้าอบรม:</strong> ${foundUser['วันที่เข้าอบรม'] || '-'}</div>
-                                    <div><strong>หน่วยงาน:</strong> ${foundUser['หน่วยงาน'] || '-'}</div>
-                                    <div><strong>เบอร์โทรศัพท์:</strong> ${foundUser['เบอร์โทรศัพท์'] || '-'}</div>
-                                    <div><strong>เลขบัตรประชาชน:</strong> ${foundUser['เลขบัตรประชาชน'] || '-'}</div>
-                                    ${paymentProofHtml}
-                                </div>
-                            </div>
+                            <h4 class="text-xl font-semibold">${user['เลือกหลักสูตรที่ลงทะเบียน']}</h4>
+                            <p><strong>ชื่อ:</strong> ${user['ชื่อ']}</p>
+                            <p><strong>สถานะ:</strong> ${user['สถานะการโอนเงิน']}</p>
                         `;
-
                         resultsContainer.appendChild(resultCard);
-
-                        // Add event listener to the summary header to toggle the detail content
-                        const summaryHeader = resultCard.querySelector('.summary-header');
-                        const detailContent = resultCard.querySelector('.detail-content');
-                        const arrowIcon = resultCard.querySelector('.arrow-icon');
-
-                        summaryHeader.addEventListener('click', function() {
-                            detailContent.classList.toggle('hidden');
-                            arrowIcon.classList.toggle('rotate-90');
-                        });
                     });
                 } else {
-                    resultsContainer.innerHTML = '<p class="text-[#45474B]">ไม่พบข้อมูลสำหรับเลขบัตรประชาชน หรือเบอร์โทรศัพท์นี้ โปรดตรวจสอบอีกครั้ง</p>';
-                    searchResultsDiv.classList.remove('hidden'); // Show the container even if empty to display the message
-                    searchResultsDiv.classList.add('search-results-fade-in'); // Trigger fade-in animation
+                    errorMessageDiv.textContent = 'ไม่พบข้อมูล';
+                    errorMessageDiv.classList.remove('hidden');
                 }
             } catch (error) {
+                console.error('Error searching:', error);
                 loadingMessageDiv.classList.add('hidden');
-                console.error('เกิดข้อผิดพลาดในการค้นหาข้อมูลผู้ลงทะเบียน:', error);
-                errorMessageDiv.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์: ' + error.message + '. โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตหรือการตั้งค่า Apps Script API';
+                errorMessageDiv.textContent = `Error: ${error.message}`;
                 errorMessageDiv.classList.remove('hidden');
             }
         }
 
-        // Fetch course details when the page loads
-        window.onload = async function() {
-            // Add fade-in class to main content div
-            document.getElementById('main-content').classList.add('fade-in');
-            await fetchCourseDetails(); // Fetch course details
-        };
+        // Scroll-spy
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-bar a');
 
-        // Event listener for registration search button
-        document.getElementById('searchButton').addEventListener('click', executeSearch);
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 60) {
+                    current = section.getAttribute('id');
+                }
+            });
 
-        // Event listener for search input field (Enter key)
-        document.getElementById('searchInput').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') { // Check if the pressed key is Enter
-                executeSearch();
-            }
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
         });
 
-        console.log('Script loaded successfully.');
+        // Payment Accordion
+        const paymentAccordions = document.querySelectorAll('.payment-accordion .accordion-header');
+        paymentAccordions.forEach(accordion => {
+            accordion.addEventListener('click', () => {
+                const content = accordion.nextElementSibling;
+                const isOpen = content.style.maxHeight;
+
+                // Close all accordions
+                document.querySelectorAll('.payment-accordion .payment-accordion-content').forEach(item => {
+                    item.style.maxHeight = null;
+                    item.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
+                });
+
+                // Open the clicked one
+                if (!isOpen) {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    accordion.querySelector('svg').classList.add('rotate-180');
+                }
+            });
+        });
+
+
+        window.onload = fetchCourseDetails;
+        document.getElementById('searchButton').addEventListener('click', executeSearch);
+        document.getElementById('searchInput').addEventListener('keydown', event => {
+            if (event.key === 'Enter') executeSearch();
+        });
+
+        document.getElementById('courseDetailModal').addEventListener('click', (event) => {
+            if (event.currentTarget === event.target) {
+                closeCourseModal();
+            }
+        });
     </script>
 </body>
 </html>
