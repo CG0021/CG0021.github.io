@@ -216,13 +216,14 @@
         <div id="coursesSection" class="section p-6 mb-8">
             <h2 class="text-2xl mb-4">หลักสูตร</h2>
             <select id="courseViewSelector" class="input-field w-full p-3 mb-4">
+                <option value="" disabled selected>-- เลือกมุมมอง --</option>
                 <option value="all">หลักสูตรทั้งหมด</option>
                 <option value="group">หลักสูตรตามกลุ่มภารกิจ</option>
             </select>
 
             <!-- All Courses View -->
-            <div id="allCoursesView">
-                <div class="overflow-auto" style="max-height: 500px;">
+            <div id="allCoursesView" class="hidden">
+                <div class="overflow-auto">
                     <table class="min-w-full bg-white">
                         <thead class="bg-gray-800 text-white sticky top-0">
                             <tr>
@@ -243,10 +244,10 @@
             <!-- Group Courses View -->
             <div id="groupCoursesView" class="hidden">
                 <select id="groupSelector" class="input-field w-full p-3 mb-4">
-                    <option value="">-- เลือกกลุ่มภารกิจ --</option>
+                    <option value="">เลือกหลักสูตร</option>
                 </select>
 
-                <div class="overflow-auto" style="max-height: 440px;">
+                <div class="overflow-auto">
                     <table id="groupCoursesTable" class="min-w-full bg-white hidden">
                         <thead class="bg-gray-800 text-white sticky top-0">
                             <tr>
@@ -566,6 +567,17 @@
             }
         }
 
+        function getGoogleDriveImageUrl(url) {
+            if (typeof url !== 'string' || !url) {
+                return '#'; // Return a safe link if URL is invalid
+            }
+            const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+            }
+            return url; // Return original url if it doesn't match the expected format
+        }
+
         async function executeSearch() {
             const searchInput = document.getElementById('searchInput').value.trim();
             const searchResultsDiv = document.getElementById('searchResults');
@@ -601,10 +613,26 @@
                     foundUsers.forEach(user => {
                         const resultCard = document.createElement('div');
                         resultCard.className = 'bg-white p-6 rounded-lg shadow-md';
+                        const paymentSlipValue = user['หลักฐานการโอนเงิน'];
+                        let paymentRow = '';
+                        if (paymentSlipValue && paymentSlipValue.trim() !== 'ไม่พบข้อมูลการชำระเงิน' && paymentSlipValue.trim() !== '') {
+                            const paymentSlipUrl = getGoogleDriveImageUrl(paymentSlipValue);
+                            paymentRow = `<tr class="border-b"><td class="py-2 px-4 font-semibold">หลักฐานการโอนเงิน</td><td class="py-2 px-4"><a href="${paymentSlipUrl}" target="_blank" class="text-blue-600 hover:underline">ดูหลักฐาน</a></td></tr>`;
+                        }
+
                         resultCard.innerHTML = `
-                            <h4 class="text-xl font-semibold">${user['เลือกหลักสูตรที่ลงทะเบียน']}</h4>
-                            <p><strong>ชื่อ:</strong> ${user['ชื่อ']}</p>
-                            <p><strong>สถานะ:</strong> ${user['สถานะการโอนเงิน']}</p>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <tbody>
+                                        <tr class="border-b"><td class="py-2 px-4 font-semibold">หลักสูตรที่ลงทะเบียน</td><td class="py-2 px-4">${user['เลือกหลักสูตรที่ลงทะเบียน']}</td></tr>
+                                        <tr class="border-b"><td class="py-2 px-4 font-semibold">วันที่เข้าอบรม</td><td class="py-2 px-4">${user['วันที่เข้าอบรม']}</td></tr>
+                                        <tr class="border-b"><td class="py-2 px-4 font-semibold">หน่วยงาน</td><td class="py-2 px-4">${user['หน่วยงาน']}</td></tr>
+                                        <tr class="border-b"><td class="py-2 px-4 font-semibold">เบอร์โทรศัพท์</td><td class="py-2 px-4">${user['เบอร์โทรศัพท์']}</td></tr>
+                                        ${paymentRow}
+                                        <tr><td class="py-2 px-4 font-semibold">สถานะการโอนเงิน</td><td class="py-2 px-4">${user['สถานะการโอนเงิน']}</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         `;
                         resultsContainer.appendChild(resultCard);
                     });
@@ -666,9 +694,12 @@
             if (this.value === 'all') {
                 document.getElementById('allCoursesView').classList.remove('hidden');
                 document.getElementById('groupCoursesView').classList.add('hidden');
-            } else {
+            } else if (this.value === 'group') {
                 document.getElementById('allCoursesView').classList.add('hidden');
                 document.getElementById('groupCoursesView').classList.remove('hidden');
+            } else {
+                document.getElementById('allCoursesView').classList.add('hidden');
+                document.getElementById('groupCoursesView').classList.add('hidden');
             }
         });
 
