@@ -473,8 +473,8 @@
             tableBody.innerHTML = '';
 
             courses.sort((a, b) => {
-                const orderA = parseInt(a['ลำดับกลุ่ม'], 10) || 0;
-                const orderB = parseInt(b['ลำดับกลุ่ม'], 10) || 0;
+                const orderA = parseInt(a['หลักสูตรที่'], 10) || 0;
+                const orderB = parseInt(b['หลักสูตรที่'], 10) || 0;
                 return orderA - orderB;
             });
 
