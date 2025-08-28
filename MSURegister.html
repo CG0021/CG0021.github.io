@@ -183,6 +183,13 @@
             overflow: hidden;
             transition: max-height 0.5s ease-out;
         }
+
+        /* Mobile-specific table column widths */
+        @media (max-width: 768px) {
+            .course-col-id { width: 14%; }
+            .course-col-name { width: 28%; }
+            .course-col-details { width: 58%; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4 sm:p-6 lg:p-8">
@@ -219,9 +226,9 @@
                     <table class="min-w-full bg-white">
                         <thead class="bg-gray-800 text-white sticky top-0">
                             <tr>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">หลักสูตรที่</th>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">ชื่อหลักสูตร</th>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">รายละเอียดย่อย</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-id">ลำดับ</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-name">ชื่อหลักสูตร</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-details">รายละเอียดย่อย</th>
                             </tr>
                         </thead>
                         <tbody id="allCoursesTableBody" class="text-gray-700">
@@ -243,9 +250,9 @@
                     <table id="groupCoursesTable" class="min-w-full bg-white hidden">
                         <thead class="bg-gray-800 text-white sticky top-0">
                             <tr>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">หลักสูตรที่</th>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">ชื่อหลักสูตร</th>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">รายละเอียดย่อย</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-id">ลำดับ</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-name">ชื่อหลักสูตร</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-details">รายละเอียดย่อย</th>
                             </tr>
                         </thead>
                         <tbody id="groupCoursesTableBody" class="text-gray-700">
