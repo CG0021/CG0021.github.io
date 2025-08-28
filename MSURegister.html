@@ -197,7 +197,7 @@
         <!-- Navigation Bar -->
         <nav class="nav-bar w-full p-3 mb-8 -mt-16 sticky top-4 z-50">
             <div class="flex flex-wrap justify-center sm:justify-between gap-2 text-sm sm:text-base text-white">
-                <a href="#courseDetailsSection">หลักสูตร</a>
+                <a href="#coursesSection">หลักสูตร</a>
                 <a href="#registrationSection">ลงทะเบียน</a>
                 <a href="#searchSection">ข้อมูลลงทะเบียน</a>
                 <a href="#paymentSection">การชำระเงิน</a>
@@ -205,14 +205,56 @@
             </div>
         </nav>
 
-        <!-- Course Details Section -->
-        <div id="courseDetailsSection" class="section p-6 mb-8">
-            <h2 class="text-2xl mb-4">รายละเอียดหลักสูตร</h2>
-            <div id="courseList" class="space-y-4">
-                <!-- Course groups will be inserted here -->
+        <!-- Courses Section -->
+        <div id="coursesSection" class="section p-6 mb-8">
+            <h2 class="text-2xl mb-4">หลักสูตร</h2>
+            <select id="courseViewSelector" class="input-field w-full p-3 mb-4">
+                <option value="all">หลักสูตรทั้งหมด</option>
+                <option value="group">หลักสูตรตามกลุ่มภารกิจ</option>
+            </select>
+
+            <!-- All Courses View -->
+            <div id="allCoursesView">
+                <div class="overflow-auto" style="max-height: 500px;">
+                    <table class="min-w-full bg-white">
+                        <thead class="bg-gray-800 text-white sticky top-0">
+                            <tr>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">หลักสูตรที่</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">ชื่อหลักสูตร</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">รายละเอียดย่อย</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allCoursesTableBody" class="text-gray-700">
+                            <!-- Course rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="allCoursesLoadingMessage" class="text-center mt-4 hidden"><div class="spinner inline-block"></div> กำลังค้นหาข้อมูลหลักสูตร...</div>
+                <div id="allCoursesErrorMessage" class="text-red-500 text-center mt-4 hidden"></div>
             </div>
-            <div id="courseLoadingMessage" class="text-center mt-4 hidden"><div class="spinner inline-block"></div> กำลังค้นหาข้อมูลหลักสูตร...</div>
-            <div id="courseErrorMessage" class="text-red-500 text-center mt-4 hidden"></div>
+
+            <!-- Group Courses View -->
+            <div id="groupCoursesView" class="hidden">
+                <select id="groupSelector" class="input-field w-full p-3 mb-4">
+                    <option value="">-- เลือกกลุ่มภารกิจ --</option>
+                </select>
+
+                <div class="overflow-auto" style="max-height: 440px;">
+                    <table id="groupCoursesTable" class="min-w-full bg-white hidden">
+                        <thead class="bg-gray-800 text-white sticky top-0">
+                            <tr>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">หลักสูตรที่</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">ชื่อหลักสูตร</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm">รายละเอียดย่อย</th>
+                            </tr>
+                        </thead>
+                        <tbody id="groupCoursesTableBody" class="text-gray-700">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="courseLoadingMessage" class="text-center mt-4 hidden"><div class="spinner inline-block"></div> กำลังค้นหาข้อมูลหลักสูตร...</div>
+                <div id="courseErrorMessage" class="text-red-500 text-center mt-4 hidden"></div>
+            </div>
         </div>
 
         <!-- Registration Link Section -->
@@ -338,8 +380,8 @@
             <div class="modal-content-body space-y-4 text-lg">
                 <div><h3 class="font-semibold">รายละเอียด</h3><p id="modalCourseSubDetail"></p></div>
                 <div><h3 class="font-semibold">หัวข้อการอบรม</h3><p id="modalCourseTopics"></p></div>
-                <div><h3 class="font-semibold">รอบการอบรม</h3><p id="modalCourseRounds"></p></div>
-                <div><h3 class="font-semibold">สถานที่จัดอบรม</h3><p id="modalCourseLocation"></p></div>
+                <div><h3 class="font-semibold">รอบการอบรม/สถานที่จัดอบรม</h3><p id="modalCourseRounds"></p></div>
+                <div><h3 class="font-semibold">หลักสูตรที่</h3><p id="modalCourseLocation"></p></div>
                 <div><h3 class="font-semibold">หนังสือโครงการ</h3><p id="modalCourseProjectBook"></p></div>
             </div>
         </div>
@@ -351,12 +393,11 @@
         let courseDetailsData = [];
 
         async function fetchCourseDetails() {
-            const courseLoadingMessageDiv = document.getElementById('courseLoadingMessage');
-            const courseErrorMessageDiv = document.getElementById('courseErrorMessage');
-            const courseListDiv = document.getElementById('courseList');
-            courseLoadingMessageDiv.classList.remove('hidden');
-            courseErrorMessageDiv.classList.add('hidden');
-            courseListDiv.innerHTML = '';
+            const allCoursesLoadingMessage = document.getElementById('allCoursesLoadingMessage');
+            const allCoursesErrorMessage = document.getElementById('allCoursesErrorMessage');
+            const courseGroupLoadingMessage = document.getElementById('courseLoadingMessage'); // Corrected ID
+            allCoursesLoadingMessage.classList.remove('hidden');
+            courseGroupLoadingMessage.classList.remove('hidden');
 
             try {
                 const response = await fetch(COURSE_APPS_SCRIPT_WEB_APP_URL);
@@ -364,77 +405,89 @@
                 const result = await response.json();
                 if (Array.isArray(result)) {
                     courseDetailsData = result;
-                    renderCourseList();
+                    renderAllCoursesTable();
+                    setupGroupSelector();
                 } else {
                     throw new Error('Invalid data format from Apps Script');
                 }
-                courseLoadingMessageDiv.classList.add('hidden');
+                allCoursesLoadingMessage.classList.add('hidden');
+                courseGroupLoadingMessage.classList.add('hidden');
             } catch (error) {
                 console.error('Error fetching course details:', error);
-                courseLoadingMessageDiv.classList.add('hidden');
-                courseErrorMessageDiv.textContent = `Error fetching course details: ${error.message}`;
-                courseErrorMessageDiv.classList.remove('hidden');
+                allCoursesLoadingMessage.classList.add('hidden');
+                allCoursesErrorMessage.textContent = `Error fetching course details: ${error.message}`;
+                allCoursesErrorMessage.classList.remove('hidden');
+                document.getElementById('courseErrorMessage').textContent = `Error fetching course details: ${error.message}`; // Corrected ID
+                document.getElementById('courseErrorMessage').classList.remove('hidden'); // Corrected ID
             }
         }
 
-        function renderCourseList() {
-            const courseListDiv = document.getElementById('courseList');
-            courseListDiv.innerHTML = '';
-            const groupedCourses = courseDetailsData.reduce((acc, course) => {
+        function setupGroupSelector() {
+            const groupSelector = document.getElementById('groupSelector');
+            
+            // Create a map of groupName to groupOrder
+            const groupOrderMap = new Map();
+            for (const course of courseDetailsData) {
                 const groupName = course['กลุ่ม'] || 'Other';
-                if (!acc[groupName]) acc[groupName] = [];
-                acc[groupName].push(course);
-                return acc;
-            }, {});
-
-            for (const groupName in groupedCourses) {
-                const groupContainer = document.createElement('div');
-                const accordionHeader = document.createElement('div');
-                accordionHeader.className = 'accordion-header flex justify-between items-center';
-                accordionHeader.innerHTML = `<h3 class="text-xl font-bold">${groupName}</h3><svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
-                
-                const accordionContent = document.createElement('div');
-                accordionContent.className = 'accordion-content';
-
-                const coursesGrid = document.createElement('div');
-                coursesGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4';
-                
-                groupedCourses[groupName].forEach(course => {
-                    const courseCard = document.createElement('div');
-                    courseCard.className = 'bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow';
-                    courseCard.innerHTML = `
-                        <h4 class="text-xl font-semibold mb-2">${course['ชื่อหลักสูตร']}</h4>
-                        <p class="text-gray-600">${course['รายละเอียดย่อย']}</p>
-                    `;
-                    courseCard.addEventListener('click', () => openCourseModal(course));
-                    coursesGrid.appendChild(courseCard);
-                });
-
-                accordionContent.appendChild(coursesGrid);
-                groupContainer.appendChild(accordionHeader);
-                groupContainer.appendChild(accordionContent);
-                courseListDiv.appendChild(groupContainer);
-
-                accordionHeader.addEventListener('click', () => {
-                    const currentlyOpen = document.querySelector('.accordion-content[style*="max-height"]');
-                    if (currentlyOpen && currentlyOpen !== accordionContent) {
-                        currentlyOpen.style.maxHeight = null;
-                        currentlyOpen.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
-                    }
-
-                    if (accordionContent.style.maxHeight) {
-                        accordionContent.style.maxHeight = null;
-                        accordionHeader.querySelector('svg').classList.remove('rotate-180');
-                    } else {
-                        accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
-                        accordionHeader.querySelector('svg').classList.add('rotate-180');
-                    }
-                });
+                if (!groupOrderMap.has(groupName)) {
+                    groupOrderMap.set(groupName, parseInt(course['ลำดับกลุ่ม'], 10) || 0);
+                }
             }
-            const allAccordions = document.querySelectorAll('.accordion-content');
-            allAccordions.forEach(acc => {
-                acc.style.maxHeight = null;
-                acc.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
+
+            // Get group names and sort them based on the order in the map
+            const groupNames = [...groupOrderMap.keys()].sort((a, b) => groupOrderMap.get(a) - groupOrderMap.get(b));
+
+            // Clear existing options but keep the first one
+            const firstOption = groupSelector.options[0];
+            groupSelector.innerHTML = '';
+            if (firstOption) {
+                groupSelector.appendChild(firstOption);
+            }
+            
+            groupNames.forEach(groupName => {
+                const option = document.createElement('option');
+                option.value = groupName;
+                option.textContent = groupName;
+                groupSelector.appendChild(option);
+            });
+
+            // Add listener only once
+            if (!groupSelector.dataset.listener) {
+                groupSelector.addEventListener('change', (event) => {
+                    const selectedGroup = event.target.value;
+                    const groupCoursesTable = document.getElementById('groupCoursesTable');
+                    if (selectedGroup) {
+                        const filteredCourses = courseDetailsData.filter(course => (course['กลุ่ม'] || 'Other') === selectedGroup);
+                        renderGroupCoursesTable(filteredCourses);
+                        groupCoursesTable.classList.remove('hidden');
+                    } else {
+                        groupCoursesTable.classList.add('hidden');
+                    }
+                });
+                groupSelector.dataset.listener = 'true';
+            }
+        }
+
+        function renderGroupCoursesTable(courses) {
+            const tableBody = document.getElementById('groupCoursesTableBody');
+            tableBody.innerHTML = '';
+
+            courses.sort((a, b) => {
+                const orderA = parseInt(a['ลำดับกลุ่ม'], 10) || 0;
+                const orderB = parseInt(b['ลำดับกลุ่ม'], 10) || 0;
+                return orderA - orderB;
+            });
+
+            courses.forEach(course => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200 hover:bg-gray-100 cursor-pointer';
+                row.innerHTML = `
+                    <td class="py-3 px-4">${course['หลักสูตรที่']}</td>
+                    <td class="py-3 px-4">${course['ชื่อหลักสูตร']}</td>
+                    <td class="py-3 px-4">${course['รายละเอียดย่อย']}</td>
+                `;
+                row.addEventListener('click', () => openCourseModal(course));
+                tableBody.appendChild(row);
             });
         }
 
@@ -458,6 +511,52 @@
         function closeCourseModal() {
             document.getElementById('courseDetailModal').classList.add('hidden');
             document.body.classList.remove('modal-open');
+        }
+
+        function renderAllCoursesTable() {
+            const tableBody = document.getElementById('allCoursesTableBody');
+
+            if (!tableBody) return;
+
+            tableBody.innerHTML = '';
+
+            if (courseDetailsData.length === 0) {
+                return;
+            }
+
+            try {
+                const uniqueCourses = [];
+                const seenCourseNumbers = new Set();
+
+                courseDetailsData.forEach(course => {
+                    const courseNumber = course['หลักสูตรที่'];
+                    if (!seenCourseNumbers.has(courseNumber)) {
+                        seenCourseNumbers.add(courseNumber);
+                        uniqueCourses.push(course);
+                    }
+                });
+
+                uniqueCourses.sort((a, b) => {
+                    const numA = parseInt(a['หลักสูตรที่'], 10) || 0;
+                    const numB = parseInt(b['หลักสูตรที่'], 10) || 0;
+                    return numA - numB;
+                });
+
+                uniqueCourses.forEach(course => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200 hover:bg-gray-100 cursor-pointer';
+                    row.innerHTML = `
+                        <td class="py-3 px-4">${course['หลักสูตรที่']}</td>
+                        <td class="py-3 px-4">${course['ชื่อหลักสูตร']}</td>
+                        <td class="py-3 px-4">${course['รายละเอียดย่อย']}</td>
+                    `;
+                    row.addEventListener('click', () => openCourseModal(course));
+                    tableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Error rendering all courses table:', error);
+            }
         }
 
         async function executeSearch() {
@@ -556,6 +655,15 @@
             });
         });
 
+        document.getElementById('courseViewSelector').addEventListener('change', function() {
+            if (this.value === 'all') {
+                document.getElementById('allCoursesView').classList.remove('hidden');
+                document.getElementById('groupCoursesView').classList.add('hidden');
+            } else {
+                document.getElementById('allCoursesView').classList.add('hidden');
+                document.getElementById('groupCoursesView').classList.remove('hidden');
+            }
+        });
 
         window.onload = fetchCourseDetails;
         document.getElementById('searchButton').addEventListener('click', executeSearch);
