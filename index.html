@@ -125,7 +125,7 @@
         </div>
 
         <div id="data-table" class="hidden">
-            <div class="overflow-hidden rounded-2xl shadow-lg border border-gray-200">
+            <div class="overflow-x-auto rounded-2xl shadow-lg border border-gray-200">
                 <table class="min-w-full divide-y divide-gray-200 table-fixed">
                     <thead class="bg-gray-50 bg-opacity-70">
                         <tr>
@@ -135,16 +135,16 @@
                                     <svg class="ml-2 w-4 h-4 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
                                 </button>
                             </th>
-                            <th class="w-3/12 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-3/12 px-2 md:px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 ชื่อโปรเจกต์
                             </th>
-                            <th class="w-5/12 px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-5/12 px-2 md:px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 รายละเอียด
                             </th>
-                            <th class="w-1/12 px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-1/12 px-2 md:px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 ลิงก์
                             </th>
-                            <th class="w-1/12 px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="w-1/12 px-2 md:px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 QR Code
                             </th>
                         </tr>
@@ -258,28 +258,33 @@
                 data.forEach(item => {
                     const newRow = document.createElement('tr');
                     newRow.classList.add('table-row-link');
+                    if (item.link) {
+                        newRow.addEventListener('click', () => {
+                            window.open(item.link, '_blank');
+                        });
+                    }
                     
                     // เซลล์ Priority
                     const priorityCell = document.createElement('td');
-                    priorityCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'font-medium', 'text-gray-900');
+                    priorityCell.classList.add('px-2', 'md:px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'font-medium', 'text-gray-900');
                     priorityCell.textContent = item.starDisplay;
                     newRow.appendChild(priorityCell);
 
                     // เซลล์ชื่อโปรเจกต์
                     const projectNameCell = document.createElement('td');
-                    projectNameCell.classList.add('px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
+                    projectNameCell.classList.add('px-2', 'md:px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
                     projectNameCell.textContent = item.projectName;
                     newRow.appendChild(projectNameCell);
 
                     // เซลล์รายละเอียด
                     const detailsCell = document.createElement('td');
-                    detailsCell.classList.add('px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
+                    detailsCell.classList.add('px-2', 'md:px-6', 'py-4', 'whitespace-normal', 'text-sm', 'text-gray-500');
                     detailsCell.textContent = item.details;
                     newRow.appendChild(detailsCell);
 
                     // เซลล์ลิงก์
                     const linkCell = document.createElement('td');
-                    linkCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-center');
+                    linkCell.classList.add('px-2', 'md:px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-center');
                     const linkButton = document.createElement('button');
                     linkButton.classList.add('text-blue-500', 'hover:text-blue-700');
                     linkButton.innerHTML = `
@@ -297,7 +302,7 @@
 
                     // เซลล์ QR Code
                     const qrCell = document.createElement('td');
-                    qrCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-center');
+                    qrCell.classList.add('px-2', 'md:px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-center');
                     const qrButton = document.createElement('button');
                     qrButton.classList.add('text-blue-500', 'hover:text-blue-700');
                     qrButton.innerHTML = `
