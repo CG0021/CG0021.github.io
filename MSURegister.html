@@ -620,7 +620,7 @@
                       
                         resultCard.className = 'bg-white p-6 rounded-lg shadow-md';
                         let paymentRow = '';
-                        if (user['สถานะการโอนเงิน'] === 'ชำระเงินแล้ว') {
+                        if (user['สถานะการโอนเงิน'] === 'ชำระเงินแล้ว' || user['สถานะการโอนเงิน'] === 'รอตรวจสอบข้อมูล 1-2 วัน') {
                             const paymentSlipValue = user['หลักฐานการโอนเงิน'];
                             if (paymentSlipValue && paymentSlipValue.trim() !== 'ไม่พบข้อมูลการชำระเงิน' && paymentSlipValue.trim() !== '') {
                                 const paymentSlipUrl = getGoogleDriveImageUrl(paymentSlipValue);
