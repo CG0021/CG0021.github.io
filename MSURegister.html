@@ -617,12 +617,15 @@
                     searchResultsDiv.classList.remove('hidden');
                     foundUsers.forEach(user => {
                         const resultCard = document.createElement('div');
+                      
                         resultCard.className = 'bg-white p-6 rounded-lg shadow-md';
-                        const paymentSlipValue = user['หลักฐานการโอนเงิน'];
                         let paymentRow = '';
-                        if (paymentSlipValue && paymentSlipValue.trim() !== 'ไม่พบข้อมูลการชำระเงิน' && paymentSlipValue.trim() !== '') {
-                            const paymentSlipUrl = getGoogleDriveImageUrl(paymentSlipValue);
-                            paymentRow = `<tr class="border-b"><td class="py-2 px-4 font-semibold">หลักฐานการโอนเงิน</td><td class="py-2 px-4"><a href="${paymentSlipUrl}" target="_blank" class="text-blue-600 hover:underline">ดูหลักฐาน</a></td></tr>`;
+                        if (user['สถานะการโอนเงิน'] === 'ชำระเงินแล้ว') {
+                            const paymentSlipValue = user['หลักฐานการโอนเงิน'];
+                            if (paymentSlipValue && paymentSlipValue.trim() !== 'ไม่พบข้อมูลการชำระเงิน' && paymentSlipValue.trim() !== '') {
+                                const paymentSlipUrl = getGoogleDriveImageUrl(paymentSlipValue);
+                                paymentRow = `<tr class="border-b"><td class="py-2 px-4 font-semibold">หลักฐานการโอนเงิน</td><td class="py-2 px-4"><a href="${paymentSlipUrl}" target="_blank" class="text-blue-600 hover:underline">ดูหลักฐาน</a></td></tr>`;
+                            }
                         }
 
                         resultCard.innerHTML = `
@@ -631,6 +634,7 @@
                                     <tbody>
                                         <tr class="border-b"><td class="py-2 px-4 font-semibold">หลักสูตรที่ลงทะเบียน</td><td class="py-2 px-4">${user['เลือกหลักสูตรที่ลงทะเบียน']}</td></tr>
                                         <tr class="border-b"><td class="py-2 px-4 font-semibold">วันที่เข้าอบรม</td><td class="py-2 px-4">${user['วันที่เข้าอบรม']}</td></tr>
+                                        <tr class="border-b"><td class="py-2 px-4 font-semibold">ชื่อ</td><td class="py-2 px-4">${user['ชื่อ']}</td></tr>
                                         <tr class="border-b"><td class="py-2 px-4 font-semibold">หน่วยงาน</td><td class="py-2 px-4">${user['หน่วยงาน']}</td></tr>
                                         <tr class="border-b"><td class="py-2 px-4 font-semibold">เบอร์โทรศัพท์</td><td class="py-2 px-4">${user['เบอร์โทรศัพท์']}</td></tr>
                                         ${paymentRow}
