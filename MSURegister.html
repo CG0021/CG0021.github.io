@@ -229,7 +229,8 @@
                             <tr>
                                 <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-id" style="width: 10%;">ลำดับ</th>
                                 <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-name" style="width: 30%;">หลักสูตร</th>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-details" style="width: 60%;">รายละเอียดย่อย</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-details" style="width: 45%;">รายละเอียดย่อย</th>
+                                <th class="text-center py-3 px-4 uppercase font-semibold text-sm" style="width: 15%;">รายละเอียด</th>
                             </tr>
                         </thead>
                         <tbody id="allCoursesTableBody" class="text-gray-700">
@@ -253,7 +254,8 @@
                             <tr>
                                 <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-id" style="width: 10%;">ลำดับ</th>
                                 <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-name" style="width: 30%;">หลักสูตร</th>
-                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-details" style="width: 60%;">รายละเอียดย่อย</th>
+                                <th class="text-left py-3 px-4 uppercase font-semibold text-sm course-col-details" style="width: 45%;">รายละเอียดย่อย</th>
+                                <th class="text-center py-3 px-4 uppercase font-semibold text-sm" style="width: 15%;">รายละเอียด</th>
                             </tr>
                         </thead>
                         <tbody id="groupCoursesTableBody" class="text-gray-700">
@@ -389,7 +391,7 @@
                 <div><h3 class="font-semibold">รายละเอียด</h3><p id="modalCourseSubDetail"></p></div>
                 <div><h3 class="font-semibold">หัวข้อการอบรม</h3><p id="modalCourseTopics"></p></div>
                 <div><h3 class="font-semibold">รอบการอบรม/สถานที่จัดอบรม</h3><p id="modalCourseRounds"></p></div>
-                <div><h3 class="font-semibold">หลักสูตรที่</h3><p id="modalCourseLocation"></p></div>
+                <div><h3 class="font-semibold">ค่าลงทะเบียนหลักสูตร</h3><p id="modalCourseFee"></p></div>
                 <div><h3 class="font-semibold">หนังสือโครงการ</h3><p id="modalCourseProjectBook"></p></div>
             </div>
         </div>
@@ -488,11 +490,12 @@
 
             courses.forEach(course => {
                 const row = document.createElement('tr');
-                row.className = 'border-b border-gray-200 hover:bg-gray-100 cursor-pointer';
+                row.className = 'border-b border-gray-200 hover:bg-gray-50';
                 row.innerHTML = `
                     <td class="py-3 px-4">${course['หลักสูตรที่']}</td>
                     <td class="py-3 px-4">${course['ชื่อหลักสูตร']}</td>
                     <td class="py-3 px-4">${course['รายละเอียดย่อย']}</td>
+                    <td class="py-3 px-4 text-center"><button class="text-blue-600 hover:text-blue-800 font-semibold"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 inline-block align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button></td>
                 `;
                 row.addEventListener('click', () => openCourseModal(course));
                 tableBody.appendChild(row);
@@ -504,7 +507,7 @@
             document.getElementById('modalCourseSubDetail').innerHTML = (course['รายละเอียดย่อย'] || '-').replace(/\n/g, '<br>');
             document.getElementById('modalCourseTopics').innerHTML = (course['หัวข้อการอบรม'] || '-').replace(/\n/g, '<br>');
             document.getElementById('modalCourseRounds').innerHTML = (course['รอบการอบรม'] || '-').replace(/\n/g, '<br>');
-            document.getElementById('modalCourseLocation').innerHTML = (course['สถานที่จัดอบรม'] || '-').replace(/\n/g, '<br>');
+            document.getElementById('modalCourseFee').innerHTML = (course['ค่าลงทะเบียนหลักสูตร'] || '-').replace(/\n/g, '<br>');
             const projectBookLink = course['หนังสือโครงการอบรม'];
             const projectBookSpan = document.getElementById('modalCourseProjectBook');
             if (projectBookLink && projectBookLink !== '-') {
@@ -514,6 +517,7 @@
             }
             document.getElementById('courseDetailModal').classList.remove('hidden');
             document.body.classList.add('modal-open');
+            document.querySelector('.modal-content-body').scrollTop = 0;
         }
 
         function closeCourseModal() {
@@ -552,11 +556,12 @@
 
                 uniqueCourses.forEach(course => {
                     const row = document.createElement('tr');
-                    row.className = 'border-b border-gray-200 hover:bg-gray-100 cursor-pointer';
+                    row.className = 'border-b border-gray-200 hover:bg-gray-50';
                     row.innerHTML = `
                         <td class="py-3 px-4">${course['หลักสูตรที่']}</td>
                         <td class="py-3 px-4">${course['ชื่อหลักสูตร']}</td>
                         <td class="py-3 px-4">${course['รายละเอียดย่อย']}</td>
+                        <td class="py-3 px-4 text-center"><button class="text-blue-600 hover:text-blue-800 font-semibold"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 inline-block align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg></button></td>
                     `;
                     row.addEventListener('click', () => openCourseModal(course));
                     tableBody.appendChild(row);
