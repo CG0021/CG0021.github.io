@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Swiper.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <style>
         /* Custom styles for Kanit font */
         body {
@@ -184,6 +186,32 @@
             transition: max-height 0.5s ease-out;
         }
 
+        /* Tab Styling */
+        .tab-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 2px solid transparent;
+            color: var(--secondary-color);
+        }
+        .tab-button:hover {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .tab-button.active {
+            color: var(--text-color);
+            font-weight: 600;
+            background-color: var(--primary-color);
+        }
+
         /* Mobile-specific table column widths */
         @media (max-width: 768px) {
             .course-col-id { width: 14%; }
@@ -211,6 +239,29 @@
                 <a href="#contactSection">ติดต่อเรา</a>
             </div>
         </nav>
+
+        <!-- Image Slider Section -->
+        <div id="imageSliderTabSection" class="section p-6 mb-8">
+            <h2 class="text-2xl mb-4">รูปภาพหลักสูตรตามกลุ่มภารกิจ</h2>
+            
+            <!-- Tab Container -->
+            <div id="imageTabContainer" class="tab-container mb-4">
+                <!-- Tabs will be inserted here -->
+            </div>
+
+            <!-- Swiper Slider -->
+            <div id="imageSlider" class="swiper w-full" style="height: 300px;">
+                <div class="swiper-wrapper py-4">
+                    <!-- Slides will be dynamically inserted here -->
+                </div>
+                <!-- Add Pagination -->
+                <div class="swiper-pagination"></div>
+                <!-- Add Navigation -->
+                <div class="swiper-button-next text-gray-600"></div>
+                <div class="swiper-button-prev text-gray-600"></div>
+            </div>
+            <div id="sliderLoadingMessage" class="text-center mt-4 hidden"><div class="spinner inline-block"></div> กำลังโหลดรูปภาพ...</div>
+        </div>
 
         <!-- Courses Section -->
         <div id="coursesSection" class="section p-6 mb-8">
@@ -350,7 +401,7 @@
                 <div class="p-6 rounded-lg border border-gray-200">
                     <h3 class="text-xl font-semibold mb-2">ยืนยันการชำระเงิน</h3>
                     <p class="mb-4">หลังจากโอนเงินแล้ว กรุณายืนยันการชำระเงินที่นี่:</p>
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform?usp=header" target="_blank" class="btn block w-full text-center">ยืนยันการชำระเงิน</a>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSc3h5NOGsQ4DPi1v1FTQDhKBb7zpnoXpNkxDYegM3JwYjKAzA/viewform?usp=header" target="_blank" class="btn block w-full text-center">ยืนันการชำระเงิน</a>
                 </div>
             </div>
         </div>
@@ -574,13 +625,20 @@
 
         function getGoogleDriveImageUrl(url) {
             if (typeof url !== 'string' || !url) {
-                return '#'; // Return a safe link if URL is invalid
+                return ''; // Return empty string for invalid input
             }
-            const match = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+            // Regex to capture the file ID from various Google Drive URL formats
+            const driveLinkRegex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)|docs\.google\.com\/(?:document|presentation|spreadsheets)\/d\/)([a-zA-Z0-9_-]{25,})/; 
+            const match = url.match(driveLinkRegex); 
+
             if (match && match[1]) {
-                return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+                const fileId = match[1];
+                // Use the reliable lh3.googleusercontent.com direct link format
+                return `https://lh3.googleusercontent.com/d/${fileId}=w800`; // =w800 for better slider image quality
             }
-            return url; // Return original url if it doesn't match the expected format
+            
+            console.warn('Could not extract Google Drive File ID from URL, returning original URL:', url);
+            return url; // Return original url if it doesn't match, it might be a direct link already
         }
 
         async function executeSearch() {
@@ -712,17 +770,190 @@
             }
         });
 
-        window.onload = fetchCourseDetails;
-        document.getElementById('searchButton').addEventListener('click', executeSearch);
-        document.getElementById('searchInput').addEventListener('keydown', event => {
-            if (event.key === 'Enter') executeSearch();
-        });
-
         document.getElementById('courseDetailModal').addEventListener('click', (event) => {
             if (event.currentTarget === event.target) {
                 closeCourseModal();
             }
         });
+
+        // ----- Tabbed Image Slider -----
+        let swiperInstance = null;
+        let groupedCoursesWithPictures = {};
+
+        function initializeSwiper() {
+            if (swiperInstance) {
+                swiperInstance.destroy(true, true);
+            }
+            swiperInstance = new Swiper('#imageSlider', {
+                loop: false, // Loop will be managed by update
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                autoplay: {
+                    delay: 3500,
+                    disableOnInteraction: false,
+                },
+                slidesPerView: 'auto',
+                spaceBetween: 15,
+            });
+        }
+
+        function updateSliderForGroup(groupName) {
+            if (!swiperInstance) return;
+
+            const sliderWrapper = document.querySelector('#imageSlider .swiper-wrapper');
+            const group = groupedCoursesWithPictures[groupName];
+            
+            swiperInstance.autoplay.stop();
+            sliderWrapper.innerHTML = ''; // Clear existing slides
+
+            if (group && group.courses.length > 0) {
+                // Sort courses within the group
+                group.courses.sort((a, b) => (parseInt(a['หลักสูตรที่'], 10) || 0) - (parseInt(b['หลักสูตรที่'], 10) || 0));
+
+                group.courses.forEach(course => {
+                    const imageUrl = getGoogleDriveImageUrl(course['linkpicture']);
+                    const slide = document.createElement('div');
+                    slide.className = 'swiper-slide';
+                    slide.style.width = '240px'; // Set a fixed width for auto slides view
+
+                    slide.innerHTML = `
+                        <a href="#" data-course-id="${course['หลักสูตรที่']}" class="block w-full h-full bg-gray-100 rounded-lg overflow-hidden shadow-sm border border-gray-200 flex flex-col">
+                            <div class="p-3 bg-white text-center">
+                                <h3 class="font-semibold truncate text-sm" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center;">${course['ชื่อหลักสูตร']}</h3>
+                            </div>
+                            <div class="flex-grow h-0 flex items-center justify-center p-2">
+                                <img src="${imageUrl}" alt="${course['ชื่อหลักสูตร']}" class="max-w-full max-h-full object-contain" onerror="this.onerror=null;this.src='https://via.placeholder.com/400x400?text=Image+Not+Found'">
+                            </div>
+                        </a>
+                    `;
+                    sliderWrapper.appendChild(slide);
+                });
+                
+                swiperInstance.loop = group.courses.length > 1;
+                swiperInstance.update();
+                swiperInstance.autoplay.start();
+
+            } else {
+                sliderWrapper.innerHTML = 
+`<div class="swiper-slide flex items-center justify-center bg-gray-100 text-gray-500">ไม่มีรูปภาพสำหรับกลุ่มนี้</div>
+`;
+                swiperInstance.loop = false;
+                swiperInstance.update();
+            }
+        }
+
+        function setupImageTabsAndSlider(courses) {
+            const tabContainer = document.getElementById('imageTabContainer');
+            const sliderSection = document.getElementById('imageSliderTabSection');
+            if (!tabContainer || !sliderSection) return;
+
+            // 1. Group courses that have pictures
+            groupedCoursesWithPictures = courses.reduce((acc, course) => {
+                if (course['linkpicture']) {
+                    const groupName = course['กลุ่ม'] || 'Other';
+                    if (!acc[groupName]) {
+                        acc[groupName] = {
+                            order: parseInt(course['ลำดับกลุ่ม'], 10) || 999,
+                            courses: [],
+                            seen: new Set()
+                        };
+                    }
+                    const courseNumber = course['หลักสูตรที่'];
+                    if (!acc[groupName].seen.has(courseNumber)) {
+                        acc[groupName].courses.push(course);
+                        acc[groupName].seen.add(courseNumber);
+                    }
+                }
+                return acc;
+            }, {});
+
+            // 2. Sort groups by order
+            const sortedGroupNames = Object.keys(groupedCoursesWithPictures).sort((a, b) => {
+                return groupedCoursesWithPictures[a].order - groupedCoursesWithPictures[b].order;
+            });
+
+            if (sortedGroupNames.length === 0) {
+                sliderSection.innerHTML = '<p class="text-center text-gray-500">ไม่มีรูปภาพหลักสูตรให้แสดง</p>';
+                return;
+            }
+
+            // 3. Create tabs
+            tabContainer.innerHTML = '';
+            sortedGroupNames.forEach(originalGroupName => {
+                const tabButton = document.createElement('button');
+                tabButton.className = 'tab-button';
+                
+                // Create and set the shortened display name
+                const displayName = originalGroupName.replace(/^สำหรับ\s*/, '').replace(/\s*และผู้สนใจ$/, '').trim();
+                tabButton.textContent = displayName;
+                
+                // The data attribute still holds the original name for filtering
+                tabButton.dataset.group = originalGroupName; 
+                
+                tabContainer.appendChild(tabButton);
+            });
+
+            // 4. Initialize Swiper
+            initializeSwiper();
+
+            // 5. Add event listener for tabs
+            tabContainer.addEventListener('click', (event) => {
+                if (event.target.matches('.tab-button')) {
+                    const groupName = event.target.dataset.group;
+                    
+                    // Update active tab style
+                    tabContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    event.target.classList.add('active');
+
+                    // Update slider
+                    updateSliderForGroup(groupName);
+                }
+            });
+            
+            // 6. Click the first tab to show initial content
+            const firstTab = tabContainer.querySelector('.tab-button');
+            if (firstTab) {
+                firstTab.click();
+            }
+
+            // 7. Add click listener for slides
+            const sliderElement = document.getElementById('imageSlider');
+            if (sliderElement && !sliderElement.dataset.listener) {
+                sliderElement.addEventListener('click', function(event) {
+                    const link = event.target.closest('a');
+                    if (link && link.dataset.courseId) {
+                        event.preventDefault();
+                        const courseId = link.dataset.courseId;
+                        const course = courseDetailsData.find(c => String(c['หลักสูตรที่']) === courseId);
+                        if (course) {
+                            openCourseModal(course);
+                        }
+                    }
+                });
+                sliderElement.dataset.listener = 'true';
+            }
+        }
+
+        // Override fetchCourseDetails to call our new setup function
+        const originalFetchCourseDetails = fetchCourseDetails;
+        fetchCourseDetails = async function() {
+            await originalFetchCourseDetails();
+            setupImageTabsAndSlider(courseDetailsData);
+        }
+
+        window.onload = fetchCourseDetails;
+        document.getElementById('searchButton').addEventListener('click', executeSearch);
+        document.getElementById('searchInput').addEventListener('keydown', event => {
+            if (event.key === 'Enter') executeSearch();
+        });
     </script>
+    <!-- Swiper.js -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 </body>
 </html>
