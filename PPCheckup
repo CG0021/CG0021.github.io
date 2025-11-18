@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PP Checkup</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for professional, clean look */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f8fafc; /* Very light blue-gray background */
+            color: #1f2937; /* Darker text for readability */
+            display: flex;
+            justify-content: center;
+            align-items: center; /* Center vertically */
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .card-container {
+            max-width: 600px;
+            width: 100%;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); /* Soft, deep shadow */
+            border-top: 6px solid #1e40af; /* Deep blue highlight */
+        }
+        h2 {
+            color: #1e40af; /* Primary dark blue for title */
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb; /* Subtle separator */
+        }
+        .input-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        input[type="number"], .gender-options, button {
+            transition: all 0.2s ease-in-out;
+        }
+        input[type="number"] {
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+        }
+        input[type="number"]:focus {
+            border-color: #2563eb; /* Blue-600 focus */
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        button {
+            background-color: #3b82f6; /* Blue-500 */
+            font-weight: 700;
+            padding: 14px;
+        }
+        button:hover {
+            background-color: #1e40af; /* Darker blue on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 64, 175, 0.2);
+        }
+        .gender-options {
+            display: flex;
+            gap: 20px;
+        }
+        .gender-options label {
+            cursor: pointer;
+            padding: 8px 0;
+            user-select: none;
+        }
+        /* Results Box Styling - Clean and informational */
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            background-color: #eff6ff; /* Light blue background for emphasis */
+            border: 1px solid #bfdbfe; /* Light blue border */
+        }
+        .results h3 {
+            color: #10b981; /* Green title for success */
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            border-bottom: none;
+        }
+        .results ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .results li {
+            background: #ffffff;
+            margin: 10px 0;
+            padding: 15px;
+            border-left: 4px solid #34d399; /* Green marker */
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 1rem;
+        }
+        /* Error State */
+        .error-message {
+            color: #ef4444; /* Red-500 */
+            background-color: #fee2e2; /* Red-100 */
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #fca5a5; /* Red-300 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="card-container">
+    <h2>🏥 ตรวจสอบสิทธิ PPFS สปสช. 2568</h2>
+    <p class="text-gray-500 mb-8">กรุณาป้อนข้อมูลเพื่อตรวจสอบรายการบริการส่งเสริมสุขภาพและป้องกันโรค (PPFS) ที่ได้รับสิทธิ์โดยอัตโนมัติ</p>
+
+    <!-- Updated: Use flexbox for single-line layout, responsive wrap -->
+    <div class="flex flex-wrap items-end gap-6">
+        <div class="input-group flex-grow">
+            <label for="age-input">อายุ (ปี)</label>
+            <input type="number" id="age-input" min="0" max="120" placeholder="ตัวเลข เช่น 35" class="w-full rounded-lg">
+        </div>
+
+        <div class="input-group flex-shrink-0">
+            <label>เพศ</label>
+            <!-- Updated: More compact button-like radio inputs -->
+            <div class="flex items-center border border-gray-300 rounded-lg p-1">
+                <input type="radio" name="gender" value="1" id="gender-male" checked class="hidden peer/male">
+                <label for="gender-male" class="px-4 py-2 rounded-md cursor-pointer text-sm font-semibold peer-checked/male:bg-blue-500 peer-checked/male:text-white">ชาย</label>
+
+                <input type="radio" name="gender" value="2" id="gender-female" class="hidden peer/female">
+                <label for="gender-female" class="px-4 py-2 rounded-md cursor-pointer text-sm font-semibold peer-checked/female:bg-pink-500 peer-checked/female:text-white">หญิง</label>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="checkEligibility()" class="w-full rounded-lg mt-8 shadow-lg hover:shadow-x1 py-4">
+        ตรวจสอบสิทธิ PPFS
+    </button>
+
+    <div class="results" id="results-output">
+        <h3>รายการสิทธิที่ได้รับ</h3>
+        <p class="text-gray-600">กรุณาป้อนข้อมูลและกดปุ่ม "ตรวจสอบสิทธิ PPFS" เพื่อแสดงผล</p>
+    </div>
+</div>
+
+<script>
+// --- 1. ข้อมูลสิทธิ PPFS จากตารางที่คุณระบุ (อัปเดตและกำจัด 'all age' แล้ว) ---
+const nhsoData = {
+    "0": {"PPA":"1,2", "PPFS5":"1,2", "PPFS6":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "1": {"PPA":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "2": {"PPA":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "3": {"PPA":"1,2", "PPFS11":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "4": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "5": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "6": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "7": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "8": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "9": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "10": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "11": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "12": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "13": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS14":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "14": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS14":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
+    "15": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "16": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "17": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "18": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "19": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "20": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "21": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "22": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "23": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "24": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "25": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "26": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "27": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "28": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "29": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "30": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "31": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "32": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "33": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "34": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "35": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "36": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "37": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "38": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "39": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "40": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "41": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "42": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "43": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "44": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "45": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "46": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "47": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "48": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "49": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "50": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "51": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "52": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "53": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "54": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "55": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "56": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "57": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "58": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "59": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "60": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "61": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "62": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "63": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "64": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "65": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "66": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "67": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "68": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "69": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "70": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "มากกว่า 70 ปี": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
+    "all": {"PPA":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPLTC":"1,2"}
+};
+
+// --- 2. ข้อมูลชื่อบริการเต็มเพื่อแสดงผล (อัปเดตตามหัวข้อที่คุณให้มา) ---
+const serviceFullNames = {
+    "PPA": "PPA: วัคซีนพื้นฐาน",
+    "PPFS1": "PPFS1: บริการฝากครรภ์",
+    "PPFS2": "PPFS2: ป้องกันและควบคุมโรคโลหิตจางธาลัสซีเมีย ในหญิงตั้งครรภ์",
+    "PPFS3": "PPFS3: คัดกรอง ธาลัสซีเมียในสามีหรือคู่ของหญิงตั้งครรภ์ และการคัดกรองซิฟิลิส",
+    "PPFS4": "PPFS4: ป้องกันและควบคุมกลุ่มอาการดาวน์ ในหญิงตั้งครรภ์",
+    "PPFS5": "PPFS5: ป้องกันและควบคุมภาวะพร่องฮอร์โมนไทรอยด์ (TSH)",
+    "PPFS6": "PPFS6: ตรวจคัดกรองผู้ป่วยโรคพันธุกรรมเมตาบอลิก (TMS)",
+    "PPFS7": "PPFS7: บริการตรวจหลังคลอด",
+    "PPFS8": "PPFS8: ทดสอบการตั้งครรภ์",
+    "PPFS9": "PPFS9: วางแผนครอบครัวและการป้องกันการตั้งครรภ์ไม่พึงประสงค์",
+    "PPFS10": "PPFS10: ป้องกันการยุติการตั้งครรภ์ที่ไม่ปลอดภัย",
+    "PPFS11": "PPFS11: บริการแว่นตาเด็กที่มีสายตาผิดปกติ",
+    "PPFS12": "PPFS12: ตรวจคัดกรองมะเร็งปากมดลูก",
+    "PPFS13": "PPFS13: คัดกรองรอยโรคเสี่ยงมะเร็งและมะเร็งช่องปาก",
+    "PPFS14": "PPFS14: คัดกรองและค้นหาวัณโรคในกลุ่มเสี่ยงสูง",
+    "PPFS15": "PPFS15: คัดกรองและประเมินปัจจัยเสี่ยงต่อสุขภาพกาย/สุขภาพจิต",
+    "PPFS16": "PPFS16: คัดกรองยีนกลายพันธุ์โรคมะเร็งเต้านม BRCA1/BRCA2",
+    "PPFS17": "PPFS17: คัดกรองโลหิตจางจากการขาดธาตุเหล็ก",
+    "PPFS18": "PPFS18: ยาเม็ดเสริมธาตุเหล็กและกรดโฟลิค",
+    "PPFS19": "PPFS19: วัคซีนคอตีบ-บาดทะยัก (dT) ในผู้ใหญ่",
+    "PPFS20": "PPFS20: เคลือบฟลูออไรด์",
+    "PPFS21": "PPFS21: คัดกรองมะเร็งลำไส้ใหญ่",
+    "PPFS22": "PPFS22: ฉีดวัคซีนป้องกันโรคไข้หวัดใหญ่",
+    "PPFS23": "PPFS23: คัดกรองไวรัสตับอักเสบบี",
+    "PPFS24": "PPFS24: คัดกรองไวรัสตับอักเสบซี",
+    "PPFS25": "PPFS25: คัดกรองพยาธิใบไม้ตับ ด้วยการตรวจปัสสาวะ",
+    "PPFS26": "PPFS26: คัดกรองมะเร็งเต้านม ด้วยเครื่องแมมโมแกรมและอัลตราซาวด์",
+    "PPHIV/STD": "PPHIV/STD: โรคติดต่อทางเพศสัมพันธ์ (รวมเอดส์)",
+    "PPNCD": "PPNCD: โรคติดต่อไม่เรื้อรัง (NCDs) เช่น เบาหวาน ความดัน",
+    "PPSMIV": "PPSMIV: จิตเวชที่มีความเสี่ยงสูงต่อการก่อความรุนแรง",
+    "PPLTC": "PPLTC: การดูแลสุขภาพระยะยาว (Long-Term Care)"
+};
+
+
+// --- 3. ฟังก์ชันตรวจสอบสิทธิ์หลัก ---
+function checkEligibility() {
+    const ageInput = document.getElementById('age-input').value;
+    const numericalAge = parseInt(ageInput);
+    const selectedGender = document.querySelector('input[name="gender"]:checked').value; // '1' (ชาย) หรือ '2' (หญิง)
+    const resultsOutput = document.getElementById('results-output');
+    const genderDisplay = selectedGender === '1' ? 'ชาย' : 'หญิง';
+
+    // 1. Input validation
+    if (ageInput.trim() === "" || isNaN(numericalAge) || numericalAge < 0 || numericalAge > 120) {
+        resultsOutput.innerHTML = `
+            <div class="error-message">
+                <h3>⚠️ ข้อมูลไม่ถูกต้อง</h3>
+                <p class="text-red-700">กรุณาป้อนอายุเป็นตัวเลขที่ถูกต้องในช่วง 0 ถึง 120 ปี</p>
+            </div>
+        `;
+        return;
+    }
+
+    // 2. Determine Age Key
+    let ageKey;
+    if (numericalAge >= 0 && numericalAge <= 70) {
+        ageKey = numericalAge.toString();
+    } else if (numericalAge > 70) {
+        ageKey = "มากกว่า 70 ปี";
+    }
+
+    // 3. Collect all eligible services
+    let eligibleServices = new Set();
+    const allAgeData = nhsoData["all"]; // Services available for all ages
+    const specificAgeData = nhsoData[ageKey]; // Services specific to the age group
+
+    // Helper function to check eligibility and add service to the Set
+    const processServices = (data) => {
+        if (!data) return;
+        for (const serviceKey in data) {
+            const eligibilityCode = data[serviceKey];
+            // Check if the code includes the selected gender code ('1' or '2')
+            if (eligibilityCode && eligibilityCode.includes(selectedGender)) {
+                eligibleServices.add(serviceKey);
+            }
+        }
+    };
+
+    // Process both age-specific and all-age services
+    if (specificAgeData) {
+        processServices(specificAgeData);
+    }
+    if (allAgeData) {
+        processServices(allAgeData);
+    }
+
+    // 4. Display results
+    if (eligibleServices.size > 0) {
+        const sortedServices = Array.from(eligibleServices).sort(); // Sort keys for consistent display
+        const serviceListHTML = sortedServices.map(key => {
+            const fullName = serviceFullNames[key] || key;
+            return `<li>${fullName}</li>`;
+        }).join('');
+
+        resultsOutput.innerHTML = `
+            <h3>✅ สรุปสิทธิ PPFS สำหรับผู้ที่มีอายุ ${numericalAge} ปี (เพศ ${genderDisplay})</h3>
+            <p class="text-gray-700 font-semibold mb-3">พบรายการบริการส่งเสริมสุขภาพและป้องกันโรคที่ได้รับสิทธิ์: <span class="text-green-600">${eligibleServices.size} รายการ</span></p>
+            <ul class="mt-4">${serviceListHTML}</ul>
+        `;
+    } else {
+        resultsOutput.innerHTML = `
+            <div class="error-message">
+                <h3>❌ ไม่พบสิทธิ</h3>
+                <p class="text-red-700">ไม่พบรายการบริการ PPFS ที่ได้รับสิทธิโดยตรงสำหรับอายุ ${numericalAge} ปี และเพศ ${genderDisplay} ในตารางข้อมูลที่กำหนด</p>
+            </div>
+        `;
+    }
+}
+</script>
+
+</body>
+</html>
