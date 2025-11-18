@@ -3,278 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PP Checkup</title>
-    <!-- Load Tailwind CSS -->
+    <title>ตรวจสอบสิทธิ PPFS 2569</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Custom styles for professional, clean look */
         body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            background-color: #f8fafc; /* Very light blue-gray background */
-            color: #1f2937; /* Darker text for readability */
-            display: flex;
-            justify-content: center;
-            align-items: center; /* Center vertically */
-            min-height: 100vh;
-            padding: 24px;
-        }
-        .card-container {
-            max-width: 600px;
-            width: 100%;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); /* Soft, deep shadow */
-            border-top: 6px solid #1e40af; /* Deep blue highlight */
-        }
-        h2 {
-            color: #1e40af; /* Primary dark blue for title */
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e5e7eb; /* Subtle separator */
-        }
-        .input-group label {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-        input[type="number"], .gender-options, button {
-            transition: all 0.2s ease-in-out;
-        }
-        input[type="number"] {
-            border: 1px solid #d1d5db;
-            padding: 12px 16px;
-        }
-        input[type="number"]:focus {
-            border-color: #2563eb; /* Blue-600 focus */
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-        button {
-            background-color: #3b82f6; /* Blue-500 */
-            font-weight: 700;
-            padding: 14px;
-        }
-        button:hover {
-            background-color: #1e40af; /* Darker blue on hover */
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(30, 64, 175, 0.2);
-        }
-        .gender-options {
-            display: flex;
-            gap: 20px;
-        }
-        .gender-options label {
-            cursor: pointer;
-            padding: 8px 0;
-            user-select: none;
-        }
-        /* Results Box Styling - Clean and informational */
-        .results {
-            margin-top: 30px;
-            padding: 25px;
-            border-radius: 12px;
-            background-color: #eff6ff; /* Light blue background for emphasis */
-            border: 1px solid #bfdbfe; /* Light blue border */
-        }
-        .results h3 {
-            color: #10b981; /* Green title for success */
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            border-bottom: none;
-        }
-        .results ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .results li {
-            background: #ffffff;
-            margin: 10px 0;
-            padding: 15px;
-            border-left: 4px solid #34d399; /* Green marker */
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            font-size: 1rem;
-        }
-        /* Error State */
-        .error-message {
-            color: #ef4444; /* Red-500 */
-            background-color: #fee2e2; /* Red-100 */
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #fca5a5; /* Red-300 */
+            font-family: 'Sarabun', sans-serif;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50">
 
-<div class="card-container">
-    <h2>🏥 ตรวจสอบสิทธิ PPFS สปสช. 2568</h2>
-    <p class="text-gray-500 mb-8">กรุณาป้อนข้อมูลเพื่อตรวจสอบรายการบริการส่งเสริมสุขภาพและป้องกันโรค (PPFS) ที่ได้รับสิทธิ์โดยอัตโนมัติ</p>
+<div class="container max-w-4xl mx-auto py-8 px-4 sm:py-16">
+    <div class="text-center mb-8 sm:mb-12">
+        
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-gray-800 mb-3 sm:mb-4">
+           ตรวจสอบสิทธิ PPFS 2569
+        </h1>
+        <p class="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto">
+            บริการสร้างเสริมสุขภาพและป้องกันโรค
+        </p>
+    </div>
 
-    <!-- Updated: Use flexbox for single-line layout, responsive wrap -->
-    <div class="flex flex-wrap items-end gap-6">
-        <div class="input-group flex-grow">
-            <label for="age-input">อายุ (ปี)</label>
-            <input type="number" id="age-input" min="0" max="120" placeholder="ตัวเลข เช่น 35" class="w-full rounded-lg">
-        </div>
-
-        <div class="input-group flex-shrink-0">
-            <label>เพศ</label>
-            <!-- Updated: More compact button-like radio inputs -->
-            <div class="flex items-center border border-gray-300 rounded-lg p-1">
-                <input type="radio" name="gender" value="1" id="gender-male" checked class="hidden peer/male">
-                <label for="gender-male" class="px-4 py-2 rounded-md cursor-pointer text-sm font-semibold peer-checked/male:bg-blue-500 peer-checked/male:text-white">ชาย</label>
-
-                <input type="radio" name="gender" value="2" id="gender-female" class="hidden peer/female">
-                <label for="gender-female" class="px-4 py-2 rounded-md cursor-pointer text-sm font-semibold peer-checked/female:bg-pink-500 peer-checked/female:text-white">หญิง</label>
+    <div class="p-6 sm:p-10 shadow-2xl rounded-2xl bg-white border border-gray-200">
+        <div class="space-y-6 sm:space-y-8">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6">
+                <p class="text-sm sm:text-base text-blue-800">
+                    กรุณาป้อนข้อมูลเพื่อตรวจสอบรายการบริการส่งเสริมสุขภาพและป้องกันโรค (PPFS) ที่ได้รับสิทธิ์โดยอัตโนมัติ
+                </p>
             </div>
+
+            <div class="grid sm:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                    <label for="age-input" class="text-base font-semibold text-gray-700">
+                        อายุ (ปี)
+                    </label>
+                    <input
+                        id="age-input"
+                        type="number"
+                        min="0"
+                        max="120"
+                        placeholder="ตัวเลข เช่น 35"
+                        oninput="checkEligibility()"
+                        class="w-full h-12 text-base border-2 border-gray-300 rounded-lg px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    />
+
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-base font-semibold text-gray-700">เพศ</label>
+                    <div class="flex gap-3 h-12">
+                        <button
+                            type="button"
+                            id="gender-btn-1"
+                            onclick="selectGender('1')"
+                            class="gender-btn flex-1 text-base font-semibold transition-all rounded-lg bg-blue-500 text-white shadow-md">
+                            ชาย
+                        </button>
+                        <button
+                            type="button"
+                            id="gender-btn-2"
+                            onclick="selectGender('2')"
+                            class="gender-btn flex-1 text-base font-semibold transition-all rounded-lg bg-white border border-gray-300 text-gray-600 hover:bg-pink-50 hover:border-pink-500">
+                            หญิง
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <button onclick="checkEligibility()" class="w-full rounded-lg mt-8 shadow-lg hover:shadow-x1 py-4">
-        ตรวจสอบสิทธิ PPFS
-    </button>
+    <div id="results-output" class="mt-6 sm:mt-8" style="display: none;"></div>
 
-    <div class="results" id="results-output">
-        <h3>รายการสิทธิที่ได้รับ</h3>
-        <p class="text-gray-600">กรุณาป้อนข้อมูลและกดปุ่ม "ตรวจสอบสิทธิ PPFS" เพื่อแสดงผล</p>
+    <div class="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-gray-400">
+        <p>ข้อมูลจาก สปสช. (สำนักงานหลักประกันสุขภาพแห่งชาติ) ปี พ.ศ. 2569</p>
     </div>
 </div>
 
 <script>
-// --- 1. ข้อมูลสิทธิ PPFS จากตารางที่คุณระบุ (อัปเดตและกำจัด 'all age' แล้ว) ---
+let selectedGender = '1'; // Default to Male
+
+function selectGender(gender) {
+    selectedGender = gender;
+    const maleBtn = document.getElementById('gender-btn-1');
+    const femaleBtn = document.getElementById('gender-btn-2');
+    if (gender === '1') {
+        maleBtn.className = 'gender-btn flex-1 text-base font-semibold transition-all rounded-lg bg-blue-500 text-white shadow-md';
+        femaleBtn.className = 'gender-btn flex-1 text-base font-semibold transition-all rounded-lg bg-white border border-gray-300 text-gray-600 hover:bg-pink-50 hover:border-pink-500';
+    } else {
+        maleBtn.className = 'gender-btn flex-1 text-base font-semibold transition-all rounded-lg bg-white border border-gray-300 text-gray-600 hover:bg-blue-50 hover:border-blue-500';
+        femaleBtn.className = 'gender-btn flex-1 text-base font-semibold transition-all rounded-lg bg-pink-500 text-white shadow-md';
+    }
+
+    // Trigger check on gender change
+    checkEligibility();
+}
+
+// --- 1. ข้อมูลสิทธิ PPFS ปี 2569 ---
 const nhsoData = {
-    "0": {"PPA":"1,2", "PPFS5":"1,2", "PPFS6":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "1": {"PPA":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "2": {"PPA":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "3": {"PPA":"1,2", "PPFS11":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "4": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "5": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "6": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "7": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "8": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "9": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "10": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "11": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "12": {"PPA":"1,2", "PPFS11":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "13": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS14":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "14": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS14":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPNCD":"1,2", "PPLTC":"1,2"},
-    "15": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "16": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "17": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "18": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "19": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "20": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "21": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "22": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "23": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "24": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS17":"2", "PPFS18":"2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "25": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "26": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "27": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "28": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "29": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "30": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "31": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "32": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "33": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "34": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "35": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "36": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "37": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "38": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "39": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "40": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "41": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "42": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "43": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "44": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "45": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS18":"2", "PPFS19":"1,2", "PPFS20":"2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "46": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "47": {"PPA":"1,2", "PPFS1":"2", "PPFS2":"2", "PPFS3":"1", "PPFS4":"2", "PPFS7":"2", "PPFS8":"2", "PPFS9":"2", "PPFS10":"2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPNCD":"2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "48": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "49": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "50": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "51": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "52": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "53": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "54": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "55": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "56": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "57": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "58": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "59": {"PPA":"1,2", "PPFS12":"2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS20":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "60": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "61": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "62": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "63": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "64": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "65": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "66": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "67": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "68": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "69": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "70": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS16":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPHIV/STD":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "มากกว่า 70 ปี": {"PPA":"1,2", "PPFS13":"1,2", "PPFS14":"1,2", "PPFS15":"1,2", "PPFS19":"1,2", "PPFS21":"1,2", "PPFS22":"1,2", "PPFS23":"1,2", "PPFS24":"1,2", "PPFS25":"1,2", "PPFS26":"1,2", "PPSMIV":"1,2", "PPLTC":"1,2"},
-    "all": {"PPA":"1,2", "PPFS14":"1,2", "PPFS22":"1,2", "PPLTC":"1,2"}
+    "0": {"S08":"1,2", "S09":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "1": {"S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "2": {"S19":"1,2","S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "3": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "4": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "5": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "6": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "7": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "8": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "9": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "10": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "11": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S30":"1,2", "S31":"1,2"},
+    "12": {"S10":"1,2", "S19":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "13": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "14": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "15": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "16": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "17": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "18": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "19": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "20": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "21": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "22": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "23": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "24": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S15":"2", "S16":"2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "25": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "26": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "27": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "28": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "29": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "30": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "31": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "32": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "33": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "34": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "35": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "36": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "37": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "38": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "39": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "40": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "41": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "42": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "43": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "44": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "45": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S16":"2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "46": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "47": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "48": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "49": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S17":"1,2", "S18":"2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "50": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "51": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "52": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "53": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "54": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "55": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "56": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "57": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "58": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "59": {"S01":"2", "S02":"2", "S03":"1,2", "S04":"2", "S05":"1,2", "S06":"2", "S07":"1,2", "S11":"1,2", "S12":"2", "S13":"1,2", "S14":"1,2", "S18":"2", "S17":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S22":"2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S29":"1,2", "S30":"1,2", "S31":"1,2"},
+    "60": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "61": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "62": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "63": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "64": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "65": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "66": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "67": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "68": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "69": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "70": {"S11":"1,2", "S13":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"},
+    "มากกว่า 70 ปี": {"S11":"1,2", "S14":"1,2", "S19":"1,2", "S20":"1,2", "S21":"1,2", "S21":"1,2", "S23":"1,2", "S24":"2", "S25":"1,2", "S26":"1,2", "S27":"1,2", "S28":"1,2", "S30":"1,2", "S31":"1,2"}
 };
 
-// --- 2. ข้อมูลชื่อบริการเต็มเพื่อแสดงผล (อัปเดตตามหัวข้อที่คุณให้มา) ---
+// --- 2. ข้อมูลชื่อบริการเต็มเพื่อแสดงผล (ปี 2569) ---
 const serviceFullNames = {
-    "PPA": "PPA: วัคซีนพื้นฐาน",
-    "PPFS1": "PPFS1: บริการฝากครรภ์",
-    "PPFS2": "PPFS2: ป้องกันและควบคุมโรคโลหิตจางธาลัสซีเมีย ในหญิงตั้งครรภ์",
-    "PPFS3": "PPFS3: คัดกรอง ธาลัสซีเมียในสามีหรือคู่ของหญิงตั้งครรภ์ และการคัดกรองซิฟิลิส",
-    "PPFS4": "PPFS4: ป้องกันและควบคุมกลุ่มอาการดาวน์ ในหญิงตั้งครรภ์",
-    "PPFS5": "PPFS5: ป้องกันและควบคุมภาวะพร่องฮอร์โมนไทรอยด์ (TSH)",
-    "PPFS6": "PPFS6: ตรวจคัดกรองผู้ป่วยโรคพันธุกรรมเมตาบอลิก (TMS)",
-    "PPFS7": "PPFS7: บริการตรวจหลังคลอด",
-    "PPFS8": "PPFS8: ทดสอบการตั้งครรภ์",
-    "PPFS9": "PPFS9: วางแผนครอบครัวและการป้องกันการตั้งครรภ์ไม่พึงประสงค์",
-    "PPFS10": "PPFS10: ป้องกันการยุติการตั้งครรภ์ที่ไม่ปลอดภัย",
-    "PPFS11": "PPFS11: บริการแว่นตาเด็กที่มีสายตาผิดปกติ",
-    "PPFS12": "PPFS12: ตรวจคัดกรองมะเร็งปากมดลูก",
-    "PPFS13": "PPFS13: คัดกรองรอยโรคเสี่ยงมะเร็งและมะเร็งช่องปาก",
-    "PPFS14": "PPFS14: คัดกรองและค้นหาวัณโรคในกลุ่มเสี่ยงสูง",
-    "PPFS15": "PPFS15: คัดกรองและประเมินปัจจัยเสี่ยงต่อสุขภาพกาย/สุขภาพจิต",
-    "PPFS16": "PPFS16: คัดกรองยีนกลายพันธุ์โรคมะเร็งเต้านม BRCA1/BRCA2",
-    "PPFS17": "PPFS17: คัดกรองโลหิตจางจากการขาดธาตุเหล็ก",
-    "PPFS18": "PPFS18: ยาเม็ดเสริมธาตุเหล็กและกรดโฟลิค",
-    "PPFS19": "PPFS19: วัคซีนคอตีบ-บาดทะยัก (dT) ในผู้ใหญ่",
-    "PPFS20": "PPFS20: เคลือบฟลูออไรด์",
-    "PPFS21": "PPFS21: คัดกรองมะเร็งลำไส้ใหญ่",
-    "PPFS22": "PPFS22: ฉีดวัคซีนป้องกันโรคไข้หวัดใหญ่",
-    "PPFS23": "PPFS23: คัดกรองไวรัสตับอักเสบบี",
-    "PPFS24": "PPFS24: คัดกรองไวรัสตับอักเสบซี",
-    "PPFS25": "PPFS25: คัดกรองพยาธิใบไม้ตับ ด้วยการตรวจปัสสาวะ",
-    "PPFS26": "PPFS26: คัดกรองมะเร็งเต้านม ด้วยเครื่องแมมโมแกรมและอัลตราซาวด์",
-    "PPHIV/STD": "PPHIV/STD: โรคติดต่อทางเพศสัมพันธ์ (รวมเอดส์)",
-    "PPNCD": "PPNCD: โรคติดต่อไม่เรื้อรัง (NCDs) เช่น เบาหวาน ความดัน",
-    "PPSMIV": "PPSMIV: จิตเวชที่มีความเสี่ยงสูงต่อการก่อความรุนแรง",
-    "PPLTC": "PPLTC: การดูแลสุขภาพระยะยาว (Long-Term Care)"
+    "S01": { 
+        name: "บริการการทดสอบการตั้งครรภ์", 
+        details: `<div class='space-y-2'>
+                    <p><strong>กลุ่มเป้าหมาย:</strong> หญิงวัยเจริญพันธุ์ที่สงสัยตั้งครรภ์หรือประจำเดือนไม่มาตามกำหนด</p>
+                    <p><strong>ขอบเขตบริการ:</strong> บริการตรวจปัสสาวะทดสอบการตั้งครรภ์หรือบริการชุดทดสอบการตั้งครรภ์ด้วยตัวเอง</p>
+                    <p><strong>อัตราจ่าย:</strong> 75 บาท/ครั้ง (ไม่เกิน 4 ครั้ง/ปี)</p>
+                  </div>` 
+    },
+    "S02": { 
+        name: "บริการฝากครรภ์", 
+        details: `<div class='space-y-2'>
+                    <p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยตั้งครรภ์ทุกสิทธิ</p>
+                    <p><strong>ขอบเขตบริการ:</strong> 1. บริการฝากครรภ์ (รวมยาเสริมธาตุเหล็ก, กรดโฟลิก, ไอโอดีน) 2. ตรวจ Lab ชุดแรก (ซิฟิลิส, HIV, HBsAg, CBC, Blood group) 3. ตรวจ Lab ชุดที่สอง (ซิฟิลิส, HIV) 4. อัลตราซาวด์ 5. ตรวจสุขภาพช่องปากและขัดฟัน</p>
+                    <p><strong>อัตราจ่าย:</strong> ค่าฝากครรภ์ 360 บาท/ครั้ง, Lab ชุดแรก 600 บาท, Lab ชุดที่สอง 190 บาท, อัลตราซาวด์ 400 บาท, ทันตกรรม 500 บาท</p>
+                  </div>`
+    },
+    "S03": { name: "ป้องกันและควบคุมโรคโลหิตจางธาลัสซีเมียในหญิงตั้งครรภ์", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงตั้งครรภ์ และสามี/คู่ ที่มีผลคัดกรองผิดปกติทั้งคู่</p><p><strong>ขอบเขตบริการ:</strong> ตรวจยืนยันทางห้องปฏิบัติการ (Hb typing, Alpha-thalassemia, beta-thalassemia), ทำหัตถการวินิจฉัยทารกในครรภ์ (PND)</p>" },
+    "S04": { name: "ป้องกันและควบคุมกลุ่มอาการดาวน์ในหญิงตั้งครรภ์", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงตั้งครรภ์คนไทยทุกสิทธิ</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรองด้วย NIPT หรือ Quadruple test และตรวจวินิจฉัยทารกในครรภ์ (PND) กรณีมีความเสี่ยงสูง</p>" },
+    "S05": { name: "คัดกรองธาลัสซีเมียและซิฟิลิสในสามี/คู่ของหญิงตั้งครรภ์", details: "<p><strong>กลุ่มเป้าหมาย:</strong> สามีหรือคู่ของหญิงตั้งครรภ์</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรองธาลัสซีเมีย (CBC, MCV, DCIP/HbE) และซิฟิลิส</p><p><strong>อัตราจ่าย:</strong> คัดกรองธาลัสซีเมีย 120 บาท, คัดกรองซิฟิลิส 50-100 บาท</p>" },
+    "S06": { name: "บริการตรวจหลังคลอด", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงหลังคลอดคนไทยทุกสิทธิ</p><p><strong>ขอบเขตบริการ:</strong> ตรวจหลังคลอดไม่เกิน 3 ครั้ง และจ่ายยาเสริมธาตุเหล็ก, กรดโฟลิก, ไอโอดีน</p><p><strong>อัตราจ่าย:</strong> ตรวจหลังคลอด 150 บาท/ครั้ง, ค่ายา 135 บาท/ครั้ง (ไม่เกิน 2 ครั้ง)</p>" },
+    "S07": { name: "บริการคัดกรองโรคซิฟิลิส", details: "<p><strong>กลุ่มเป้าหมาย:</strong> สามี/คู่ของหญิงตั้งครรภ์, ผู้ต้องขัง, เยาวชน/ผู้มีพฤติกรรมเสี่ยง</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรองและยืนยันด้วยวิธี TT, NTT, TPPA/TPHA</p><p><strong>อัตราจ่าย:</strong> 50-100 บาท/ครั้ง</p>" },
+    "S08": { name: "ป้องกันและควบคุมภาวะพร่องฮอร์โมนไทรอยด์ (TSH) ในเด็กแรกเกิด", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กไทยแรกเกิดทุกคน</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรอง TSH 1-2 ครั้ง และตรวจยืนยันกรณีผิดปกติ</p><p><strong>อัตราจ่าย:</strong> ค่าตรวจคัดกรอง 135 บาท/ครั้ง, ค่าติดตามและตรวจยืนยัน 350 บาท/ครั้ง</p>" },
+    "S09": { name: "ตรวจคัดกรองโรคพันธุกรรมเมตาบอลิก (TMS) ในเด็กแรกเกิด", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กไทยแรกเกิดทุกคน</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรองด้วยเครื่อง Tandem mass spectrometry (TMS) 1-2 ครั้ง</p><p><strong>อัตราจ่าย:</strong> 500 บาท/ครั้ง</p>" },
+    "S10": { name: "บริการแว่นตาเด็กที่มีสายตาผิดปกติ", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กไทยอายุ 3-12 ปี</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรอง, วินิจฉัย, สั่งตัดแว่นตา และตรวจติดตาม</p><p><strong>อัตราจ่าย:</strong> ค่าเลนส์และกรอบแว่น 800-1000 บาท/คน/ปี (เขต 1-12), ค่าตรวจวินิจฉัย 200 บาท/ครั้ง/ปี (เขต 13)</p>" },
+    "S11": { name: "คัดกรองรอยโรคเสี่ยงมะเร็งและมะเร็งช่องปาก", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชาชนไทยอายุ 40 ปีขึ้นไป</p><p><strong>ขอบเขตบริการ:</strong> คัดกรองปัจจัยเสี่ยง, ตรวจรอยโรค, ตัดชิ้นเนื้อ (biopsy) และตรวจทางพยาธิวิทยา</p><p><strong>อัตราจ่าย:</strong> 600 บาท/ครั้ง</p>" },
+    "S12": { name: "ตรวจคัดกรองมะเร็งปากมดลูก", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยอายุ 30-59 ปี หรือ 15-29 ปี ที่มีความเสี่ยงสูง</p><p><strong>ขอบเขตบริการ:</strong> ตรวจด้วย Pap smear, VIA หรือ HPV DNA Test ทุก 5 ปี</p><p><strong>อัตราจ่าย:</strong> 50-900 บาท แล้วแต่วิธีการตรวจ</p>" },
+    "S13": { name: "ตรวจยีน BRCA1/BRCA2 ในผู้ป่วยมะเร็งเต้านมและญาติ", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้ป่วยมะเร็งเต้านมความเสี่ยงสูงและญาติสายตรง อายุ 18 ปีขึ้นไป</p><p><strong>ขอบเขตบริการ:</strong> ประเมินความเสี่ยง, ให้คำปรึกษา, เก็บตัวอย่าง, ตรวจยีน</p><p><strong>อัตราจ่าย:</strong> ค่าให้คำปรึกษา 500 บาท, ค่าตรวจยีน 2,500-10,000 บาท</p>" },
+    "S14": { name: "ตรวจคัดกรองมะเร็งลำไส้ใหญ่และลำไส้ตรง (Fit test)", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชาชนไทยอายุ 50-70 ปี</p><p><strong>ขอบเขตบริการ:</strong> ตรวจด้วยวิธี FIT Test และให้คำปรึกษา</p><p><strong>อัตราจ่าย:</strong> 60 บาท/ครั้ง (ทุก 2 ปี)</p>" },
+    "S15": { name: "คัดกรองโลหิตจางจากการขาดธาตุเหล็ก", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กและหญิงไทยอายุไม่เกิน 24 ปี (ขึ้นกับเขต)</p><p><strong>ขอบเขตบริการ:</strong> ตรวจ CBC หรือ Hct</p><p><strong>อัตราจ่าย:</strong> 35-65 บาท/คน</p>" },
+    "S16": { name: "บริการยาเม็ดเสริมธาตุเหล็ก", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กและผู้หญิงอายุ 13-45 ปี (ขึ้นกับเขต)</p><p><strong>ขอบเขตบริการ:</strong> ยาเม็ดเสริมธาตุเหล็กและกรดโฟลิค</p><p><strong>อัตราจ่าย:</strong> 80 บาท/คน/ปี</p>" },
+    "S17": { name: "บริการเคลือบฟลูออไรด์", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้มีอายุ 25-59 ปี กลุ่มเสี่ยง, ผู้ต้องขัง</p><p><strong>ขอบเขตบริการ:</strong> เคลือบฟลูออไรด์ชนิดเข้มข้นสูง</p><p><strong>อัตราจ่าย:</strong> 100 บาท/ครั้ง (ไม่เกิน 2 ครั้ง/ปี)</p>" },
+    "S18": { name: "ป้องกันการยุติการตั้งครรภ์ที่ไม่ปลอดภัย", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยทุกอายุที่จำเป็นต้องยุติการตั้งครรภ์ตามกฎหมาย</p><p><strong>ขอบเขตบริการ:</strong> ยุติการตั้งครรภ์ด้วยยาหรือวิธีทางศัลยกรรม (MVA/EVA)</p><p><strong>อัตราจ่าย:</strong> 3,000 บาท/การตั้งครรภ์</p>" },
+    "S19": { name: "ตรวจคัดกรองและค้นหาวัณโรคในกลุ่มเสี่ยงสูง", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้มีความเสี่ยงสูงต่อการติดเชื้อวัณโรค 7 กลุ่ม</p><p><strong>ขอบเขตบริการ:</strong> ถ่ายภาพรังสีทรวงอก, ตรวจด้วยวิธีอณูชีววิทยา (Molecular testing), AFB, Culture</p><p><strong>อัตราจ่าย:</strong> 20-700 บาท แล้วแต่วิธีการตรวจ</p>" },
+    "S20": { name: "ตรวจคัดกรองโรคไวรัสตับอักเสบ บี", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชากรไทยที่เกิดก่อนปี 2535</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรอง HBsAg 1 ครั้งตลอดชีวิต</p><p><strong>อัตราจ่าย:</strong> 50 บาท/ครั้ง</p>" },
+    "S21": { name: "ตรวจคัดกรองไวรัสตับอักเสบ ซี", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชากรไทยที่เกิดก่อนปี 2535 และประชากรกลุ่มเสี่ยง 5 กลุ่ม</p><p><strong>ขอบเขตบริการ:</strong> ตรวจคัดกรอง Anti-HCV และตรวจยืนยัน</p><p><strong>อัตราจ่าย:</strong> คัดกรอง 50 บาท, ยืนยัน 400-1,690 บาท</p>" },
+    "S22": { name: "บริการวางแผนครอบครัวและการป้องกันการตั้งครรภ์ไม่พึงประสงค์", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยวัยเจริญพันธุ์</p><p><strong>ขอบเขตบริการ:</strong> ยาคุมกำเนิด (เม็ด, ฉีด, ฝัง), ห่วงอนามัย, ยาคุมฉุกเฉิน, ถุงยางอนามัย</p><p><strong>อัตราจ่าย:</strong> ตามรายการบริการ</p>" },
+    "S23": { name: "ตรวจคัดกรองพยาธิใบไม้ตับ (OV-RDT)", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชาชนไทยอายุ 15 ปีขึ้นไป ที่มีประวัติเสี่ยง</p><p><strong>ขอบเขตบริการ:</strong> ตรวจปัสสาวะด้วยชุดตรวจ OV-RDT</p><p><strong>อัตราจ่าย:</strong> 150 บาท/ครั้ง/ปี</p>" },
+    "S24": { name: "ตรวจคัดกรองมะเร็งเต้านมด้วยแมมโมแกรมและอัลตราซาวด์", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยอายุ 40 ปีขึ้นไป ที่มีประวัติญาติสายตรงเป็นมะเร็งเต้านม</p><p><strong>ขอบเขตบริการ:</strong> ตรวจด้วยเครื่องแมมโมแกรมและอัลตราซาวด์</p><p><strong>อัตราจ่าย:</strong> ไม่เกิน 2,400 บาท/ครั้ง (ทุก 2 ปี)</p>" },
+    "S25": { name: "บริการคัดกรองเบาหวานและไขมันในเลือด", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้มีอายุ 35-70 ปี (ตามเงื่อนไขความเสี่ยง)</p><p><strong>ขอบเขตบริการ:</strong> เจาะเลือดวัดระดับน้ำตาล (FPG), Total Cholesterol และ HDL</p><p><strong>อัตราจ่าย:</strong> FPG 40 บาท/ปี, Cholesterol 160 บาท/ทุก 5 ปี</p>" },
+    "S26": { name: "ค่าบริการให้วัคซีนป้องกันโรค", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ทุกกลุ่มอายุ</p><p><strong>ขอบเขตบริการ:</strong> วัคซีนพื้นฐาน (EPI), dT ในผู้ใหญ่, ไข้หวัดใหญ่, ไอกรนและ dT ในหญิงตั้งครรภ์</p><p><strong>อัตราจ่าย:</strong> 20 บาท/โดส</p>" },
+    "S27": { name: "บริการศูนย์ให้คำปรึกษาสุขภาพจิต", details: "<p><strong>กลุ่มเป้าหมาย:</strong> อายุ 12 ปีขึ้นไป ที่ไม่ได้รับการวินิจฉัยว่าเป็นโรคจิตเวช</p><p><strong>ขอบเขตบริการ:</strong> ให้คำปรึกษาสุขภาพจิตรายบุคคล</p><p><strong>อัตราจ่าย:</strong> 153 บาท/ครั้ง (ไม่เกิน 6 ครั้ง/ปี)</p>" },
+    "S28": { name: "บริการฮอร์โมนเพื่อการยืนยันเพศสภาพ", details: "<p><strong>กลุ่มเป้าหมาย:</strong> บุคคลผู้มีความต้องการยืนยันเพศสภาพ</p><p><strong>ขอบเขตบริการ:</strong> จ่ายตาม Protocol 1-4</p><p><strong>อัตราจ่าย:</strong> จ่ายตามรายการตรวจ Lab และยา/ฮอร์โมน</p>" },
+    "S29": { name: "คัดกรองวัณโรคระยะแฝง (Latent TB Infection)", details: "<p><strong>กลุ่มเป้าหมาย:</strong> กลุ่มอายุ 12-59 ปี</p><p><strong>ขอบเขตบริการ:</strong> ตรวจด้วย Interferon gamma release assays (IGRAs)</p><p><strong>อัตราจ่าย:</strong> ค่าเจาะเลือดและให้คำปรึกษา 100 บาท, ค่าจัดส่ง 100 บาท, ค่าตรวจ Lab 650 บาท</p>" },
+    "S30": { name: "ตรวจหาการติดเชื้อเอชไอวีด้วยตนเอง (HIVSST)", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชาชนไทยทุกคน</p><p><strong>ขอบเขตบริการ:</strong> ชุดตรวจ HIV self-screening Test รวมค่าบริการให้คำปรึกษา</p><p><strong>อัตราจ่าย:</strong> 100 บาท/ครั้ง (ไม่เกิน 1 test/วัน)</p>" },
+    "S31": { name: "บริการสร้างเสริมสุขภาพและป้องกันโรคสำหรับผู้ประกันตน (14 รายการ)", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้ประกันตนสิทธิประกันสังคม</p><p><strong>ขอบเขตบริการ:</strong> บริการตามรายการ 14 รายการ เช่น คัดกรองการได้ยิน, ตรวจเต้านม, ตรวจตา, ตรวจปัสสาวะ, การทำงานของไต, X-ray, Fit test, FBS, HBsAg, CBC, ไขมันในเลือด, คัดกรองมะเร็งปากมดลูก</p><p><strong>อัตราจ่าย:</strong> จ่ายตามรายการและอัตราที่สำนักงานประกันสังคมกำหนด</p>" }
 };
 
 
-// --- 3. ฟังก์ชันตรวจสอบสิทธิ์หลัก ---
+// --- 3. ฟังก์ชันหลักสำหรับตรวจสอบสิทธิ ---
 function checkEligibility() {
-    const ageInput = document.getElementById('age-input').value;
-    const numericalAge = parseInt(ageInput);
-    const selectedGender = document.querySelector('input[name="gender"]:checked').value; // '1' (ชาย) หรือ '2' (หญิง)
+    const ageInput = document.getElementById('age-input');
     const resultsOutput = document.getElementById('results-output');
+    resultsOutput.style.display = 'block';
+
+    const numericalAge = parseInt(ageInput.value);
     const genderDisplay = selectedGender === '1' ? 'ชาย' : 'หญิง';
 
-    // 1. Input validation
-    if (ageInput.trim() === "" || isNaN(numericalAge) || numericalAge < 0 || numericalAge > 120) {
+    // 1. Input Validation
+    if (isNaN(numericalAge) || numericalAge < 0 || numericalAge > 120) {
         resultsOutput.innerHTML = `
-            <div class="error-message">
-                <h3>⚠️ ข้อมูลไม่ถูกต้อง</h3>
-                <p class="text-red-700">กรุณาป้อนอายุเป็นตัวเลขที่ถูกต้องในช่วง 0 ถึง 120 ปี</p>
-            </div>
-        `;
+            <div class="p-4 sm:p-6 bg-red-50 border-2 border-red-300 rounded-xl shadow-inner">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-red-200 flex items-center justify-center flex-shrink-0">
+                        <span class="text-2xl">⚠️</span>
+                    </div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-red-700"> ข้อมูลไม่ถูกต้อง </h3>
+                </div>
+                <p class="text-red-800/80 mt-2 pl-13">กรุณาป้อนอายุเป็นตัวเลขที่ถูกต้องในช่วง 0 ถึง 120 ปี</p>
+            </div>`;
         return;
     }
 
@@ -287,8 +262,7 @@ function checkEligibility() {
     }
 
     // 3. Collect all eligible services
-    let eligibleServices = new Set();
-    const allAgeData = nhsoData["all"]; // Services available for all ages
+    const eligibleServices = new Set();
     const specificAgeData = nhsoData[ageKey]; // Services specific to the age group
 
     // Helper function to check eligibility and add service to the Set
@@ -303,37 +277,69 @@ function checkEligibility() {
         }
     };
 
-    // Process both age-specific and all-age services
+    // Process age-specific services
     if (specificAgeData) {
         processServices(specificAgeData);
-    }
-    if (allAgeData) {
-        processServices(allAgeData);
     }
 
     // 4. Display results
     if (eligibleServices.size > 0) {
         const sortedServices = Array.from(eligibleServices).sort(); // Sort keys for consistent display
+
+        // Create HTML for clickable buttons that open the modal
         const serviceListHTML = sortedServices.map(key => {
-            const fullName = serviceFullNames[key] || key;
-            return `<li>${fullName}</li>`;
+            const serviceInfo = serviceFullNames[key] || { name: key, details: 'ไม่พบรายละเอียดเพิ่มเติม' }; // Handle missing info
+            return `
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <button onclick="toggleAccordion('${key}')" class="w-full text-left p-3 sm:p-4 font-semibold text-gray-800 hover:bg-gray-50 flex justify-between items-center transition-colors">
+                        <span>${serviceInfo.name}</span>
+                        <i id="icon-${key}" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div id="details-${key}" class="accordion-content hidden px-3 sm:px-4 pb-4 text-gray-600 text-sm space-y-2">
+                        ${serviceInfo.details}
+                    </div>
+                </div>
+            `;
         }).join('');
 
         resultsOutput.innerHTML = `
-            <h3>✅ สรุปสิทธิ PPFS สำหรับผู้ที่มีอายุ ${numericalAge} ปี (เพศ ${genderDisplay})</h3>
-            <p class="text-gray-700 font-semibold mb-3">พบรายการบริการส่งเสริมสุขภาพและป้องกันโรคที่ได้รับสิทธิ์: <span class="text-green-600">${eligibleServices.size} รายการ</span></p>
-            <ul class="mt-4">${serviceListHTML}</ul>
+            <div class="p-6 sm:p-8 shadow-2xl rounded-2xl bg-white border border-gray-200">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">✅ สรุปสิทธิ PPFS </h3>
+                <p class="text-gray-700 font-semibold mb-3 mt-1">สำหรับผู้ที่มีอายุ ${numericalAge} ปี (เพศ ${genderDisplay})</p>
+                <p class="text-gray-700 font-semibold mb-4">พบรายการบริการส่งเสริมสุขภาพและป้องกันโรคที่ได้รับสิทธิ์: <span class="text-green-600">${eligibleServices.size} รายการ</span></p>
+                
+                <div class="space-y-3">
+                    ${serviceListHTML}
+                </div>
+                <p class="text-sm text-gray-500 mt-4">**คลิกที่รายการเพื่อดูรายละเอียดเพิ่มเติม</p>
+            </div>
         `;
     } else {
         resultsOutput.innerHTML = `
-            <div class="error-message">
-                <h3>❌ ไม่พบสิทธิ</h3>
-                <p class="text-red-700">ไม่พบรายการบริการ PPFS ที่ได้รับสิทธิโดยตรงสำหรับอายุ ${numericalAge} ปี และเพศ ${genderDisplay} ในตารางข้อมูลที่กำหนด</p>
+            <div class="p-6 sm:p-8 shadow-2xl rounded-2xl bg-white border border-gray-200">
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-800">❌ ไม่พบสิทธิ</h3>
+                <p class="text-red-700 mt-2">ไม่พบรายการบริการ PPFS สำหรับข้อมูลที่คุณป้อน</p>
             </div>
         `;
     }
 }
-</script>
 
+// --- 4. ฟังก์ชันสำหรับ Accordion เปิด-ปิดรายละเอียด ---
+function toggleAccordion(serviceKey) {
+    const detailsDiv = document.getElementById(`details-${serviceKey}`);
+    const icon = document.getElementById(`icon-${serviceKey}`);
+    if (detailsDiv && icon) {
+        const isHidden = detailsDiv.classList.contains('hidden');
+        detailsDiv.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180', !isHidden);
+    }
+}
+
+// Initialize gender selection on load
+document.addEventListener('DOMContentLoaded', () => {
+    selectGender('1'); // Set default to Male on page load
+    document.getElementById('results-output').style.display = 'none'; // Ensure results are hidden on load
+});
+</script>
 </body>
 </html>
