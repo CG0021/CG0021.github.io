@@ -167,6 +167,8 @@
                             <i class="fa-solid fa-venus text-pink-500"></i>
                             <span>หญิง</span>
                         </button>
+
+
                     </div>
                 </div>
             </div>
@@ -218,84 +220,8 @@
     </footer>
 
     <script>
-        // Data
-        const ppfsServices = [
-            // PP Fee Schedule
-            { code: "PPFS01", name: "บริการฝากครรภ์", minAge: 13, maxAge: 59, gender: "2", category: "PP Fee Schedule", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยตั้งครรภ์ ทุกสิทธิการรักษาพยาบาล</p><p><strong>ขอบเขตบริการ:</strong><br>1. บริการฝากครรภ์ (รวมยาเสริมธาตุเหล็ก กรดโฟลิก ไอโอดีน)<br>2. ตรวจ Lab ชุดแรก (Syphilis, HIV, HBsAg, CBC, etc.)<br>3. ตรวจ Lab ชุดสอง (Syphilis, HIV เมื่อใกล้คลอด)<br>4. อัลตราซาวน์ 1 ครั้ง<br>5. ตรวจสุขภาพช่องปากและขัดฟัน</p>" },
-            { code: "PPFS02", name: "บริการป้องกันและควบคุมโรคโลหิตจางธาลัสซีเมียในหญิงตั้งครรภ์", minAge: 13, maxAge: 59, gender: "1,2", category: "PP Fee Schedule", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงตั้งครรภ์ และสามีหรือคู่ของหญิงตั้งครรภ์</p><p><strong>ขอบเขตบริการ:</strong><br>1. ตรวจยืนยัน Lab (Hb typing, Alpha-thal 1, Beta-thal)<br>2. หัตถการวินิจฉัยทารกในครรภ์ (CVS, Amniocentesis, Cordocentesis)<br>3. ตรวจสิ่งส่งตรวจวินิจฉัยทารก (DNA Analysis, Hb typing)</p>" },
-            { code: "PPFS03", name: "บริการคัดกรองธาลัสซีเมียในสามี/คู่ และคัดกรองซิฟิลิส", minAge: 13, maxAge: 59, gender: "1,2", category: "PP Fee Schedule", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> สามีหรือคู่ของหญิงตั้งครรภ์</p><p><strong>ขอบเขตบริการ:</strong><br>1. คัดกรองธาลัสซีเมีย (CBC, HbE screening)<br>2. คัดกรองซิฟิลิส (Treponemal/Nontreponemal test)</p>" },
-            { code: "PPFS04", name: "บริการป้องกันและควบคุมกลุ่มอาการดาวน์ในหญิงตั้งครรภ์", minAge: 13, maxAge: 59, gender: "2", category: "PP Fee Schedule", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงตั้งครรภ์</p><p><strong>ขอบเขตบริการ:</strong><br>1. คัดกรองดาวน์ (NIPT หรือ Quadruple test)<br>2. ตรวจวินิจฉัยทารกในครรภ์ (PND) กรณีเสี่ยงสูง<br>3. ตรวจโครโมโซม</p>" },
-            { code: "PPFS05", name: "การตรวจหลังคลอด", minAge: 13, maxAge: 59, gender: "2", category: "PP Fee Schedule", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงหลังคลอด</p><p><strong>ขอบเขตบริการ:</strong><br>1. ตรวจหลังคลอด 3 ครั้ง (ภายใน 7 วัน, 8-15 วัน, 16-42 วัน)<br>2. ยาเสริมธาตุเหล็ก กรดโฟลิก ไอโอดีน</p>" },
-            { code: "PPFS06", name: "บริการการทดสอบการตั้งครรภ์", minAge: 13, maxAge: 59, gender: "2", category: "PP Fee Schedule", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงวัยเจริญพันธุ์ที่สงสัยตั้งครรภ์</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจปัสสาวะทดสอบการตั้งครรภ์ หรือชุดทดสอบด้วยตัวเอง</p>" },
-            { code: "PPFS07", name: "บริการป้องกันและควบคุมภาวะพร่องฮอร์โมนไทรอยด์ (TSH)", minAge: 0, maxAge: 0, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กไทยแรกเกิดทุกคน</p><p><strong>ขอบเขตบริการ:</strong><br>1. ตรวจคัดกรอง TSH ครั้งที่ 1<br>2. ตรวจครั้งที่ 2 สำหรับกลุ่มเสี่ยง (คลอดก่อนกำหนด, น้ำหนักน้อย)<br>3. ตรวจยืนยันและให้ยา Thyroxine</p>" },
-            { code: "PPFS08", name: "บริการตรวจคัดกรองโรคพันธุกรรมเมตาบอลิก (TMS)", minAge: 0, maxAge: 0, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กไทยแรกเกิดทุกคน</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจคัดกรองโรคพันธุกรรมเมตาบอลิกด้วยเครื่อง TMS</p>" },
-            { code: "PPFS09", name: "บริการแว่นตาเด็กที่มีสายตาผิดปกติ", minAge: 3, maxAge: 12, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็กไทยอายุ 3-12 ปี</p><p><strong>ขอบเขตบริการ:</strong><br>1. คัดกรองสายตา<br>2. ตรวจวินิจฉัยและตัดแว่น<br>3. ตรวจติดตาม</p>" },
-            { code: "PPFS10", name: "บริการคัดกรองรอยโรคเสี่ยงมะเร็งและมะเร็งช่องปาก", minAge: 40, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชาชนอายุ 40 ปีขึ้นไป</p><p><strong>ขอบเขตบริการ:</strong><br>1. คัดกรองรอยโรคในช่องปาก<br>2. Biopsy กรณีพบรอยโรค</p>" },
-            { code: "PPFS11", name: "บริการการตรวจคัดกรองมะเร็งปากมดลูก", minAge: 15, maxAge: 59, gender: "2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทย 30-59 ปี หรือ 15-29 ปีที่มีความเสี่ยง</p><p><strong>ขอบเขตบริการ:</strong><br>1. Pap smear / VIA / HPV DNA Test<br>2. ตรวจยืนยันด้วย Colposcope/Biopsy กรณีผิดปกติ</p>" },
-            { code: "PPFS12", name: "บริการตรวจยีน BRCA1/BRCA2", minAge: 18, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้ป่วยมะเร็งเต้านมเสี่ยงสูงและญาติสายตรง</p><p><strong>ขอบเขตบริการ:</strong><br>1. ประเมินความเสี่ยงและให้คำปรึกษา<br>2. ตรวจยีน BRCA1/BRCA2</p>" },
-            { code: "PPFS13", name: "บริการตรวจคัดกรองมะเร็งลำไส้ใหญ่และลำไส้ตรง (Fit test)", minAge: 50, maxAge: 70, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชากรไทย 50-70 ปี</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจคัดกรองด้วยวิธี FIT Test</p>" },
-            { code: "PPFS14", name: "บริการคัดกรองโลหิตจางจากการขาดธาตุเหล็ก", minAge: 13, maxAge: 24, gender: "2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทย 13-24 ปี</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจ CBC หรือ Hct</p>" },
-            { code: "PPFS15", name: "บริการยาเม็ดเสริมธาตุเหล็ก", minAge: 13, maxAge: 45, gender: "2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทย 13-45 ปี</p><p><strong>ขอบเขตบริการ:</strong><br>รับยาเม็ดเสริมธาตุเหล็กและกรดโฟลิค (สัปดาห์ละ 1 ครั้ง)</p>" },
-            { code: "PPFS16", name: "บริการเคลือบฟลูออไรด์", minAge: 25, maxAge: 59, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้มีอายุ 25-59 ปี (กลุ่มเสี่ยง)</p><p><strong>ขอบเขตบริการ:</strong><br>เคลือบฟลูออไรด์วาร์นิชเข้มข้นสูง</p>" },
-            { code: "PPFS17", name: "บริการป้องกันการยุติการตั้งครรภ์ที่ไม่ปลอดภัย", minAge: 13, maxAge: 59, gender: "2", category: "PP Fee Schedule", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยที่จำเป็นต้องยุติการตั้งครรภ์ตามกฎหมาย</p><p><strong>ขอบเขตบริการ:</strong><br>ยุติการตั้งครรภ์ด้วยยา หรือ หัตถการ (MVA/EVA)</p>" },
-            { code: "PPFS18", name: "บริการตรวจคัดกรองและค้นหาวัณโรคในกลุ่มเสี่ยงสูง", minAge: 0, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้มีความเสี่ยงสูงต่อวัณโรค</p><p><strong>ขอบเขตบริการ:</strong><br>1. CXR<br>2. Molecular testing (TB-LAMP, PCR, LPA)<br>3. ตรวจหาเชื้อดื้อยา</p>" },
-            { code: "PPFS19", name: "การตรวจคัดกรองโรคไวรัสตับอักเสบ บี", minAge: 34, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชากรไทยเกิดก่อนปี 2535</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจ HBsAg 1 ครั้งตลอดชีวิต</p>" },
-            { code: "PPFS20", name: "บริการตรวจคัดกรองไวรัสตับอักเสบ ซี", minAge: 34, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชากรไทยเกิดก่อนปี 2535 และกลุ่มเสี่ยง</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจ Anti-HCV</p>" },
-            { code: "PPFS21", name: "บริการวางแผนครอบครัว", minAge: 13, maxAge: 59, gender: "2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยวัยเจริญพันธุ์</p><p><strong>ขอบเขตบริการ:</strong><br>ยาคุม, ยาฉีด, ห่วงอนามัย, ยาฝัง, ถุงยางอนามัย</p>" },
-            { code: "PPFS22", name: "บริการตรวจคัดกรองพยาธิใบไม้ตับ (OV-RDT)", minAge: 15, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชาชนอายุ 15 ปีขึ้นไปที่มีความเสี่ยง</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจปัสสาวะ OV-RDT</p>" },
-            { code: "PPFS23", name: "บริการตรวจคัดกรองมะเร็งเต้านม (Mammogram/Ultrasound)", minAge: 40, maxAge: 120, gender: "2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงไทยอายุ 40+ ที่มีประวัติญาติสายตรงเป็นมะเร็งเต้านม</p><p><strong>ขอบเขตบริการ:</strong><br>Mammogram และ Ultrasound</p>" },
-            { code: "PPFS24", name: "บริการคัดกรองเบาหวานและไขมันในเลือด", minAge: 35, maxAge: 70, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> อายุ 35-59 (เสี่ยงเบาหวาน), 45-70 (ไขมัน)</p><p><strong>ขอบเขตบริการ:</strong><br>1. ตรวจน้ำตาล (FPG)<br>2. ตรวจไขมัน (Cholesterol, HDL)</p>" },
-            { code: "PPFS25", name: "ค่าบริการให้วัคซีนป้องกันโรค", minAge: 0, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ทุกกลุ่มอายุ</p><p><strong>ขอบเขตบริการ:</strong><br>วัคซีนพื้นฐาน, dT, ไข้หวัดใหญ่ (กลุ่มเสี่ยง), aP (หญิงตั้งครรภ์)</p>" },
-            { code: "PPFS26", name: "บริการคัดกรองวัณโรคระยะแฝง (Latent TB)", minAge: 12, maxAge: 59, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> อายุ 12-59 ปี</p><p><strong>ขอบเขตบริการ:</strong><br>IGRA</p>" },
-            { code: "PPFS27", name: "บริการคัดกรองโลหิตจาง (Hb/Hct)", minAge: 3, maxAge: 12, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> 6 เดือน - 12 ปี</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจ Hb/Hct</p>" },
-            { code: "PPFS28", name: "บริการยาเสริมธาตุเหล็ก (เด็ก)", minAge: 0, maxAge: 12, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> 2 เดือน - 12 ปี</p><p><strong>ขอบเขตบริการ:</strong><br>ยาน้ำ/ยาเม็ดเสริมธาตุเหล็ก</p>" },
-            { code: "PPFS29", name: "บริการศูนย์ให้คำปรึกษาสุขภาพจิต", minAge: 12, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> อายุ 12 ปีขึ้นไป</p><p><strong>ขอบเขตบริการ:</strong><br>ให้คำปรึกษาสุขภาพจิต (Counselling)</p>" },
-            { code: "PPFS30", name: "บริการฮอร์โมนเพื่อการยืนยันเพศสภาพ", minAge: 13, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้มีความต้องการยืนยันเพศสภาพ</p><p><strong>ขอบเขตบริการ:</strong><br>Lab และ ฮอร์โมน</p>" },
-            { code: "PPFS31", name: "การตรวจคัดกรองโรคกระดูกพรุน", minAge: 60, maxAge: 120, gender: "2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงอายุ 60 ปีขึ้นไป</p><p><strong>ขอบเขตบริการ:</strong><br>ตรวจ DXA</p>" },
-            { code: "PPFS32", name: "การตรวจคัดกรอง Autistic disorder (TDAS)", minAge: 1, maxAge: 5, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็ก 12-60 เดือน ที่พัฒนาการล่าช้า</p><p><strong>ขอบเขตบริการ:</strong><br>คัดกรองด้วย TDAS</p>" },
-            { code: "PPFS33", name: "บริการตรวจ HIV ด้วยตนเอง (HIVSST)", minAge: 13, maxAge: 120, gender: "1,2", category: "PP Fee Schedule", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ประชาชนไทยทุกคน</p><p><strong>ขอบเขตบริการ:</strong><br>ชุดตรวจ HIV Self-test และคำปรึกษา</p>" },
-
-            // PP Workload
-            { code: "PPBWK01", name: "บริการตรวจพัฒนาการ", minAge: 0, maxAge: 5, gender: "1,2", category: "PP Workload", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็ก 0-5 ปี</p>" },
-            { code: "PPBWK02", name: "บริการชั่งน้ำหนักและวัดส่วนสูง", minAge: 6, maxAge: 12, gender: "1,2", category: "PP Workload", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็ก 6-12 ปี</p>" },
-            { code: "PPBWK03", name: "การเคลือบฟลูออไรด์ (เด็กวัยเรียน)", minAge: 4, maxAge: 12, gender: "1,2", category: "PP Workload", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็ก 4-12 ปี</p>" },
-            { code: "PPBWK04", name: "เคลือบหลุมร่องฟัน", minAge: 6, maxAge: 12, gender: "1,2", category: "PP Workload", details: "<p><strong>กลุ่มเป้าหมาย:</strong> เด็ก 6-12 ปี</p>" },
-            { code: "PPBWK05", name: "บริการตรวจคัดกรองโรคซึมเศร้า", minAge: 60, maxAge: 120, gender: "1,2", category: "PP Workload", details: "<p><strong>กลุ่มเป้าหมาย:</strong> อายุ 60 ปีขึ้นไป</p>" },
-
-            // PPHIV
-            { code: "PPHIV", name: "ตรวจการติดเชื้อเอชไอวีโดยสมัครใจ (VCT)", minAge: 13, maxAge: 120, gender: "1,2", category: "PPHIV", details: "<p><strong>บริการ:</strong><br>1. ปรึกษาและตรวจ HIV (VCT)<br>2. ยาต้านไวรัส (PrEP, PEP)</p>" },
-
-            // PPNCD
-            { code: "PPNCD01", name: "บริการผู้ป่วยเบาหวานชนิดที่ 1", minAge: 18, maxAge: 120, gender: "1,2", category: "PPNCD", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้ป่วยเบาหวานชนิดที่ 1</p><p><strong>ขอบเขตบริการ:</strong><br>สอนดูแลตนเอง, ตรวจ Lab, ตรวจภาวะแทรกซ้อน</p>" },
-            { code: "PPNCD02", name: "หญิงตั้งครรภ์ที่ถูกวินิจฉัยว่าเป็นเบาหวาน", minAge: 18, maxAge: 120, gender: "2", category: "PPNCD", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงตั้งครรภ์ที่เป็นเบาหวาน (GDM)</p>" },
-            { code: "PPNCD03", name: "หญิงตั้งครรภ์ที่ถูกวินิจฉัยว่าเป็นเบาหวานก่อนตั้งครรภ์", minAge: 18, maxAge: 120, gender: "2", category: "PPNCD", isPregnancyRelated: true, details: "<p><strong>กลุ่มเป้าหมาย:</strong> หญิงตั้งครรภ์ที่เป็นเบาหวานมาก่อน (Pre-existing DM)</p>" },
-            { code: "PPNCD04", name: "ผู้ป่วยเบาหวานชนิดที่ 2", minAge: 18, maxAge: 120, gender: "1,2", category: "PPNCD", details: "<p><strong>บริการ:</strong> ตรวจ HbA1c 2 ครั้ง/ปี</p>" },
-            { code: "PPNCD05", name: "ผู้ป่วยความดันโลหิตสูง", minAge: 18, maxAge: 120, gender: "1,2", category: "PPNCD", details: "<p><strong>บริการ:</strong> ตรวจ Serum Creatinine, Potassium</p>" },
-
-            // PPSMIV
-            { code: "PPSMIV", name: "บริการผู้ป่วยจิตเวชเรื้อรังในชุมชน", minAge: 15, maxAge: 120, gender: "1,2", category: "PPSMIV", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้ป่วยจิตเภท/จิตเวชเรื้อรังในชุมชน</p>" },
-
-            // PPLTC
-            { code: "PPLTC", name: "บริการสาธารณสุขสำหรับผู้ที่มีภาวะพึ่งพิงในชุมชน", minAge: 0, maxAge: 120, gender: "1,2", category: "PPLTC", details: "<p><strong>กลุ่มเป้าหมาย:</strong> ผู้มีภาวะพึ่งพิง (ADL<=11), Palliative, Dementia</p>" },
-
-            // Social Security (ประกันสังคม)
-            { code: "PPSSO01", name: "การคัดกรองการได้ยิน Finger Rub Test", minAge: 15, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>1 ครั้ง/ปี</p>" },
-            { code: "PPSSO02", name: "การตรวจเต้านมโดยแพทย์/บุคลากร", minAge: 30, maxAge: 120, gender: "2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>30-39 ปี ทุก 2 ปี, 40+ ปี ทุกปี</p>" },
-            { code: "PPSSO03", name: "การตรวจตาโดยจักษุแพทย์", minAge: 40, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>40-54 ปี ทุก 2 ปี, 55+ ปี ทุกปี</p>" },
-            { code: "PPSSO04", name: "การตรวจความสมบูรณ์ของเม็ดเลือด CBC", minAge: 15, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>15-34 ปี 1 ครั้ง, 35+ ปี ทุกปี</p>" },
-            { code: "PPSSO05", name: "การตรวจปัสสาวะ UA", minAge: 35, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>1 ครั้ง/ปี</p>" },
-            { code: "PPSSO06", name: "การตรวจน้ำตาลในเลือด FBS", minAge: 35, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>1 ครั้ง/ปี</p>" },
-            { code: "PPSSO07", name: "ตรวจการทำงานของไต Cr และ eGFR", minAge: 35, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>1 ครั้ง/ปี</p>" },
-            { code: "PPSSO08", name: "การตรวจไขมัน Total & HDL", minAge: 20, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>20-34 ปี ทุก 5 ปี, 35+ ปี ทุกปี</p>" },
-            { code: "PPSSO09", name: "การตรวจ HBsAg", minAge: 34, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>เกิดก่อน 2535 ตรวจ 1 ครั้ง</p>" },
-            { code: "PPSSO10", name: "การตรวจมะเร็งปากมดลูก Pap Smear", minAge: 30, maxAge: 120, gender: "2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>ทุก 3 ปี</p>" },
-            { code: "PPSSO11", name: "การตรวจมะเร็งปากมดลูกวิธี VIA", minAge: 30, maxAge: 54, gender: "2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>ทุก 5 ปี</p>" },
-            { code: "PPSSO12", name: "การตรวจมะเร็งปากมดลูก HPV DNA Test", minAge: 30, maxAge: 120, gender: "2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>ทุก 5 ปี</p>" },
-            { code: "PPSSO13", name: "การตรวจคัดกรองมะเร็งลำไส้ใหญ่ (Fit test)", minAge: 50, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>1 ครั้ง/ปี</p>" },
-            { code: "PPSSO14", name: "Chest X-ray", minAge: 15, maxAge: 120, gender: "1,2", category: "ประกันสังคม", isSocialSecurity: true, details: "<p>ทุก 3 ปี</p>" }
-        ];
-
         // State
+        let ppfsServices = []; // Store data from Google Sheet
         let selectedGender = null;
         let isPregnant = false;
         let isSSO = false;
@@ -309,6 +235,54 @@
         const resultsOutput = document.getElementById('results-output');
         const servicesContainer = document.getElementById('services-container');
         const totalCount = document.getElementById('total-count');
+
+        // --- NEW: Fetch data from Google Apps Script with Loading/Error states ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show initial loading state
+            resultsOutput.classList.remove('hidden');
+            servicesContainer.innerHTML = `
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fa-solid fa-spinner fa-spin text-4xl mb-4 text-blue-500"></i>
+                    <p class="font-semibold">กำลังโหลดข้อมูลสิทธิประโยชน์...</p>
+                    <p class="text-sm">กรุณารอสักครู่</p>
+                </div>
+            `;
+
+            // *** PASTE YOUR WEB APP URL HERE ***
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbxOJLHqL9vtkwYvf5j8TZqJsZuLMVuBOxcerv9QocePyBnLlQOVoNqt8RUa0ochGPBH/exec'; // <--- วาง URL ใหม่ล่าสุดจากขั้นตอนที่ 2 ตรงนี้
+
+            // --- NEW: JSONP Method to bypass CORS ---
+            const script = document.createElement('script');
+            // เพิ่ม callback function และ timestamp เพื่อป้องกัน cache
+            script.src = `${webAppUrl}?callback=loadData&t=${new Date().getTime()}`;
+            
+            // Handle loading errors
+            script.onerror = function() {
+                console.error('Script loading error.');
+                servicesContainer.innerHTML = `
+                    <div class="text-center py-10 text-red-600 bg-red-50 rounded-lg border border-red-200">
+                        <i class="fa-solid fa-circle-exclamation text-4xl mb-4"></i>
+                        <p class="font-bold">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+                        <p class="text-sm text-red-500 mt-1">ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้ กรุณาตรวจสอบการตั้งค่า Deploy และการแชร์ไฟล์ Google Sheet</p>
+                    </div>
+                `;
+            };
+            
+            document.body.appendChild(script);
+        });
+
+        // --- NEW: This function will be called by the JSONP response ---
+        function loadData(data) {
+            if (data && !data.error && Array.isArray(data)) {
+                ppfsServices = data;
+                console.log('Data loaded successfully via JSONP.');
+                resultsOutput.classList.add('hidden');
+                servicesContainer.innerHTML = '';
+            } else {
+                console.error('Error in data from Google Sheet:', data.error);
+                throw new Error(data.error || 'รูปแบบข้อมูลไม่ถูกต้อง');
+            }
+        }
 
         // Functions
         function selectGender(gender) {
@@ -387,24 +361,43 @@
                 return;
             }
 
+            if (ppfsServices.length === 0) {
+                // This case now primarily handles the error state where data failed to load
+                if (!document.querySelector('.fa-spinner')) { // Check if it's not already showing an error
+                    servicesContainer.innerHTML = `
+                        <div class="text-center py-10 text-yellow-600">ยังไม่มีข้อมูลสิทธิประโยชน์ กรุณารอสักครู่ หรือลองโหลดหน้าเว็บใหม่อีกครั้ง</div>
+                    `;
+                    resultsOutput.classList.remove('hidden');
+                }
+                return;
+            }
+
             const eligibleServices = ppfsServices.filter(service => {
+                const minAge = parseInt(service.minAge, 10);
+                const maxAge = parseInt(service.maxAge, 10);
+
                 // Age Check
                 let ageEligible = false;
-                if (service.minAge === 0 && service.maxAge === 0) {
+                if (minAge === 0 && maxAge === 0) {
                     ageEligible = age === 0;
                 } else {
-                    ageEligible = age >= service.minAge && age <= service.maxAge;
+                    ageEligible = age >= minAge && age <= maxAge;
                 }
 
                 // Gender Check
-                const genderEligible = service.gender.includes(selectedGender);
+                let genderEligible = false;
+                const serviceGender = service.เพศ.toLowerCase();
+                if (serviceGender.includes('ทุกเพศ') || serviceGender.includes('ชาย/หญิง')) {
+                    genderEligible = true;
+                } else if (selectedGender === '1' && serviceGender.includes('ชาย')) {
+                    genderEligible = true;
+                } else if (selectedGender === '2' && serviceGender.includes('หญิง')) {
+                    genderEligible = true;
+                }
 
                 // Special Conditions
-                // If service is pregnancy related, user MUST be pregnant
-                if (service.isPregnancyRelated && !isPregnant) return false;
-
-                // If service is SSO, user MUST be SSO
-                if (service.isSocialSecurity && !isSSO) return false;
+                if (service.ตั้งครรภ์ === 'ตั้งครรภ์' && !isPregnant) return false;
+                if (service.กลุ่ม === 'ประกันสังคม' && !isSSO) return false;
 
                 return ageEligible && genderEligible;
             });
@@ -430,10 +423,11 @@
             // Group by Category
             const categories = {};
             services.forEach(service => {
-                if (!categories[service.category]) {
-                    categories[service.category] = [];
+                const categoryKey = service.กลุ่ม || 'ไม่ระบุกลุ่ม';
+                if (!categories[categoryKey]) {
+                    categories[categoryKey] = [];
                 }
-                categories[service.category].push(service);
+                categories[categoryKey].push(service);
             });
 
             // Render Groups
@@ -450,16 +444,20 @@
                         <div id="category-content-${category}" class="divide-y divide-gray-100">
                             ${items.map(item => `
                                 <div>
-                                    <button onclick="toggleAccordion('${item.code}')" class="w-full text-left p-4 hover:bg-blue-50 flex justify-between items-start transition-colors group">
+                                    <button onclick="toggleAccordion('${item.รหัส}')" class="w-full text-left p-4 hover:bg-blue-50 flex justify-between items-start transition-colors group">
                                         <div class="pr-4">
-                                            <div class="font-medium text-gray-800 group-hover:text-blue-700">${item.name}</div>
-                                            <div class="text-xs text-gray-500 mt-1">รหัส: ${item.code}</div>
+                                            <div class="font-medium text-gray-800 group-hover:text-blue-700">${item.บริการ}</div>
+                                            <div class="text-xs text-gray-500 mt-1">รหัส: ${item.รหัส}</div>
                                         </div>
-                                        <i id="icon-${item.code}" class="fa-solid fa-chevron-down text-gray-400 mt-1 transition-transform duration-300"></i>
+                                        <i id="icon-${item.รหัส}" class="fa-solid fa-chevron-down text-gray-400 mt-1 transition-transform duration-300"></i>
                                     </button>
-                                    <div id="details-${item.code}" class="accordion-content bg-gray-50 px-4 text-sm text-gray-600">
+                                    <div id="details-${item.รหัส}" class="accordion-content bg-gray-50 px-4 text-sm text-gray-600">
                                         <div class="py-3 space-y-2">
-                                            ${item.details}
+                                            <p><strong>กลุ่มเป้าหมาย:</strong> ${item.กลุ่มเป้าหมาย.replace(/\n/g, '<br>')}</p>
+                                            <p><strong>ขอบเขตบริการ:</strong> ${item.ขอบเขตบริการ.replace(/\n/g, '<br>')}</p>
+                                            <p><strong>เงื่อนไขและอัตราจ่าย:</strong> ${item.เงื่อนไขและอัตราจ่าย.replace(/\n/g, '<br>')}</p>
+                                            <p><strong>หน่วยบริการ:</strong> ${item.หน่วยบริการ.replace(/\n/g, '<br>')}</p>
+                                            <p><strong>โปรแกรม:</strong> ${item.โปรแกรม.replace(/\n/g, '<br>')}</p>
                                         </div>
                                     </div>
                                 </div>
