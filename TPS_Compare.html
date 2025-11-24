@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเปรียบเทียบประสิทธิภาพ TPS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .header-subtitle {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+
+        /* Search Box in Header */
+        .search-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .province-box {
+            position: relative;
+            width: 200px;
+            display: flex;
+            gap: 5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        input[type="text"]:focus::placeholder {
+            color: #999;
+        }
+
+        .btn-add-all {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            background: #27ae60;
+            color: white;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            white-space: nowrap;
+            transition: background 0.3s;
+        }
+
+        .btn-add-all:hover {
+            background: #2ecc71;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 5px;
+            color: #2c3e50;
+        }
+
+        .suggestion-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+
+        .table-wrapper {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            border-right: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        /* Sticky Headers */
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #2c3e50;
+            color: white;
+            z-index: 20;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            height: 60px;
+            user-select: none;
+        }
+
+        /* Draggable Header Styling */
+        thead th.draggable {
+            cursor: grab;
+        }
+
+        thead th.draggable:active {
+            cursor: grabbing;
+        }
+
+        thead th.dragging {
+            opacity: 0.5;
+            background: #34495e;
+        }
+
+        /* First Column Sticky */
+        th:first-child,
+        td:first-child {
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 10;
+            border-right: 2px solid #bdc3c7;
+            min-width: 350px;
+            max-width: 350px;
+        }
+
+        thead th:first-child {
+            z-index: 30;
+            background: #2c3e50;
+        }
+
+        /* Hospital Columns */
+        th:not(:first-child):not(:nth-child(2)),
+        td:not(:first-child):not(:nth-child(2)) {
+            min-width: 150px;
+            max-width: 150px;
+        }
+
+        /* Row Styles */
+        tr:hover td {
+            background-color: #f1f8ff;
+        }
+
+        .section-header td {
+            background-color: #e9ecef;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .sub-header td {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .score-cell {
+            text-align: center;
+            font-weight: 500;
+            position: relative;
+            cursor: help;
+        }
+
+        .score-cell.zero {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .full-score {
+            text-align: center;
+            color: #7f8c8d;
+            background: #fafafa;
+            width: 80px;
+            min-width: 80px;
+        }
+
+        /* Tooltip */
+        .custom-tooltip {
+            visibility: hidden;
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            padding: 10px;
+            border-radius: 6px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9em;
+            width: 250px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+            white-space: normal;
+        }
+
+        .score-cell:hover .custom-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Positioning tooltip */
+        .score-cell .custom-tooltip {
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 10px;
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 2px;
+        }
+
+        .tooltip-row:last-child {
+            border-bottom: none;
+        }
+
+        .tooltip-label {
+            color: #aaa;
+        }
+
+        .tooltip-val {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <h1>ระบบเปรียบเทียบประสิทธิภาพ TPS</h1>
+                <div class="header-subtitle">เปรียบเทียบข้อมูลหลายโรงพยาบาล</div>
+            </div>
+
+            <div class="search-group">
+                <div class="province-box">
+                    <input type="text" id="provinceInput" placeholder="ระบุจังหวัด (ต้องตรงกับข้อมูล)">
+                    <button class="btn-add-all" onclick="addAllByProvince()">เพิ่มทั้งจังหวัด</button>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="ค้นหาและเพิ่มโรงพยาบาล..." disabled>
+                    <div class="suggestions" id="suggestions"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="compareTable">
+                <thead>
+                    <tr id="headerRow">
+                        <th>รายการ</th>
+                        <th>เต็ม</th>
+                        <!-- Dynamic Hospital Headers -->
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p style="margin-top: 10px; color: #3498db; font-weight: 500;">กำลังโหลดข้อมูล...</p>
+    </div>
+
+    <script>
+        // State
+        let hospitalList = [];
+        let selectedHospitals = []; // Array of { code, name, data }
+        let draggedColIndex = null;
+
+        // Configuration for Rows
+        const rowConfig = [
+            { id: 'grade', label: 'TPS Grade', type: 'summary', key: 'TPS Grade' },
+            { id: 'total', label: 'รวมคะแนนประเมินประสิทธิภาพ', full: 15.0, type: 'summary', key: 'คะแนนประเมินประสิทธิภาพ' },
+
+            { id: '1', label: '1. ตัวชี้วัดกระบวนการ (Process Indicators)', type: 'section' },
+
+            { id: '1.1', label: '1.1 การบริหารแผนทางการเงิน', full: 2.0, type: 'header', key: 'คะแนน 1.1' },
+            { id: '1.1.1', label: '1.1.1 มิติรายได้ ± ไม่เกิน 5 %', full: 1.0, type: 'item', key: 'P_รายได้', resultKey: 'รวมรายได้_ร้อยละ', unit: '%' },
+            { id: '1.1.2', label: '1.1.2 มิติค่าใช้จ่าย ± ไม่เกิน 5 %', full: 1.0, type: 'item', key: 'P_ค่าใช้จ่าย', resultKey: 'รวมค่าใช้จ่าย_ร้อยละ', unit: '%' },
+
+            { id: '1.2', label: '1.2 การบริหารสินทรัพย์หมุนเวียนและหนี้สินหมุนเวียน', full: 3.0, type: 'header', key: 'คะแนน1.2' },
+            { id: '1.2.1', label: '1.2.1 ระยะเวลาชำระเจ้าหนี้การค้า (App-D)', full: 1.0, type: 'item', key: 'P_App-D', resultKey: 'App-D', unit: 'วัน' },
+            { id: '1.2.2', label: '1.2.2 ระยะเวลาเก็บหนี้ UC (ACP:UC)', full: 0.5, type: 'item', key: 'P_acp uc', resultKey: 'ACP:UC', unit: 'วัน' },
+            { id: '1.2.3', label: '1.2.3 ระยะเวลาเก็บหนี้ CS (ACP:CS)', full: 0.5, type: 'item', key: 'P_acp cs', resultKey: 'ACP:CS', unit: 'วัน' },
+            { id: '1.2.4', label: '1.2.4 การบริหารสินค้าคงคลัง (AIP)', full: 1.0, type: 'item', key: 'P_Aip', resultKey: 'AIP', unit: 'วัน' },
+
+            { id: '1.3', label: '1.3 การบริหารจัดการ', full: 5.0, type: 'header', calcSum: ['1.3.1', '1.3.2', '1.3.3'] },
+
+            { id: '1.3.1', label: '1.3.1 การบริหารต้นทุนและค่าใช้จ่าย', full: 2.0, type: 'sub-header', key: 'คะแนน 1.3.1' },
+            {
+                id: '1.3.1.1', label: '1.3.1.1 Unit Cost for OP', full: 1.0, type: 'item', key: 'QM-OP',
+                sheet: 'qm', resultKey: 'ต้นทุนบริการผู้ป่วยนอกต่อครั้ง', meanKey: 'Mean+1SD(ผู้ป่วยนอก)', unit: 'บาท'
+            },
+            {
+                id: '1.3.1.2', label: '1.3.1.2 Unit Cost for IP', full: 1.0, type: 'item', key: 'QM-IP',
+                sheet: 'qm', resultKey: 'ต้นทุนบริการผู้ป่วยในต่อ AdjRW', meanKey: 'Mean+1SD(ผู้ป่วยใน)', unit: 'บาท'
+            },
+            {
+                id: '1.3.1.3', label: '1.3.1.3 LC ค่าแรงบุคลากร', full: 0.5, type: 'item', key: 'LC',
+                sheet: 'hgr', resultKey: 'LC', meanKey: 'Mean#LC', diffKey: 'ผลต่างLC', unit: 'บาท'
+            },
+            {
+                id: '1.3.1.4', label: '1.3.1.4 MC ค่ายา', full: 0.5, type: 'item', key: 'ค่ายา',
+                sheet: 'hgr', resultKey: 'ค่ายา', meanKey: 'Mean#ค่ายา', diffKey: 'ผลต่างค่ายา', unit: 'บาท'
+            },
+            {
+                id: '1.3.1.5', label: '1.3.1.5 MC วัสดุวิทย์ฯ', full: 0.5, type: 'item', key: 'ค่าวัสดุวิทยาศาสตร์และการแพทย์',
+                sheet: 'hgr', resultKey: 'ค่าวัสดุวิทยาศาสตร์และการแพทย์', meanKey: 'Mean#ค่าวัสดุวิทยาศาสตร์และการแพทย์', diffKey: 'ผลต่างค่าวัสดุวิทยาศาสตร์และการแพทย์', unit: 'บาท'
+            },
+            {
+                id: '1.3.1.6', label: '1.3.1.6 MC เวชภัณฑ์มิใช่ยาฯ', full: 0.5, type: 'item', key: 'ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์',
+                sheet: 'hgr', resultKey: 'ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', meanKey: 'Mean#ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', diffKey: 'ผลต่างค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', unit: 'บาท'
+            },
+
+            { id: '1.3.2', label: '1.3.2 ตรวจสอบงบทดลองเบื้องต้น', full: 1.0, type: 'item', key: '1.3.2 ตรวจสอบงบทดลอง' },
+
+            { id: '1.3.3', label: '1.3.3 ผลผลิต (Productivity)', full: 2.0, type: 'sub-header', key: 'คะแนน 1.3.3' },
+            {
+                id: '1.3.3.1', label: '1.3.3.1 อัตราครองเตียง', full: 1.0, type: 'item', key: 'อัตราครองเตียง',
+                sheet: 'occupancy', resultKey: '%อัตราครองเตียง', unit: '%'
+            },
+            {
+                id: '1.3.3.2', label: '1.3.3.2 SumAdjRW', full: 1.0, type: 'item', key: 'Sum AdjRW',
+                sheet: 'occupancy', resultKey: '2568Q4', meanKey: 'ค่ากลางกลุ่ม', diffKey: 'ผลเปรียบเทียบค่ากลางกลุ่ม'
+            },
+
+            { id: '2', label: '2. ตัวชี้วัดผลลัพท์การดำเนินงาน', full: 5.0, type: 'section', key: 'คะแนน 2 ตัวชี้วัดผลการดำเนินงาน' },
+
+            { id: '2.1', label: '2.1 ความสามารถในการทำกำไร', full: 3.0, type: 'header', key: 'คะแนน 2.1' },
+            {
+                id: '2.1.1', label: '2.1.1 Operating Margin', full: 1.0, type: 'item', key: 'OPM',
+                sheet: 'ratio', resultKey: 'Ratio_OPM', meanKey: 'Ratio_OPMค่ากลาง', unit: '%'
+            },
+            {
+                id: '2.1.2', label: '2.1.2 Return on Asset (ROA)', full: 1.0, type: 'item', key: 'ROA',
+                sheet: 'ratio', resultKey: 'Ratio_ROA', meanKey: 'Ratio_ROAค่ากลาง', unit: '%'
+            },
+            { id: '2.1.3', label: '2.1.3 EBITDA', full: 1.0, type: 'item', key: 'EBITDA_Score', resultKey: 'EBITDA', unit: 'บาท' },
+
+            { id: '2.2', label: '2.2 สภาพคล่องทางการเงิน', full: 2.0, type: 'header', key: 'คะแนน 2.2' },
+            { id: '2.2.1', label: '2.2.1 Net Working Capital (NWC)', full: 1.0, type: 'item', key: 'P_NWC', resultKey: 'ทุนสำรองสุทธิ(NWC)', unit: 'บาท' },
+            {
+                id: '2.2.2', label: '2.2.2 Cash Ratio', full: 1.0, type: 'item', key: 'Cash',
+                sheet: 'ratio', resultKey: 'Cash R', unit: 'เท่า'
+            }
+        ];
+
+        // --- Helper Functions ---
+        function showLoading() { document.getElementById('loading').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+        function formatNumber(num) {
+            if (num === null || num === undefined || num === '') return '0';
+            if (typeof num === 'string') num = parseFloat(num.replace(/,/g, ''));
+            if (isNaN(num)) return '0';
+            return new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+        }
+
+        function isZero(val) {
+            if (!val) return false;
+            const num = parseFloat(val);
+            return !isNaN(num) && num === 0;
+        }
+
+        function getValue(row, headers, columnName) {
+            if (!row || !headers) return null;
+            const index = headers.findIndex(h => h && h.toString().includes(columnName));
+            return index !== -1 ? row[index] : null;
+        }
+
+        function findHospitalInSheet(sheetData, hospitalCode) {
+            if (!sheetData || !Array.isArray(sheetData) || sheetData.length < 2) return null;
+            const codeIndex = sheetData[0].findIndex(h => h && h.toString().includes('รหัส'));
+            if (codeIndex === -1) return null;
+
+            for (let i = 1; i < sheetData.length; i++) {
+                if (sheetData[i][codeIndex] == hospitalCode) {
+                    return { headers: sheetData[0], row: sheetData[i] };
+                }
+            }
+            return null;
+        }
+
+        // --- Data Fetching ---
+        async function fetchHospitalList() {
+            return new Promise((resolve, reject) => {
+                showLoading();
+                const callbackName = 'cb_list_' + Date.now();
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    hideLoading();
+                    if (data.error) reject(data.message);
+                    else resolve(data.list || []);
+                };
+                const script = document.createElement('script');
+                script.src = `https://script.google.com/macros/s/AKfycbyO26iU11w8EnwnWIz3d1S5uEYmBbUrzIgK3PXooMajmblDAppEuPAqsykGN7XY8uFB/exec?action=list&callback=${callbackName}`;
+                script.onerror = () => { hideLoading(); reject('Load failed'); };
+                document.body.appendChild(script);
+            });
+        }
+
+        async function fetchHospitalDetails(code) {
+            return new Promise((resolve, reject) => {
+                showLoading();
+                const callbackName = 'cb_data_' + Date.now();
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    hideLoading();
+                    if (data.error) reject(data.message);
+                    else resolve(data);
+                };
+                const script = document.createElement('script');
+                script.src = `https://script.google.com/macros/s/AKfycbyO26iU11w8EnwnWIz3d1S5uEYmBbUrzIgK3PXooMajmblDAppEuPAqsykGN7XY8uFB/exec?action=data&code=${code}&callback=${callbackName}`;
+                script.onerror = () => { hideLoading(); reject('Load failed'); };
+                document.body.appendChild(script);
+            });
+        }
+
+        // --- Core Logic ---
+
+        function getCellData(hospital, config) {
+            const mainHeaders = hospital.data.main[0];
+            const mainRow = hospital.data.main[1];
+            const code = getValue(mainRow, mainHeaders, 'รหัส');
+
+            let score = 0;
+            let result = null;
+            let mean = null;
+            let diff = null;
+
+            // 1. Get Score (Usually from Main Sheet)
+            if (config.calcSum) {
+                let sum = 0;
+                config.calcSum.forEach(childId => {
+                    const childRow = rowConfig.find(r => r.id === childId);
+                    if (childRow && childRow.key) {
+                        const val = getValue(mainRow, mainHeaders, childRow.key);
+                        sum += parseFloat(val || 0);
+                    }
+                });
+                score = sum.toFixed(1);
+            } else if (config.key) {
+                score = getValue(mainRow, mainHeaders, config.key);
+            }
+
+            // 2. Get Result/Details (Might be in other sheets)
+            let targetSheet = null;
+            if (config.sheet) {
+                if (config.sheet === 'qm') targetSheet = hospital.data.qm;
+                if (config.sheet === 'hgr') targetSheet = hospital.data.hgr;
+                if (config.sheet === 'occupancy') targetSheet = hospital.data.occupancy;
+                if (config.sheet === 'ratio') targetSheet = hospital.data.ratio;
+
+                const sheetData = findHospitalInSheet(targetSheet, code);
+                if (sheetData) {
+                    if (config.resultKey) result = getValue(sheetData.row, sheetData.headers, config.resultKey);
+                    if (config.meanKey) mean = getValue(sheetData.row, sheetData.headers, config.meanKey);
+                    if (config.diffKey) diff = getValue(sheetData.row, sheetData.headers, config.diffKey);
+                }
+            } else {
+                // Default to main sheet for result if resultKey exists
+                if (config.resultKey) {
+                    result = getValue(mainRow, mainHeaders, config.resultKey);
+                }
+            }
+
+            return { score, result, mean, diff, unit: config.unit };
+        }
+
+        function renderTable() {
+            const theadRow = document.getElementById('headerRow');
+            const tbody = document.getElementById('tableBody');
+
+            // 1. Reset Headers (Keep first 2)
+            while (theadRow.children.length > 2) {
+                theadRow.removeChild(theadRow.lastChild);
+            }
+
+            // 2. Add Hospital Headers
+            selectedHospitals.forEach((h, index) => {
+                const th = document.createElement('th');
+                th.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:1.1em;">${h.name}</span>
+                       
+                        <button class="remove-btn" onclick="removeHospital(${index})">ลบ</button>
+                    </div>
+                `;
+                th.style.minWidth = '120px';
+
+                // Drag and Drop Attributes
+                th.draggable = true;
+                th.classList.add('draggable');
+                th.dataset.index = index;
+
+                // Drag Events
+                th.addEventListener('dragstart', handleDragStart);
+                th.addEventListener('dragover', handleDragOver);
+                th.addEventListener('drop', handleDrop);
+                th.addEventListener('dragend', handleDragEnd);
+
+                theadRow.appendChild(th);
+            });
+
+            // 3. Render Body
+            tbody.innerHTML = '';
+
+            rowConfig.forEach(row => {
+                const tr = document.createElement('tr');
+
+                // Style based on type
+                if (row.type === 'section') tr.className = 'section-header';
+                else if (row.type === 'header') tr.className = 'sub-header';
+
+                // Col 1: Item Name
+                const tdName = document.createElement('td');
+                tdName.style.paddingLeft = row.id.split('.').length > 2 ? (row.id.split('.').length * 10 + 'px') : '15px';
+                tdName.textContent = row.label;
+                tr.appendChild(tdName);
+
+                // Col 2: Full Score
+                const tdFull = document.createElement('td');
+                tdFull.className = 'full-score';
+                tdFull.textContent = row.full !== undefined ? row.full.toFixed(1) : '';
+                tr.appendChild(tdFull);
+
+                // Col 3+: Hospital Data
+                selectedHospitals.forEach(h => {
+                    const td = document.createElement('td');
+                    td.className = 'score-cell';
+
+                    if (row.type === 'section') {
+                        if (row.key) {
+                            const data = getCellData(h, row);
+                            td.textContent = data.score || '';
+                        }
+                    } else {
+                        const data = getCellData(h, row);
+
+                        // Display Score
+                        td.textContent = data.score || '0';
+                        if (isZero(data.score)) td.classList.add('zero');
+
+                        // Tooltip Content
+                        if (data.result || data.mean || data.diff) {
+                            const tooltip = document.createElement('div');
+                            tooltip.className = 'custom-tooltip';
+
+                            let html = `<div style="font-weight:bold; margin-bottom:5px; border-bottom:1px solid #777; padding-bottom:3px;">${row.label}</div>`;
+
+                            if (data.result) html += `<div class="tooltip-row"><span class="tooltip-label">ผลลัพธ์:</span> <span class="tooltip-val">${formatNumber(data.result)} ${data.unit || ''}</span></div>`;
+                            if (data.mean) html += `<div class="tooltip-row"><span class="tooltip-label">ค่ากลาง:</span> <span class="tooltip-val">${formatNumber(data.mean)}</span></div>`;
+                            if (data.diff) html += `<div class="tooltip-row"><span class="tooltip-label">ผลต่าง:</span> <span class="tooltip-val">${formatNumber(data.diff)}</span></div>`;
+
+                            tooltip.innerHTML = html;
+                            td.appendChild(tooltip);
+                        }
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Drag and Drop Handlers ---
+        function handleDragStart(e) {
+            draggedColIndex = parseInt(this.dataset.index);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            const targetIndex = parseInt(this.dataset.index);
+
+            if (draggedColIndex !== null && draggedColIndex !== targetIndex) {
+                // Reorder array
+                const item = selectedHospitals.splice(draggedColIndex, 1)[0];
+                selectedHospitals.splice(targetIndex, 0, item);
+                renderTable();
+            }
+            return false;
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            draggedColIndex = null;
+        }
+
+        async function addHospital(code) {
+            // Check if already exists
+            if (selectedHospitals.find(h => h.code === code)) {
+                // alert('โรงพยาบาลนี้ถูกเพิ่มไปแล้ว');
+                return; // Silent return for bulk add
+            }
+
+            try {
+                const data = await fetchHospitalDetails(code);
+
+                // Extract basic info
+                if (data.main && data.main.length >= 2) {
+                    const headers = data.main[0];
+                    const row = data.main[1];
+                    const name = getValue(row, headers, 'โรงพยาบาล');
+
+                    selectedHospitals.push({
+                        code: code,
+                        name: name,
+                        data: data
+                    });
+
+                    renderTable();
+                    document.getElementById('searchInput').value = '';
+                } else {
+                    console.warn('ไม่พบข้อมูลรายละเอียดสำหรับ ' + code);
+                }
+            } catch (e) {
+                console.error('Error adding hospital:', e);
+            }
+        }
+
+        async function addAllByProvince() {
+            const province = document.getElementById('provinceInput').value.trim();
+            if (!province) {
+                alert('กรุณาระบุชื่อจังหวัด');
+                return;
+            }
+
+            // Strictly filter by province column (p)
+            const matches = hospitalList.filter(h =>
+                h.p && h.p.toString().includes(province)
+            );
+
+            if (matches.length === 0) {
+                // Check if we even have province data loaded
+                const hasProvinceData = hospitalList.some(h => h.p);
+                if (!hasProvinceData) {
+                    alert('ไม่พบข้อมูลจังหวัดในระบบ (กรุณาอัปเดต Google Apps Script ให้ส่งค่า p มาด้วย)');
+                } else {
+                    alert('ไม่พบโรงพยาบาลในจังหวัดที่ระบุ');
+                }
+                return;
+            }
+
+            if (matches.length > 20) {
+                if (!confirm(`พบ ${matches.length} โรงพยาบาล การโหลดอาจใช้เวลานาน ยืนยันหรือไม่?`)) return;
+            }
+
+            showLoading();
+            for (const h of matches) {
+                await addHospital(h.c);
+            }
+            hideLoading();
+        }
+
+        function removeHospital(index) {
+            selectedHospitals.splice(index, 1);
+            renderTable();
+        }
+
+        // --- Initialization ---
+        window.onload = async () => {
+            try {
+                hospitalList = await fetchHospitalList();
+                const searchInput = document.getElementById('searchInput');
+                searchInput.disabled = false;
+
+                // Search Logic
+                searchInput.addEventListener('input', (e) => {
+                    const val = e.target.value.toLowerCase();
+                    const suggestions = document.getElementById('suggestions');
+
+                    if (val.length < 2) {
+                        suggestions.style.display = 'none';
+                        return;
+                    }
+
+                    const matches = hospitalList.filter(h =>
+                        (h.n && h.n.toString().toLowerCase().includes(val)) ||
+                        (h.c && h.c.toString().includes(val)) ||
+                        (h.p && h.p.toString().includes(val))
+                    ).slice(0, 10);
+
+                    if (matches.length > 0) {
+                        suggestions.innerHTML = matches.map(h => `
+                            <div class="suggestion-item" onclick="selectSuggestion('${h.c}')">
+                                <div>${h.n}</div>
+                                <div style="font-size:0.8em; color:#888;">
+                                    ${h.p ? h.p + ' | ' : ''}${h.c}
+                                </div>
+                            </div>
+                        `).join('');
+                        suggestions.style.display = 'block';
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
+                });
+
+                // Close suggestions on click outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.search-box')) {
+                        document.getElementById('suggestions').style.display = 'none';
+                    }
+                });
+
+            } catch (e) {
+                alert('Failed to load hospital list');
+            }
+        };
+
+        window.selectSuggestion = (code) => {
+            document.getElementById('suggestions').style.display = 'none';
+            addHospital(code);
+        };
+    </script>
+</body>
+
+</html>
