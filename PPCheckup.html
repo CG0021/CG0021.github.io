@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ตรวจสอบสิทธิประโยชน์การสร้างเสริมสุขภาพและป้องกันโรค</title>
+    <title>ตรวจสอบสิทธิประโยชน์การสร้างเสริมสุขภาพและป้องกันโรค <br></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
@@ -118,8 +118,18 @@
                     <div>
                         <h1 class="text-xl md:text-2xl font-bold">ตรวจสอบสิทธิประโยชน์</h1>
                         <p class="text-xs md:text-sm text-blue-100">บริการสร้างเสริมสุขภาพและป้องกันโรค
+                            <br> ได้รับการสนับสนุนโดย หลักสูตร การเงินการคลัง CFO CCO
+                            สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม
                         </p>
                     </div>
+                </div>
+                <div class="hidden md:block text-right text-xs text-blue-100 leading-snug">
+                    <p class="text-gray-200">พัฒนาโดย&nbsp;
+                        <span class="font-semibold text-white text-lg">ดร.นพ.ชุมพล นุชผ่อง</span>
+                    </p>
+                    <p>นายแพทย์เชี่ยวชาญ เวชกรรมป้องกัน</p>
+                    <p>กองเศรษฐกิจสุขภาพและหลักประกันสุขภาพ</p>
+                    <p>สำนักงานปลัดกระทรวงสาธารณสุข</p>
                 </div>
             </div>
         </div>
@@ -255,9 +265,9 @@
             const script = document.createElement('script');
             // เพิ่ม callback function และ timestamp เพื่อป้องกัน cache
             script.src = `${webAppUrl}?callback=loadData&t=${new Date().getTime()}`;
-            
+
             // Handle loading errors
-            script.onerror = function() {
+            script.onerror = function () {
                 console.error('Script loading error.');
                 servicesContainer.innerHTML = `
                     <div class="text-center py-10 text-red-600 bg-red-50 rounded-lg border border-red-200">
@@ -267,7 +277,7 @@
                     </div>
                 `;
             };
-            
+
             document.body.appendChild(script);
         });
 
