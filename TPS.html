@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบค้นหาชื่อโรงพยาบาล</title>
+    <title>ระบบวิเคราะห์และประเมินประสิทธิภาพ TPS</title>
     <!-- Chart.js removed as per request -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap');
@@ -498,14 +498,52 @@
             font-size: 0.85em;
         }
 
+        /* General Table Improvements */
+        .criteria-table th {
+            padding: 12px 8px;
+            /* More breathing room */
+            font-size: 0.95em;
+            /* Larger font */
+        }
+
+        .criteria-table td {
+            padding: 10px 8px;
+            /* More breathing room */
+            font-size: 1em;
+        }
+
+        .analysis-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 900px) {
+            .credit-box {
+                position: static;
+                text-align: center;
+                margin-top: 15px;
+            }
+
+            .analysis-container {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
         @media (max-width: 1200px) {
             .criteria-table {
-                font-size: 0.8em;
+                font-size: 0.9em;
+                /* Increased from 0.8em */
             }
 
             .criteria-table th,
             .criteria-table td {
-                padding: 6px 4px;
+                padding: 8px 6px;
+                /* Increased padding */
             }
         }
 
@@ -525,26 +563,246 @@
 
             .table-container {
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
-            .criteria-table {
-                min-width: 800px;
+            /* Mobile adjustments for Main Criteria Table */
+            .criteria-table:not(#analysisTable) {
+                min-width: 100%;
+                border: none;
             }
-        }
 
-        .analysis-container {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            margin-top: 25px;
-            margin-bottom: 10px;
-        }
+            .criteria-table:not(#analysisTable) thead {
+                display: none;
+            }
 
-        @media (max-width: 900px) {
-            .analysis-container {
-                display: flex;
+            .criteria-table:not(#analysisTable) tbody tr {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                background: white;
+                margin-bottom: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 12px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+                gap: 8px;
+                grid-template-areas:
+                    "item item"
+                    "mean full"
+                    "result actual"
+                    "diff diff";
+            }
+
+            .criteria-table:not(#analysisTable) td {
+                border: none;
+                padding: 4px;
+                font-size: 0.95em;
+            }
+
+            /* Hide empty cells */
+            .criteria-table:not(#analysisTable) td:empty {
+                display: none;
+            }
+
+            /* Line 1: Item (Col 1) */
+            .criteria-table:not(#analysisTable) td:nth-child(1) {
+                grid-area: item;
+                font-weight: 600;
+                color: #2c3e50;
+                border-bottom: 1px solid #f0f0f0;
+                margin-bottom: 8px;
+                padding-bottom: 8px;
+                font-size: 1.1em;
+            }
+
+            /* Line 2: Mean (Col 6) | Full (Col 2) */
+            .criteria-table:not(#analysisTable) td:nth-child(6) {
+                grid-area: mean;
+                text-align: left;
+            }
+
+            .criteria-table:not(#analysisTable) td:nth-child(2) {
+                grid-area: full;
+                text-align: right;
+            }
+
+            /* Line 3: Result (Col 4) | Actual (Col 3) */
+            .criteria-table:not(#analysisTable) td:nth-child(4) {
+                grid-area: result;
+                text-align: left;
+            }
+
+            .criteria-table:not(#analysisTable) td:nth-child(3) {
+                grid-area: actual;
+                text-align: right;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            /* Line 4: Diff (Col 7) */
+            .criteria-table:not(#analysisTable) td:nth-child(7) {
+                grid-area: diff;
+                text-align: left;
+                margin-top: 4px;
+                border-top: 1px dashed #f0f0f0;
+                padding-top: 8px;
+            }
+
+            /* Labels */
+            .criteria-table:not(#analysisTable) td:nth-child(2)::before {
+                content: "เต็ม: ";
+                color: #7f8c8d;
+                font-size: 0.9em;
+            }
+
+            .criteria-table:not(#analysisTable) td:nth-child(3)::before {
+                content: "ได้: ";
+                color: #7f8c8d;
+                font-size: 0.9em;
+            }
+
+            .criteria-table:not(#analysisTable) td:nth-child(4)::before {
+                content: "ผล: ";
+                color: #95a5a6;
+                font-size: 0.9em;
+            }
+
+            .criteria-table:not(#analysisTable) td:nth-child(6)::before {
+                content: "ค่ากลาง: ";
+                color: #95a5a6;
+                font-size: 0.9em;
+            }
+
+            .criteria-table:not(#analysisTable) td:nth-child(7)::before {
+                content: "ผลต่าง: ";
+                color: #95a5a6;
+                font-size: 0.9em;
+            }
+
+            /* Hide Unit (Col 5) */
+            .criteria-table:not(#analysisTable) td:nth-child(5) {
+                display: none;
+            }
+
+            /* Special handling for Header Rows (criteria-header) */
+            .criteria-table:not(#analysisTable) tr.criteria-header {
+                grid-template-areas:
+                    "item item"
+                    "full actual";
+                padding-bottom: 8px;
+            }
+
+            /* Hide Mean, Result, Diff for headers */
+            .criteria-table:not(#analysisTable) tr.criteria-header td:nth-child(4),
+            .criteria-table:not(#analysisTable) tr.criteria-header td:nth-child(6),
+            .criteria-table:not(#analysisTable) tr.criteria-header td:nth-child(7) {
+                display: none !important;
+            }
+
+            /* Adjust alignment for headers */
+            .criteria-table:not(#analysisTable) tr.criteria-header td:nth-child(2) {
+                text-align: left;
+            }
+
+            .criteria-table:not(#analysisTable) tr.criteria-header td:nth-child(3) {
+                text-align: right;
+            }
+
+
+            /* Mobile adjustments for Analysis Table - Stacked Layout */
+            #analysisTable thead {
+                display: none;
+            }
+
+            #analysisTable tbody tr {
+                display: block;
+                margin-bottom: 20px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+                background: white;
+            }
+
+            #analysisTable td {
+                display: block;
+                width: 100% !important;
+                text-align: left;
+                border-bottom: 1px solid #f0f0f0;
+                padding: 12px 15px;
+            }
+
+            #analysisTable td:last-child {
+                border-bottom: none;
+            }
+
+            /* Hide Result (2) and Criteria (3) */
+            #analysisTable th:nth-child(2),
+            #analysisTable td:nth-child(2),
+            #analysisTable th:nth-child(3),
+            #analysisTable td:nth-child(3) {
+                display: none;
+            }
+
+            /* Item (1) */
+            #analysisTable td:nth-child(1) {
+                background-color: #f8f9fa;
+                color: #2c3e50;
+                font-weight: bold;
+                font-size: 1.1em;
+                border-left: 5px solid #e67e22;
+                border-radius: 8px 8px 0 0;
+            }
+
+            /* Solution (4) */
+            #analysisTable td:nth-child(4) {
+                color: #34495e;
+                line-height: 1.6;
+            }
+
+            #analysisTable td:nth-child(4)::before {
+                content: "แนวทางแก้ไข:";
+                font-weight: 600;
+                color: #e67e22;
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            /* Responsible (5) */
+            #analysisTable td:nth-child(5) {
+                display: block;
+                color: #7f8c8d;
+                font-size: 0.95em;
+                background-color: #fafafa;
+                border-radius: 0 0 8px 8px;
+            }
+
+            #analysisTable td:nth-child(5)::before {
+                content: "ผู้รับผิดชอบ: ";
+                font-weight: 600;
+                color: #34495e;
+                display: inline-block;
+                margin-right: 5px;
+            }
+
+            #analysisTable {
+                min-width: 100%;
+                border: none;
+            }
+
+            /* Button adjustments for mobile */
+            button {
+                width: 100%;
+                white-space: normal;
+                padding: 12px 15px;
+            }
+
+            .button-group {
                 flex-direction: column;
-                gap: 15px;
+            }
+
+            .analysis-container button {
+                width: 100%;
+                font-size: 1em !important;
             }
         }
     </style>
@@ -553,7 +811,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>ระบบวิเคราะห์และการประเมินประสิทธิภาพ TPS</h1>
+            <h1>ระบบวิเคราะห์และประเมินประสิทธิภาพ TPS</h1>
             <p>ได้รับการสนับสนุนโดย หลักสูตร การเงินการคลัง CFO CCO สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</p>
             <div class="credit-box">
                 ออกแบบและพัฒนาโดย <br>
@@ -991,7 +1249,7 @@
                                     </tr>
                                     
                                     <!-- 1. ตัวชี้วัดกระบวนการ -->
-                                    <tr>
+                                    <tr class="criteria-header">
                                         <td><strong>1. ตัวชี้วัดกระบวนการ (Process Indicators)</strong></td>
                                         <td></td>
                                         <td></td>
@@ -1002,7 +1260,7 @@
                                     </tr>
                                     
                                     <!-- 1.1 -->
-                                    <tr class="sub-criteria">
+                                    <tr class="sub-criteria criteria-header">
                                         <td>1.1 การบริหารแผนทางการเงินเปรียบเทียบผลการดำเนินงานผลต่าง</td>
                                         <td class="full-score">2.0</td>
                                         <td class="actual-score ${isZero(score1_1) ? 'zero' : ''}">${score1_1 || '0'}</td>
@@ -1035,7 +1293,7 @@
                                     </tr>
                                     
                                     <!-- 1.2 -->
-                                    <tr class="sub-criteria">
+                                    <tr class="sub-criteria criteria-header">
                                         <td>1.2 การบริหารสินทรัพย์หมุนเวียนและหนี้สินหมุนเวียน (3 คะแนน)</td>
                                         <td class="full-score">3.0</td>
                                         <td class="actual-score ${isZero(score1_2) ? 'zero' : ''}">${score1_2 || '0'}</td>
@@ -1090,7 +1348,7 @@
                                     </tr>
                                     
                                     <!-- 1.3 -->
-                                    <tr class="sub-criteria">
+                                    <tr class="sub-criteria criteria-header">
                                         <td>1.3 การบริหารจัดการ</td>
                                         <td class="full-score">5.0</td>
                                         <td class="actual-score ${isZero(score1_3_1) && isZero(score1_3_2) && isZero(score1_3_3) ? 'zero' : ''}">${(parseFloat(score1_3_1 || 0) + parseFloat(score1_3_2 || 0) + parseFloat(score1_3_3 || 0)).toFixed(1)}</td>
@@ -1101,7 +1359,7 @@
                                     </tr>
                                     
                                     <!-- 1.3.1 -->
-                                    <tr class="sub-sub-criteria">
+                                    <tr class="sub-sub-criteria criteria-header">
                                         <td>1.3.1 การบริหารต้นทุนและค่าใช้จ่าย (2 คะแนน)</td>
                                         <td class="full-score">2.0</td>
                                         <td class="actual-score ${isZero(score1_3_1) ? 'zero' : ''}">${score1_3_1 || '0'}</td>
@@ -1189,7 +1447,7 @@
                                     </tr>
                                     
                                     <!-- 1.3.3 -->
-                                    <tr class="sub-sub-criteria">
+                                    <tr class="sub-sub-criteria criteria-header">
                                         <td>1.3.3 ผลผลิต (Productivity) เป็นที่ยอมรับ</td>
                                         <td class="full-score">2.0</td>
                                         <td class="actual-score ${isZero(score1_3_3) ? 'zero' : ''}">${score1_3_3 || '0'}</td>
@@ -1223,7 +1481,7 @@
                                     </tr>
                                     
                                     <!-- 2. ตัวชี้วัดผลลัพท์การดำเนินงาน -->
-                                    <tr>
+                                    <tr class="criteria-header">
                                         <td><strong>2. ตัวชี้วัดผลลัพท์การดำเนินงาน</strong></td>
                                         <td class="full-score">5.0</td>
                                         <td class="actual-score ${isZero(score2) ? 'zero' : ''}">${score2 || '0'}</td>
@@ -1234,7 +1492,7 @@
                                     </tr>
                                     
                                     <!-- 2.1 -->
-                                    <tr class="sub-criteria">
+                                    <tr class="sub-criteria criteria-header">
                                         <td>2.1 ความสามารถในการทำกำไร</td>
                                         <td class="full-score">3.0</td>
                                         <td class="actual-score ${isZero(score2_1) ? 'zero' : ''}">${score2_1 || '0'}</td>
@@ -1278,7 +1536,7 @@
                                     </tr>
                                     
                                     <!-- 2.2 -->
-                                    <tr class="sub-criteria">
+                                    <tr class="sub-criteria criteria-header">
                                         <td>2.2 การวัดสภาพคล่องทางการเงิน</td>
                                         <td class="full-score">2.0</td>
                                         <td class="actual-score ${isZero(score2_2) ? 'zero' : ''}">${score2_2 || '0'}</td>
@@ -1350,10 +1608,10 @@
                                 <table class="criteria-table" id="analysisTable">
                                     <thead>
                                         <tr>
-                                            <th style="width: 20%; background: #e67e22;">รายการ</th>
-                                            <th style="width: 10%; background: #e67e22;">ผล</th>
-                                            <th style="width: 15%; background: #e67e22;">เกณฑ์</th>
-                                            <th style="width: 50%; background: #e67e22;">แนวทางแก้ไข</th>
+                                            <th style="width: 15%; background: #e67e22;">รายการ</th>
+                                            <th style="width: 5%; background: #e67e22;">ผล</th>
+                                            <th style="width: 10%; background: #e67e22;">เกณฑ์</th>
+                                            <th style="width: 60%; background: #e67e22;">แนวทางแก้ไข</th>
                                             <th style="width: 10%; background: #e67e22;">ผู้รับผิดชอบ</th>
                                         </tr>
                                     </thead>
@@ -1531,6 +1789,11 @@
                     });
 
                     if (match) {
+                        // ตรวจสอบว่ามีข้อมูลแนวทางแก้ไขหรือไม่
+                        if (!match.solution || match.solution.toString().trim() === '') {
+                            return; // ข้ามรายการนี้ถ้าไม่มีแนวทางแก้ไข
+                        }
+
                         count++;
                         processedNames.add(item.name);
 
