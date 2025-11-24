@@ -294,6 +294,30 @@
             overflow: auto;
             border: 1px solid #e9ecef;
             border-radius: 8px;
+            /* Ensure scrollbar is visible for touch devices */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Custom Scrollbar for visibility */
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #bdc3c7;
+            border-radius: 4px;
+            border: 2px solid #f1f1f1;
+            /* Creates padding around thumb */
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #95a5a6;
         }
 
         .criteria-table {
@@ -829,9 +853,7 @@
                 <button id="searchBtn">ค้นหา</button>
                 <div class="suggestions" id="suggestions"></div>
             </div>
-            <div class="button-group">
-                <button id="resetBtn">ล้างการค้นหา</button>
-            </div>
+
         </div>
 
         <div class="results-section">
@@ -1855,17 +1877,7 @@
 
                 // ปุ่มแสดงข้อมูลทั้งหมด removed
 
-                // ปุ่มล้างค่า
-                document.getElementById('resetBtn').addEventListener('click', () => {
-                    document.getElementById('searchInput').value = '';
-                    document.getElementById('suggestions').style.display = 'none';
-                    document.getElementById('results').innerHTML = `
-                        <div class="hospital-card">
-                            <h3 style="color: #2c3e50;">กรุณาใช้ช่องค้นหาด้านบนเพื่อค้นหาโรงพยาบาล</h3>
-                        </div>
-                    `;
-                    window.hospitalData = null;
-                });
+
 
                 // ปุ่ม Enter
                 document.getElementById('searchInput').addEventListener('keypress', (e) => {
