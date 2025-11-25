@@ -40,6 +40,35 @@
             position: relative;
         }
 
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-btn.active {
+            background-color: #2980b9;
+            font-weight: 600;
+            cursor: default;
+        }
+
         .credit-box {
             position: absolute;
             top: 20px;
@@ -837,6 +866,12 @@
         <div class="header">
             <h1>ระบบวิเคราะห์และประเมินประสิทธิภาพ TPS</h1>
             <p>ได้รับการสนับสนุนโดย หลักสูตร การเงินการคลัง CFO CCO สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</p>
+            
+            <div class="nav-buttons">
+                <a href="https://cg0021.github.io/TPS.html" class="nav-btn active">ระบบวิเคราะห์ TPS</a>
+                <a href="https://cg0021.github.io/TPS_Compare.html" class="nav-btn">ระบบเปรียบเทียบ TPS</a>
+            </div>
+
             <div class="credit-box">
                 ออกแบบและพัฒนาโดย <br>
                 <div class="credit-name">ดร.นพ.ชุมพล นุชผ่อง</div>
@@ -1153,7 +1188,8 @@
             const score1_1 = getValue(row, headers, 'คะแนน 1.1');
             const score1_1_1 = getValue(row, headers, 'P_รายได้');
             const score1_1_2 = getValue(row, headers, 'P_ค่าใช้จ่าย');
-
+            const score1_1_1_รายได้ = getValue(row, headers, 'รวมรายได้_ร้อยละ');
+            const score1_1_2_ค่าใช้จ่าย = getValue(row, headers, 'รวมค่าใช้จ่าย_ร้อยละ');
             const score1_2 = getValue(row, headers, 'คะแนน1.2');
             const score1_3_1 = getValue(row, headers, 'คะแนน 1.3.1');
             const score1_3_2 = getValue(row, headers, '1.3.2 ตรวจสอบงบทดลอง');
@@ -1286,6 +1322,8 @@
                                         <td>1.1 การบริหารแผนทางการเงินเปรียบเทียบผลการดำเนินงานผลต่าง</td>
                                         <td class="full-score">2.0</td>
                                         <td class="actual-score ${isZero(score1_1) ? 'zero' : ''}">${score1_1 || '0'}</td>
+                                        
+
                                         <td class="result-value"></td>
                                         <td class="unit-value"></td>
                                         <td class="group-value"></td>
@@ -1297,7 +1335,8 @@
                                         <td>1.1.1 มิติรายได้ ± ไม่เกิน 5 %</td>
                                         <td class="full-score">1.0</td>
                                         <td class="actual-score ${isZero(score1_1_1) ? 'zero' : ''}">${score1_1_1 || '0'}</td>
-                                        <td class="result-value"></td>
+                                        <td class="result-value ${isZero(score1_1_1) ? 'zero' : ''}">${score1_1_1_รายได้ || '0'}</td>
+                                       
                                         <td class="unit-value">%</td>
                                         <td class="group-value"></td>
                                         <td class="diff-value"></td>
@@ -1308,7 +1347,7 @@
                                         <td>1.1.2 มิติค่าใช้จ่าย ± ไม่เกิน 5 %</td>
                                         <td class="full-score">1.0</td>
                                         <td class="actual-score ${isZero(score1_1_2) ? 'zero' : ''}">${score1_1_2 || '0'}</td>
-                                        <td class="result-value"></td>
+                                        <td class="result-value ${isZero(score1_1_2) ? 'zero' : ''}">${score1_1_2_ค่าใช้จ่าย || '0'}</td>
                                         <td class="unit-value">%</td>
                                         <td class="group-value"></td>
                                         <td class="diff-value"></td>
@@ -1382,7 +1421,7 @@
                                     
                                     <!-- 1.3.1 -->
                                     <tr class="sub-sub-criteria criteria-header">
-                                        <td>1.3.1 การบริหารต้นทุนและค่าใช้จ่าย (2 คะแนน)</td>
+                                        <td style="padding-left: 20px;">1.3.1 การบริหารต้นทุนและค่าใช้จ่าย (2 คะแนน)</td>
                                         <td class="full-score">2.0</td>
                                         <td class="actual-score ${isZero(score1_3_1) ? 'zero' : ''}">${score1_3_1 || '0'}</td>
                                         <td class="result-value"></td>
