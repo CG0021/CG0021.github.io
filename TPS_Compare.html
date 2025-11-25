@@ -56,26 +56,15 @@
             margin: 0;
         }
 
-        .header-subtitle {
-            font-size: 0.85em;
-            opacity: 0.9;
-        }
-
-        /* Search Box in Header */
-        .search-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
 
         .search-box {
             position: relative;
-            width: 300px;
+            width: 400px;
         }
 
         .province-box {
             position: relative;
-            width: 200px;
+            width: 350px;
             display: flex;
             gap: 5px;
         }
@@ -124,6 +113,35 @@
             background: #2ecc71;
         }
 
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-btn.active {
+            background-color: #2980b9;
+            font-weight: 600;
+            cursor: default;
+        }
+
         .suggestions {
             position: absolute;
             top: 100%;
@@ -166,19 +184,7 @@
 
         th,
         td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e9ecef;
-            border-right: 1px solid #e9ecef;
-            vertical-align: middle;
-        }
-
-        /* Sticky Headers */
-        thead th {
-            position: sticky;
-            top: 0;
-            background: #2c3e50;
-            color: white;
-            z-index: 20;
+            z-index: 1;
             font-weight: 500;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -206,15 +212,24 @@
             position: sticky;
             left: 0;
             background: white;
-            z-index: 10;
+            z-index: 30;
             border-right: 2px solid #bdc3c7;
             min-width: 350px;
             max-width: 350px;
+            text-align: left;
+        }
+
+        /* Make Table Header Sticky */
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #2c3e50;
+            color: white;
+            z-index: 50;
         }
 
         thead th:first-child {
-            z-index: 30;
-            background: #2c3e50;
+            z-index: 60; /* Higher z-index for the top-left corner */
         }
 
         /* Hospital Columns */
@@ -356,6 +371,16 @@
                 transform: rotate(360deg);
             }
         }
+
+        .spinner-small {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
@@ -367,9 +392,15 @@
                 <div class="header-subtitle">เปรียบเทียบข้อมูลหลายโรงพยาบาล</div>
             </div>
 
+            <div class="nav-buttons">
+                <a href="https://cg0021.github.io/TPS.html" class="nav-btn">ระบบวิเคราะห์ TPS</a>
+                <a href="https://cg0021.github.io/TPS_Compare.html" class="nav-btn active">ระบบเปรียบเทียบ TPS</a>
+            </div>
+
             <div class="search-group">
                 <div class="province-box">
-                    <input type="text" id="provinceInput" placeholder="ระบุจังหวัด (ต้องตรงกับข้อมูล)">
+                    <input type="text" id="provinceInput" placeholder="ระบุจังหวัด">
+                    <div class="suggestions" id="provinceSuggestions"></div>
                     <button class="btn-add-all" onclick="addAllByProvince()">เพิ่มทั้งจังหวัด</button>
                 </div>
                 <div class="search-box">
@@ -496,7 +527,7 @@
         }
 
         function isZero(val) {
-            if (!val) return false;
+            if (val === null || val === undefined || val === '') return false;
             const num = parseFloat(val);
             return !isNaN(num) && num === 0;
         }
@@ -541,18 +572,21 @@
 
         async function fetchHospitalDetails(code) {
             return new Promise((resolve, reject) => {
-                showLoading();
+                // showLoading(); // Removed global loading
                 const callbackName = 'cb_data_' + Date.now();
                 window[callbackName] = (data) => {
                     delete window[callbackName];
                     document.body.removeChild(script);
-                    hideLoading();
+                    // hideLoading(); // Removed global loading
                     if (data.error) reject(data.message);
                     else resolve(data);
                 };
                 const script = document.createElement('script');
                 script.src = `https://script.google.com/macros/s/AKfycbyO26iU11w8EnwnWIz3d1S5uEYmBbUrzIgK3PXooMajmblDAppEuPAqsykGN7XY8uFB/exec?action=data&code=${code}&callback=${callbackName}`;
-                script.onerror = () => { hideLoading(); reject('Load failed'); };
+                script.onerror = () => {
+                    // hideLoading(); 
+                    reject('Load failed');
+                };
                 document.body.appendChild(script);
             });
         }
@@ -620,25 +654,38 @@
             // 2. Add Hospital Headers
             selectedHospitals.forEach((h, index) => {
                 const th = document.createElement('th');
-                th.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center;">
-                        <span style="font-size:1.1em;">${h.name}</span>
-                       
-                        <button class="remove-btn" onclick="removeHospital(${index})">ลบ</button>
-                    </div>
-                `;
+
+                let headerContent = '';
+                if (h.loading) {
+                    headerContent = `
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+                            <div class="spinner-small"></div>
+                            <span style="font-size:1.1em; color:#7f8c8d;">${h.name || 'กำลังโหลด...'}</span>
+                            <button class="remove-btn" onclick="removeHospital(${index})">ลบ</button>
+                        </div>
+                    `;
+                } else {
+                    headerContent = `
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <span style="font-size:1.1em;">${h.name}</span>
+                            <button class="remove-btn" onclick="removeHospital(${index})">ลบ</button>
+                        </div>
+                    `;
+                }
+
+                th.innerHTML = headerContent;
                 th.style.minWidth = '120px';
 
-                // Drag and Drop Attributes
-                th.draggable = true;
-                th.classList.add('draggable');
-                th.dataset.index = index;
-
-                // Drag Events
-                th.addEventListener('dragstart', handleDragStart);
-                th.addEventListener('dragover', handleDragOver);
-                th.addEventListener('drop', handleDrop);
-                th.addEventListener('dragend', handleDragEnd);
+                // Drag and Drop Attributes (only if not loading)
+                if (!h.loading) {
+                    th.draggable = true;
+                    th.classList.add('draggable');
+                    th.dataset.index = index;
+                    th.addEventListener('dragstart', handleDragStart);
+                    th.addEventListener('dragover', handleDragOver);
+                    th.addEventListener('drop', handleDrop);
+                    th.addEventListener('dragend', handleDragEnd);
+                }
 
                 theadRow.appendChild(th);
             });
@@ -670,31 +717,35 @@
                     const td = document.createElement('td');
                     td.className = 'score-cell';
 
-                    if (row.type === 'section') {
-                        if (row.key) {
-                            const data = getCellData(h, row);
-                            td.textContent = data.score || '';
-                        }
+                    if (h.loading) {
+                        td.innerHTML = '<div class="spinner-small"></div>';
                     } else {
-                        const data = getCellData(h, row);
+                        if (row.type === 'section') {
+                            if (row.key) {
+                                const data = getCellData(h, row);
+                                td.textContent = data.score || '';
+                            }
+                        } else {
+                            const data = getCellData(h, row);
 
-                        // Display Score
-                        td.textContent = data.score || '0';
-                        if (isZero(data.score)) td.classList.add('zero');
+                            // Display Score
+                            td.textContent = data.score || '0';
+                            if (isZero(data.score)) td.classList.add('zero');
 
-                        // Tooltip Content
-                        if (data.result || data.mean || data.diff) {
-                            const tooltip = document.createElement('div');
-                            tooltip.className = 'custom-tooltip';
+                            // Tooltip Content
+                            if (data.result || data.mean || data.diff) {
+                                const tooltip = document.createElement('div');
+                                tooltip.className = 'custom-tooltip';
 
-                            let html = `<div style="font-weight:bold; margin-bottom:5px; border-bottom:1px solid #777; padding-bottom:3px;">${row.label}</div>`;
+                                let html = `<div style="font-weight:bold; margin-bottom:5px; border-bottom:1px solid #777; padding-bottom:3px;">${row.label}</div>`;
 
-                            if (data.result) html += `<div class="tooltip-row"><span class="tooltip-label">ผลลัพธ์:</span> <span class="tooltip-val">${formatNumber(data.result)} ${data.unit || ''}</span></div>`;
-                            if (data.mean) html += `<div class="tooltip-row"><span class="tooltip-label">ค่ากลาง:</span> <span class="tooltip-val">${formatNumber(data.mean)}</span></div>`;
-                            if (data.diff) html += `<div class="tooltip-row"><span class="tooltip-label">ผลต่าง:</span> <span class="tooltip-val">${formatNumber(data.diff)}</span></div>`;
+                                if (data.result) html += `<div class="tooltip-row"><span class="tooltip-label">ผลลัพธ์:</span> <span class="tooltip-val">${formatNumber(data.result)} ${data.unit || ''}</span></div>`;
+                                if (data.mean) html += `<div class="tooltip-row"><span class="tooltip-label">ค่ากลาง:</span> <span class="tooltip-val">${formatNumber(data.mean)}</span></div>`;
+                                if (data.diff) html += `<div class="tooltip-row"><span class="tooltip-label">ผลต่าง:</span> <span class="tooltip-val">${formatNumber(data.diff)}</span></div>`;
 
-                            tooltip.innerHTML = html;
-                            td.appendChild(tooltip);
+                                tooltip.innerHTML = html;
+                                td.appendChild(tooltip);
+                            }
                         }
                     }
 
@@ -736,35 +787,53 @@
             draggedColIndex = null;
         }
 
-        async function addHospital(code) {
+        async function addHospital(code, knownName = '') {
             // Check if already exists
             if (selectedHospitals.find(h => h.code === code)) {
-                // alert('โรงพยาบาลนี้ถูกเพิ่มไปแล้ว');
-                return; // Silent return for bulk add
+                return;
             }
+
+            // 1. Add placeholder (Loading State)
+            const placeholder = {
+                code: code,
+                name: knownName || code,
+                loading: true,
+                data: null
+            };
+            selectedHospitals.push(placeholder);
+            renderTable();
 
             try {
                 const data = await fetchHospitalDetails(code);
 
-                // Extract basic info
-                if (data.main && data.main.length >= 2) {
-                    const headers = data.main[0];
-                    const row = data.main[1];
-                    const name = getValue(row, headers, 'โรงพยาบาล');
+                // 2. Update with real data
+                const target = selectedHospitals.find(h => h.code === code);
+                if (target) {
+                    if (data.main && data.main.length >= 2) {
+                        const headers = data.main[0];
+                        const row = data.main[1];
+                        const name = getValue(row, headers, 'โรงพยาบาล');
 
-                    selectedHospitals.push({
-                        code: code,
-                        name: name,
-                        data: data
-                    });
+                        target.name = name;
+                        target.data = data;
+                        target.loading = false;
 
-                    renderTable();
-                    document.getElementById('searchInput').value = '';
-                } else {
-                    console.warn('ไม่พบข้อมูลรายละเอียดสำหรับ ' + code);
+                        renderTable();
+                        document.getElementById('searchInput').value = '';
+                    } else {
+                        console.warn('ไม่พบข้อมูลรายละเอียดสำหรับ ' + code);
+                        // Remove if failed
+                        const idx = selectedHospitals.indexOf(target);
+                        if (idx > -1) selectedHospitals.splice(idx, 1);
+                        renderTable();
+                    }
                 }
             } catch (e) {
                 console.error('Error adding hospital:', e);
+                // Remove if failed
+                const idx = selectedHospitals.findIndex(h => h.code === code);
+                if (idx > -1) selectedHospitals.splice(idx, 1);
+                renderTable();
             }
         }
 
@@ -795,11 +864,10 @@
                 if (!confirm(`พบ ${matches.length} โรงพยาบาล การโหลดอาจใช้เวลานาน ยืนยันหรือไม่?`)) return;
             }
 
-            showLoading();
-            for (const h of matches) {
-                await addHospital(h.c);
-            }
-            hideLoading();
+            // Non-blocking load
+            matches.forEach(h => {
+                addHospital(h.c, h.n);
+            });
         }
 
         function removeHospital(index) {
@@ -832,7 +900,7 @@
 
                     if (matches.length > 0) {
                         suggestions.innerHTML = matches.map(h => `
-                            <div class="suggestion-item" onclick="selectSuggestion('${h.c}')">
+                            <div class="suggestion-item" onclick="selectSuggestion('${h.c}', '${h.n}')">
                                 <div>${h.n}</div>
                                 <div style="font-size:0.8em; color:#888;">
                                     ${h.p ? h.p + ' | ' : ''}${h.c}
@@ -850,6 +918,39 @@
                     if (!e.target.closest('.search-box')) {
                         document.getElementById('suggestions').style.display = 'none';
                     }
+                    if (!e.target.closest('.province-box')) {
+                        document.getElementById('provinceSuggestions').style.display = 'none';
+                    }
+                });
+
+                // Province Search Logic
+                const provinceInput = document.getElementById('provinceInput');
+                provinceInput.addEventListener('input', (e) => {
+                    const val = e.target.value.toLowerCase();
+                    const suggestions = document.getElementById('provinceSuggestions');
+
+                    if (val.length < 1) {
+                        suggestions.style.display = 'none';
+                        return;
+                    }
+
+                    // Extract unique provinces
+                    const provinces = [...new Set(hospitalList.map(h => h.p).filter(p => p))];
+
+                    const matches = provinces.filter(p =>
+                        p.toString().toLowerCase().includes(val)
+                    ).slice(0, 10);
+
+                    if (matches.length > 0) {
+                        suggestions.innerHTML = matches.map(p => `
+                            <div class="suggestion-item" onclick="selectProvinceSuggestion('${p}')">
+                                <div>${p}</div>
+                            </div>
+                        `).join('');
+                        suggestions.style.display = 'block';
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
                 });
 
             } catch (e) {
@@ -857,9 +958,14 @@
             }
         };
 
-        window.selectSuggestion = (code) => {
+        window.selectSuggestion = (code, name) => {
             document.getElementById('suggestions').style.display = 'none';
-            addHospital(code);
+            addHospital(code, name);
+        };
+
+        window.selectProvinceSuggestion = (province) => {
+            document.getElementById('provinceSuggestions').style.display = 'none';
+            document.getElementById('provinceInput').value = province;
         };
     </script>
 </body>
