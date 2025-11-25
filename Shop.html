@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>แอพร้านค้า - สแกนบาร์โค้ด</title>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            background-color: white;
+            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 80px; /* Space for bottom navigation */
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            padding: 10px 0;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border-radius: 10px;
+            margin-top: 0;
+        }
+        
+        .mobile-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            border-top: 1px solid #ddd;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-tab {
+            flex: 1;
+            padding: 12px 5px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.8em;
+            color: #666;
+            border: none;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .mobile-tab.active {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .mobile-tab i {
+            display: block;
+            font-size: 1.4em;
+            margin-bottom: 4px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            height: 40vh;
+            margin-bottom: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        #scanner {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .scanner-overlay.hidden {
+            display: none;
+        }
+        
+        .scanner-frame {
+            width: 80%;
+            height: 40%;
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .scanner-frame::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+        
+        .mobile-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 14px 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        button.secondary {
+            background-color: #f44336;
+        }
+        
+        button.info {
+            background-color: #2196F3;
+        }
+        
+        button.warning {
+            background-color: #ff9800;
+        }
+        
+        button.success {
+            background-color: #4CAF50;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            font-size: 0.95em;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 30px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #4CAF50;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        .product-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        input, select {
+            padding: 12px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            min-height: 44px; /* Better touch target */
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .mobile-table-container {
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .product-list {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px; /* Ensure table doesn't get too small */
+        }
+        
+        .product-list th, .product-list td {
+            border: 1px solid #ddd;
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        
+        .product-list th {
+            background-color: #f2f2f2;
+            position: sticky;
+            left: 0;
+        }
+        
+        .summary {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .summary h3 {
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        
+        .total {
+            font-weight: bold;
+            font-size: 1.1em;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        
+        .payment-section {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .payment-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .payment-result {
+            background-color: #fff3e0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 15px;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .modal-form input, .modal-form select {
+            padding: 14px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        
+        .new-product-options {
+            background-color: #f8f8f8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .new-product-options h3 {
+            margin-bottom: 10px;
+            color: #2196F3;
+            font-size: 1.1em;
+        }
+        
+        .option-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .stock-management {
+            background-color: #e8f5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .stock-management h3 {
+            margin-bottom: 10px;
+            color: #2e7d32;
+            font-size: 1.1em;
+        }
+        
+        .stock-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .last-scanned {
+            background-color: #fff3e0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .income-summary {
+            background-color: #e3f2fd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .income-summary h3 {
+            margin-bottom: 10px;
+            color: #1565c0;
+            font-size: 1.1em;
+        }
+        
+        .income-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .income-stat {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .income-stat .value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+                padding-bottom: 70px;
+            }
+            
+            h1 {
+                font-size: 1.2em;
+                margin-bottom: 10px;
+            }
+            
+            .scanner-container {
+                height: 35vh;
+            }
+            
+            .mobile-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-form, .stock-form, .payment-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .income-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            button {
+                padding: 16px 10px;
+                font-size: 1em;
+            }
+            
+            .mobile-tab {
+                padding: 10px 3px;
+                font-size: 0.75em;
+            }
+            
+            .mobile-tab i {
+                font-size: 1.2em;
+            }
+        }
+        
+        /* Better touch targets */
+        .touch-target {
+            min-height: 44px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Swipe gestures for tabs */
+        .tab-content {
+            touch-action: pan-y;
+        }
+        
+        /* Loading states */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        /* Success/error states */
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 แอพร้านค้า - สแกนบาร์โค้ด</h1>
+        
+        <!-- แท็บขายสินค้า -->
+        <div class="tab-content active" id="sale-tab">
+            <div class="scanner-container">
+                <div id="scanner"></div>
+                <div id="scanner-overlay" class="scanner-overlay">
+                    <div class="scanner-frame"></div>
+                    <p>กดปุ่ม "เริ่มสแกน" เพื่อเปิดกล้อง</p>
+                    <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.8;">วางบาร์โค้ดในกรอบเพื่อสแกน</p>
+                </div>
+            </div>
+            
+            <div class="mobile-controls">
+                <button id="start-button" class="success">📷 เริ่มสแกน</button>
+                <button id="stop-button" class="secondary">🛑 หยุดสแกน</button>
+                <button id="manual-input" class="info">⌨️ ป้อนรหัสมือ</button>
+            </div>
+            
+            <!-- Toggle คำนวณภาษี -->
+            <div class="toggle-container">
+                <span>คำนวณภาษี 7%</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="tax-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+                <span id="tax-status">เปิด</span>
+            </div>
+            
+            <!-- ส่วนแสดงตัวเลือกเมื่อพบสินค้าใหม่ -->
+            <div id="new-product-options" class="new-product-options hidden">
+                <h3>⚠️ ไม่พบสินค้าในระบบ</h3>
+                <p>รหัสสินค้า: <strong id="new-product-code"></strong></p>
+                <div class="option-buttons">
+                    <button id="add-to-database" class="info">➕ เพิ่มสินค้าในระบบ</button>
+                    <button id="sell-without-save">💰 ขายสินค้าโดยไม่บันทึก</button>
+                    <button id="cancel-new-product" class="secondary">❌ ยกเลิก</button>
+                </div>
+            </div>
+            
+            <div class="product-form">
+                <input type="text" id="product-code" placeholder="รหัสสินค้า" readonly>
+                <input type="text" id="product-name" placeholder="ชื่อสินค้า">
+                <input type="number" id="product-price" placeholder="ราคา" min="0" step="0.01">
+                <input type="number" id="product-quantity" placeholder="จำนวน" min="1" value="1">
+                <button id="add-product" class="success">➕ เพิ่มสินค้า</button>
+            </div>
+            
+            <div class="mobile-table-container">
+                <table class="product-list">
+                    <thead>
+                        <tr>
+                            <th>รหัส</th>
+                            <th>ชื่อสินค้า</th>
+                            <th>ราคา</th>
+                            <th>จำนวน</th>
+                            <th>รวม</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-list-body">
+                        <!-- รายการสินค้าจะถูกเพิ่มที่นี่ -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="summary">
+                <h3>🧮 สรุปราคา</h3>
+                <div class="summary-item">
+                    <span>รวมราคาสินค้า:</span>
+                    <span id="subtotal">0.00</span>
+                </div>
+                <div class="summary-item" id="tax-item">
+                    <span>ภาษี (7%):</span>
+                    <span id="tax">0.00</span>
+                </div>
+                <div class="summary-item total">
+                    <span>ยอดรวมทั้งหมด:</span>
+                    <span id="total">0.00</span>
+                </div>
+                
+                <!-- ส่วนการชำระเงิน -->
+                <div class="payment-section">
+                    <h3>💳 การชำระเงิน</h3>
+                    <div class="payment-form">
+                        <input type="number" id="cash-received" placeholder="จำนวนเงินที่รับมา" min="0" step="0.01">
+                        <button id="calculate-change" class="info">🔄 คำนวณเงินทอน</button>
+                    </div>
+                    <div class="payment-result" id="change-result">
+                        กรุณากรอกจำนวนเงินที่รับมา
+                    </div>
+                    <div class="mobile-controls" style="margin-top: 15px;">
+                        <button id="checkout-button" class="success">✅ รับเงินและพิมพ์ใบเสร็จ</button>
+                        <button id="clear-cart" class="secondary">🗑️ ล้างรายการ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- แท็บจัดการสินค้า -->
+        <div class="tab-content" id="database-tab">
+            <div style="margin-bottom: 15px;">
+                <h3 style="text-align: center; margin-bottom: 15px;">📦 ฐานข้อมูลสินค้า</h3>
+                <div class="mobile-controls">
+                    <button id="add-new-product" class="info">➕ เพิ่มสินค้าใหม่</button>
+                    <button id="scan-new-product" class="warning">📷 สแกนเพิ่มสินค้า</button>
+                </div>
+            </div>
+            
+            <div class="mobile-table-container">
+                <table class="product-list">
+                    <thead>
+                        <tr>
+                            <th>รหัส</th>
+                            <th>ชื่อสินค้า</th>
+                            <th>ราคา</th>
+                            <th>สต็อก</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="database-list-body">
+                        <!-- ฐานข้อมูลสินค้าจะถูกแสดงที่นี่ -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- แท็บจัดการสต็อก -->
+        <div class="tab-content" id="stock-tab">
+            <div class="stock-management">
+                <h3>📊 จัดการสต็อกสินค้า</h3>
+                <div class="stock-form">
+                    <input type="text" id="stock-product-code" placeholder="รหัสสินค้า" readonly>
+                    <input type="text" id="stock-product-name" placeholder="ชื่อสินค้า" readonly>
+                    <input type="number" id="stock-quantity" placeholder="จำนวน" min="1" value="1">
+                    <select id="stock-action">
+                        <option value="add">➕ เพิ่มสต็อก</option>
+                        <option value="remove">➖ ลดสต็อก</option>
+                    </select>
+                    <button id="apply-stock" class="info">✅ ปรับปรุงสต็อก</button>
+                </div>
+                <div class="mobile-controls">
+                    <button id="scan-stock" class="info">📷 สแกนสินค้า</button>
+                    <button id="manual-stock" class="warning">⌨️ ป้อนรหัสมือ</button>
+                </div>
+                <div id="last-scanned" class="last-scanned hidden">
+                    <!-- แสดงรหัสที่สแกนล่าสุด -->
+                </div>
+            </div>
+            
+            <h3 style="margin-bottom: 10px;">📋 ประวัติการจัดการสต็อก</h3>
+            <div class="mobile-table-container">
+                <table class="product-list">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>รหัสสินค้า</th>
+                            <th>ชื่อสินค้า</th>
+                            <th>ประเภท</th>
+                            <th>จำนวน</th>
+                            <th>สต็อกหลังปรับ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-history-body">
+                        <!-- ประวัติสต็อกจะถูกแสดงที่นี่ -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- แท็บสรุปรายรับ -->
+        <div class="tab-content" id="income-tab">
+            <div class="income-summary">
+                <h3>💰 สรุปรายรับ</h3>
+                <div class="mobile-controls">
+                    <button id="today-income" class="info">📅 วันนี้</button>
+                    <button id="week-income" class="info">📅 สัปดาห์นี้</button>
+                    <button id="month-income" class="info">📅 เดือนนี้</button>
+                    <button id="all-income" class="info">📊 ทั้งหมด</button>
+                </div>
+                
+                <div class="income-stats">
+                    <div class="income-stat">
+                        <div>จำนวนรายการขาย</div>
+                        <div class="value" id="sales-count">0</div>
+                    </div>
+                    <div class="income-stat">
+                        <div>ยอดขายรวม</div>
+                        <div class="value" id="total-sales">0.00</div>
+                    </div>
+                    <div class="income-stat">
+                        <div>ภาษีรวม</div>
+                        <div class="value" id="total-tax">0.00</div>
+                    </div>
+                    <div class="income-stat">
+                        <div>รายรับสุทธิ</div>
+                        <div class="value" id="net-income">0.00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="margin-bottom: 10px;">📈 ประวัติการขาย</h3>
+            <div class="mobile-table-container">
+                <table class="product-list">
+                    <thead>
+                        <tr>
+                            <th>วันที่/เวลา</th>
+                            <th>จำนวนสินค้า</th>
+                            <th>ยอดขาย</th>
+                            <th>ภาษี</th>
+                            <th>รวม</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-history-body">
+                        <!-- ประวัติการขายจะถูกแสดงที่นี่ -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-tabs">
+        <button class="mobile-tab active" data-tab="sale">
+            <span>🛒</span>
+            <span>ขายสินค้า</span>
+        </button>
+        <button class="mobile-tab" data-tab="database">
+            <span>📦</span>
+            <span>สินค้า</span>
+        </button>
+        <button class="mobile-tab" data-tab="stock">
+            <span>📊</span>
+            <span>สต็อก</span>
+        </button>
+        <button class="mobile-tab" data-tab="income">
+            <span>💰</span>
+            <span>รายรับ</span>
+        </button>
+    </div>
+
+    <!-- Modal สำหรับเพิ่ม/แก้ไขสินค้า -->
+    <div id="product-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">➕ เพิ่มสินค้าใหม่</h2>
+                <button id="modal-close-btn" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-form">
+                <input type="text" id="modal-code" placeholder="รหัสสินค้า">
+                <input type="text" id="modal-name" placeholder="ชื่อสินค้า">
+                <input type="number" id="modal-price" placeholder="ราคา" min="0" step="0.01">
+                <input type="number" id="modal-stock" placeholder="จำนวนสต็อกเริ่มต้น" min="0" value="0">
+                <div class="modal-buttons">
+                    <button id="modal-cancel" class="secondary">❌ ยกเลิก</button>
+                    <button id="modal-save" class="success">💾 บันทึก</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal สำหรับป้อนรหัสด้วยมือ -->
+    <div id="manual-input-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⌨️ ป้อนรหัสสินค้า</h2>
+                <button class="modal-close manual-close">&times;</button>
+            </div>
+            <div class="modal-form">
+                <input type="text" id="manual-code" placeholder="กรอกรหัสสินค้า" autofocus>
+                <div class="modal-buttons">
+                    <button class="manual-cancel secondary">❌ ยกเลิก</button>
+                    <button id="manual-confirm" class="success">✅ ตกลง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ฐานข้อมูลสินค้าตัวอย่าง
+        let productDatabase = {
+            '123456789012': { name: 'น้ำดื่มคริสตัล', price: 10.00, stock: 50 },
+            '234567890123': { name: 'ขนมปังฟาร์มเฮ้าส์', price: 25.00, stock: 30 },
+            '345678901234': { name: 'นมยูเอชที', price: 15.00, stock: 40 },
+            '456789012345': { name: 'บะหมี่กึ่งสำเร็จรูป', price: 8.00, stock: 100 },
+            '567890123456': { name: 'ไข่ไก่ 10 ฟอง', price: 45.00, stock: 20 }
+        };
+        
+        let products = [];
+        let isScanning = false;
+        let currentEditingCode = null;
+        let currentScannedCode = null;
+        let stockHistory = [];
+        let salesHistory = [];
+        let includeTax = true;
+        
+        // ฟังก์ชันเริ่มต้นสแกนเนอร์
+        function startScanner() {
+            const scannerOverlay = document.getElementById('scanner-overlay');
+            scannerOverlay.classList.add('hidden');
+            
+            const config = {
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner'),
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment"
+                    }
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                numOfWorkers: 2,
+                decoder: {
+                    readers: ["ean_reader", "ean_8_reader", "code_128_reader", "upc_reader", "upc_e_reader"]
+                },
+                locate: true
+            };
+            
+            Quagga.init(config, function(err) {
+                if (err) {
+                    console.error(err);
+                    alert('ไม่สามารถเปิดกล้องได้: ' + err);
+                    return;
+                }
+                Quagga.start();
+                isScanning = true;
+            });
+            
+            let lastCode = '';
+            let sameCodeCount = 0;
+            
+            Quagga.onDetected(function(result) {
+                const code = result.codeResult.code;
+                
+                // ตรวจสอบว่าเป็นโค้ดเดียวกันหรือไม่ (ป้องกันการอ่านซ้ำ)
+                if (code === lastCode) {
+                    sameCodeCount++;
+                    if (sameCodeCount < 2) {
+                        return;
+                    }
+                } else {
+                    lastCode = code;
+                    sameCodeCount = 1;
+                    return;
+                }
+                
+                // รีเซ็ตตัวนับ
+                sameCodeCount = 0;
+                
+                processScannedCode(code);
+            });
+        }
+        
+        // ประมวลผลโค้ดที่สแกนได้
+        function processScannedCode(code) {
+            currentScannedCode = code;
+            
+            // หยุดสแกนชั่วคราว
+            Quagga.stop();
+            isScanning = false;
+            
+            // ตรวจสอบแท็บปัจจุบัน
+            const activeTab = document.querySelector('.mobile-tab.active').getAttribute('data-tab');
+            
+            if (activeTab === 'sale') {
+                // โหมดขายสินค้า
+                document.getElementById('product-code').value = code;
+                
+                // ตรวจสอบว่ามีสินค้าในฐานข้อมูลหรือไม่
+                if (productDatabase[code]) {
+                    const product = productDatabase[code];
+                    document.getElementById('product-name').value = product.name;
+                    document.getElementById('product-price').value = product.price.toFixed(2);
+                    
+                    // แจ้งเตือนหากสต็อกต่ำ
+                    if (product.stock <= 5) {
+                        showMessage(`คำเตือน: สินค้า ${product.name} เหลือเพียง ${product.stock} ชิ้น`, 'warning');
+                    }
+                    
+                    // ซ่อนส่วนตัวเลือกสินค้าใหม่
+                    document.getElementById('new-product-options').classList.add('hidden');
+                    
+                    // โฟกัสไปที่ช่องจำนวน
+                    document.getElementById('product-quantity').focus();
+                } else {
+                    // แสดงตัวเลือกสำหรับสินค้าใหม่
+                    document.getElementById('new-product-code').textContent = code;
+                    document.getElementById('new-product-options').classList.remove('hidden');
+                    
+                    // ล้างฟอร์ม
+                    document.getElementById('product-name').value = '';
+                    document.getElementById('product-price').value = '';
+                }
+            } else if (activeTab === 'stock') {
+                // โหมดจัดการสต็อก
+                document.getElementById('stock-product-code').value = code;
+                
+                if (productDatabase[code]) {
+                    const product = productDatabase[code];
+                    document.getElementById('stock-product-name').value = product.name;
+                    document.getElementById('stock-quantity').focus();
+                    
+                    // แสดงข้อมูลล่าสุด
+                    document.getElementById('last-scanned').classList.remove('hidden');
+                    document.getElementById('last-scanned').innerHTML = `
+                        <strong>สินค้าล่าสุด:</strong> ${product.name} (${code}) - สต็อกปัจจุบัน: ${product.stock} ชิ้น
+                    `;
+                } else {
+                    document.getElementById('stock-product-name').value = 'ไม่พบสินค้าในระบบ';
+                    document.getElementById('last-scanned').classList.remove('hidden');
+                    document.getElementById('last-scanned').innerHTML = `
+                        <strong>ไม่พบสินค้า:</strong> รหัส ${code} ไม่มีในระบบ
+                    `;
+                }
+            }
+        }
+        
+        // ฟังก์ชันหยุดสแกนเนอร์
+        function stopScanner() {
+            if (isScanning) {
+                Quagga.stop();
+                isScanning = false;
+            }
+            document.getElementById('scanner-overlay').classList.remove('hidden');
+            document.getElementById('new-product-options').classList.add('hidden');
+        }
+        
+        // ฟังก์ชันเพิ่มสินค้า
+        function addProduct() {
+            const code = document.getElementById('product-code').value;
+            const name = document.getElementById('product-name').value;
+            const price = parseFloat(document.getElementById('product-price').value);
+            const quantity = parseInt(document.getElementById('product-quantity').value);
+            
+            if (!code || !name || isNaN(price) || isNaN(quantity)) {
+                showMessage('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+                return;
+            }
+            
+            // ตรวจสอบสต็อกสินค้า
+            if (productDatabase[code] && productDatabase[code].stock < quantity) {
+                showMessage(`สินค้า ${name} มีสต็อกไม่เพียงพอ! สต็อกปัจจุบัน: ${productDatabase[code].stock} ชิ้น`, 'error');
+                return;
+            }
+            
+            // เพิ่มสินค้าในรายการ
+            const product = {
+                code: code,
+                name: name,
+                price: price,
+                quantity: quantity,
+                total: price * quantity
+            };
+            
+            products.push(product);
+            updateProductList();
+            updateSummary();
+            
+            // ลดสต็อกสินค้า
+            if (productDatabase[code]) {
+                productDatabase[code].stock -= quantity;
+                localStorage.setItem('productDatabase', JSON.stringify(productDatabase));
+                
+                // บันทึกประวัติสต็อก
+                addStockHistory(code, name, 'sale', quantity, productDatabase[code].stock);
+            }
+            
+            // รีเซ็ตฟอร์ม
+            document.getElementById('product-code').value = '';
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-quantity').value = '1';
+            
+            // ซ่อนส่วนตัวเลือกสินค้าใหม่
+            document.getElementById('new-product-options').classList.add('hidden');
+            
+            // เริ่มสแกนใหม่
+            if (!isScanning) {
+                startScanner();
+            }
+        }
+        
+        // ฟังก์ชันลบสินค้า
+        function removeProduct(index) {
+            const product = products[index];
+            
+            // คืนสต็อกสินค้า
+            if (productDatabase[product.code]) {
+                productDatabase[product.code].stock += product.quantity;
+                localStorage.setItem('productDatabase', JSON.stringify(productDatabase));
+                
+                // บันทึกประวัติสต็อก
+                addStockHistory(product.code, product.name, 'return', product.quantity, productDatabase[product.code].stock);
+            }
+            
+            products.splice(index, 1);
+            updateProductList();
+            updateSummary();
+        }
+        
+        // อัพเดตรายการสินค้า
+        function updateProductList() {
+            const tbody = document.getElementById('product-list-body');
+            tbody.innerHTML = '';
+            
+            products.forEach((product, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.code}</td>
+                    <td>${product.name}</td>
+                    <td>${product.price.toFixed(2)}</td>
+                    <td>${product.quantity}</td>
+                    <td>${product.total.toFixed(2)}</td>
+                    <td><button onclick="removeProduct(${index})" class="secondary touch-target">🗑️</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // อัพเดตสรุปราคา
+        function updateSummary() {
+            const subtotal = products.reduce((sum, product) => sum + product.total, 0);
+            const tax = includeTax ? subtotal * 0.07 : 0;
+            const total = subtotal + tax;
+            
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('tax').textContent = tax.toFixed(2);
+            document.getElementById('total').textContent = total.toFixed(2);
+            
+            // แสดง/ซ่อนรายการภาษี
+            document.getElementById('tax-item').style.display = includeTax ? 'flex' : 'none';
+            
+            // อัพเดตเงินทอน
+            calculateChange();
+        }
+        
+        // คำนวณเงินทอน
+        function calculateChange() {
+            const cashReceived = parseFloat(document.getElementById('cash-received').value) || 0;
+            const total = parseFloat(document.getElementById('total').textContent) || 0;
+            
+            if (cashReceived === 0) {
+                document.getElementById('change-result').textContent = 'กรุณากรอกจำนวนเงินที่รับมา';
+                document.getElementById('change-result').style.backgroundColor = '#fff3e0';
+                document.getElementById('change-result').style.color = 'inherit';
+                return;
+            }
+            
+            if (cashReceived < total) {
+                document.getElementById('change-result').textContent = `เงินไม่พอ! ต้องการเพิ่มอีก ${(total - cashReceived).toFixed(2)} บาท`;
+                document.getElementById('change-result').style.backgroundColor = '#ffebee';
+                document.getElementById('change-result').style.color = '#c62828';
+            } else {
+                const change = cashReceived - total;
+                document.getElementById('change-result').textContent = `เงินทอน: ${change.toFixed(2)} บาท`;
+                document.getElementById('change-result').style.backgroundColor = '#e8f5e9';
+                document.getElementById('change-result').style.color = '#2e7d32';
+            }
+        }
+        
+        // ชำระเงิน
+        function checkout() {
+            if (products.length === 0) {
+                showMessage('ไม่มีสินค้าในรายการ', 'error');
+                return;
+            }
+            
+            const cashReceived = parseFloat(document.getElementById('cash-received').value) || 0;
+            const total = parseFloat(document.getElementById('total').textContent) || 0;
+            
+            if (cashReceived < total) {
+                showMessage('เงินที่รับมายังไม่ครบตามยอดรวม', 'error');
+                return;
+            }
+            
+            // บันทึกรายการขาย
+            const saleRecord = {
+                id: Date.now(),
+                date: new Date().toLocaleString('th-TH'),
+                products: [...products],
+                subtotal: parseFloat(document.getElementById('subtotal').textContent),
+                tax: parseFloat(document.getElementById('tax').textContent),
+                total: total,
+                cashReceived: cashReceived,
+                change: cashReceived - total
+            };
+            
+            salesHistory.unshift(saleRecord);
+            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+            
+            const change = cashReceived - total;
+            showMessage(`ชำระเงินสำเร็จ! เงินทอน: ${change.toFixed(2)} บาท`, 'success');
+            
+            // รีเซ็ตการขาย
+            products = [];
+            updateProductList();
+            updateSummary();
+            document.getElementById('cash-received').value = '';
+            document.getElementById('change-result').textContent = 'กรุณากรอกจำนวนเงินที่รับมา';
+            document.getElementById('change-result').style.backgroundColor = '#fff3e0';
+            document.getElementById('change-result').style.color = 'inherit';
+            
+            // อัพเดตรายรับ
+            updateIncomeSummary();
+            
+            // เริ่มสแกนใหม่
+            startScanner();
+        }
+        
+        // แสดงข้อความ
+        function showMessage(message, type) {
+            // ลบข้อความเก่าถ้ามี
+            const existingMessage = document.querySelector('.success-message, .error-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+            
+            // แทรกข้อความที่ด้านบนของ container
+            const container = document.querySelector('.container');
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            // ลบข้อความหลังจาก 3 วินาที
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+        
+        // อัพเดตฐานข้อมูลสินค้า
+        function updateDatabaseList() {
+            const tbody = document.getElementById('database-list-body');
+            tbody.innerHTML = '';
+            
+            Object.keys(productDatabase).forEach(code => {
+                const product = productDatabase[code];
+                const stockClass = product.stock === 0 ? 'stock-out' : (product.stock <= 5 ? 'stock-low' : '');
+                
+                const row = document.createElement('tr');
+                row.className = stockClass;
+                row.innerHTML = `
+                    <td>${code}</td>
+                    <td>${product.name}</td>
+                    <td>${product.price.toFixed(2)}</td>
+                    <td>${product.stock}</td>
+                    <td>
+                        <button onclick="editProduct('${code}')" class="info touch-target">✏️</button>
+                        <button onclick="deleteProduct('${code}')" class="secondary touch-target">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // เปิด modal เพื่อเพิ่ม/แก้ไขสินค้า
+        function openProductModal(code = '') {
+            const modal = document.getElementById('product-modal');
+            const title = document.getElementById('modal-title');
+            
+            if (code && productDatabase[code]) {
+                // โหมดแก้ไข
+                title.textContent = '✏️ แก้ไขสินค้า';
+                currentEditingCode = code;
+                document.getElementById('modal-code').value = code;
+                document.getElementById('modal-code').readOnly = true;
+                document.getElementById('modal-name').value = productDatabase[code].name;
+                document.getElementById('modal-price').value = productDatabase[code].price;
+                document.getElementById('modal-stock').value = productDatabase[code].stock;
+            } else {
+                // โหมดเพิ่มใหม่
+                title.textContent = '➕ เพิ่มสินค้าใหม่';
+                currentEditingCode = null;
+                document.getElementById('modal-code').value = code;
+                document.getElementById('modal-code').readOnly = false;
+                document.getElementById('modal-name').value = '';
+                document.getElementById('modal-price').value = '';
+                document.getElementById('modal-stock').value = '0';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        // บันทึกสินค้าในฐานข้อมูล
+        function saveProduct() {
+            const code = document.getElementById('modal-code').value;
+            const name = document.getElementById('modal-name').value;
+            const price = parseFloat(document.getElementById('modal-price').value);
+            const stock = parseInt(document.getElementById('modal-stock').value);
+            
+            if (!code || !name || isNaN(price) || isNaN(stock)) {
+                showMessage('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+                return;
+            }
+            
+            // บันทึกลงฐานข้อมูล
+            productDatabase[code] = { name, price, stock };
+            
+            // อัพเดตฐานข้อมูลใน localStorage
+            localStorage.setItem('productDatabase', JSON.stringify(productDatabase));
+            
+            // ปิด modal
+            closeModal();
+            
+            // อัพเดตรายการฐานข้อมูล
+            updateDatabaseList();
+            
+            showMessage('บันทึกสินค้าสำเร็จ!', 'success');
+            
+            // ถ้าอยู่ในโหมดขายสินค้า ให้อัพเดตฟอร์ม
+            if (document.querySelector('.mobile-tab.active').getAttribute('data-tab') === 'sale') {
+                document.getElementById('product-code').value = code;
+                document.getElementById('product-name').value = name;
+                document.getElementById('product-price').value = price.toFixed(2);
+                
+                // ซ่อนส่วนตัวเลือกสินค้าใหม่
+                document.getElementById('new-product-options').classList.add('hidden');
+                
+                // โฟกัสไปที่ช่องจำนวน
+                document.getElementById('product-quantity').focus();
+            }
+        }
+        
+        // แก้ไขสินค้า
+        function editProduct(code) {
+            openProductModal(code);
+        }
+        
+        // ลบสินค้าจากฐานข้อมูล
+        function deleteProduct(code) {
+            if (confirm(`ต้องการลบสินค้า ${productDatabase[code].name} (${code}) ใช่หรือไม่?`)) {
+                delete productDatabase[code];
+                
+                // อัพเดตฐานข้อมูลใน localStorage
+                localStorage.setItem('productDatabase', JSON.stringify(productDatabase));
+                
+                // อัพเดตรายการฐานข้อมูล
+                updateDatabaseList();
+                
+                showMessage('ลบสินค้าสำเร็จ!', 'success');
+            }
+        }
+        
+        // ปิด modal
+        function closeModal() {
+            const modal = document.getElementById('product-modal');
+            modal.classList.add('hidden');
+            currentEditingCode = null;
+            
+            // เริ่มสแกนใหม่ถ้าอยู่ในโหมดขายสินค้า
+            if (document.querySelector('.mobile-tab.active').getAttribute('data-tab') === 'sale' && !isScanning) {
+                startScanner();
+            }
+        }
+        
+        // เปิด modal ป้อนรหัสด้วยมือ
+        function openManualInput() {
+            document.getElementById('manual-input-modal').classList.remove('hidden');
+            document.getElementById('manual-code').value = '';
+            document.getElementById('manual-code').focus();
+        }
+        
+        // ปิด modal ป้อนรหัสด้วยมือ
+        function closeManualInput() {
+            document.getElementById('manual-input-modal').classList.add('hidden');
+        }
+        
+        // ประมวลผลรหัสที่ป้อนด้วยมือ
+        function processManualCode() {
+            const code = document.getElementById('manual-code').value.trim();
+            if (code) {
+                closeManualInput();
+                processScannedCode(code);
+            }
+        }
+        
+        // เพิ่มประวัติสต็อก
+        function addStockHistory(code, name, type, quantity, newStock) {
+            const history = {
+                date: new Date().toLocaleString('th-TH'),
+                code: code,
+                name: name,
+                type: type,
+                quantity: quantity,
+                newStock: newStock
+            };
+            
+            stockHistory.unshift(history);
+            localStorage.setItem('stockHistory', JSON.stringify(stockHistory));
+            updateStockHistory();
+        }
+        
+        // อัพเดตประวัติสต็อก
+        function updateStockHistory() {
+            const tbody = document.getElementById('stock-history-body');
+            tbody.innerHTML = '';
+            
+            stockHistory.forEach(history => {
+                const row = document.createElement('tr');
+                const typeText = history.type === 'add' ? 'รับเข้า' : 
+                               history.type === 'remove' ? 'จ่ายออก' :
+                               history.type === 'sale' ? 'ขาย' : 'คืนสินค้า';
+                
+                row.innerHTML = `
+                    <td>${history.date}</td>
+                    <td>${history.code}</td>
+                    <td>${history.name}</td>
+                    <td>${typeText}</td>
+                    <td>${history.quantity}</td>
+                    <td>${history.newStock}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // ปรับปรุงสต็อกสินค้า
+        function updateStock() {
+            const code = document.getElementById('stock-product-code').value;
+            const quantity = parseInt(document.getElementById('stock-quantity').value);
+            const action = document.getElementById('stock-action').value;
+            
+            if (!code || isNaN(quantity)) {
+                showMessage('กรุณากรอกข้อมูลให้ครบถ้วน', 'error');
+                return;
+            }
+            
+            if (!productDatabase[code]) {
+                showMessage('ไม่พบสินค้าในระบบ', 'error');
+                return;
+            }
+            
+            const product = productDatabase[code];
+            let newStock = product.stock;
+            
+            if (action === 'add') {
+                newStock += quantity;
+            } else {
+                if (product.stock < quantity) {
+                    showMessage(`สต็อกไม่เพียงพอ! สต็อกปัจจุบัน: ${product.stock} ชิ้น`, 'error');
+                    return;
+                }
+                newStock -= quantity;
+            }
+            
+            // อัพเดตสต็อก
+            productDatabase[code].stock = newStock;
+            localStorage.setItem('productDatabase', JSON.stringify(productDatabase));
+            
+            // บันทึกประวัติ
+            addStockHistory(code, product.name, action, quantity, newStock);
+            
+            // อัพเดตฐานข้อมูล
+            updateDatabaseList();
+            
+            // รีเซ็ตฟอร์ม
+            document.getElementById('stock-product-code').value = '';
+            document.getElementById('stock-product-name').value = '';
+            document.getElementById('stock-quantity').value = '1';
+            document.getElementById('last-scanned').classList.add('hidden');
+            
+            showMessage(`ปรับปรุงสต็อกสำเร็จ! สต็อกใหม่: ${newStock} ชิ้น`, 'success');
+        }
+        
+        // อัพเดตรายรับ
+        function updateIncomeSummary(period = 'all') {
+            let filteredSales = [];
+            const now = new Date();
+            
+            if (period === 'today') {
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                filteredSales = salesHistory.filter(sale => new Date(sale.id) >= today);
+            } else if (period === 'week') {
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                filteredSales = salesHistory.filter(sale => new Date(sale.id) >= weekAgo);
+            } else if (period === 'month') {
+                const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                filteredSales = salesHistory.filter(sale => new Date(sale.id) >= monthAgo);
+            } else {
+                filteredSales = salesHistory;
+            }
+            
+            const salesCount = filteredSales.length;
+            const totalSales = filteredSales.reduce((sum, sale) => sum + sale.subtotal, 0);
+            const totalTax = filteredSales.reduce((sum, sale) => sum + sale.tax, 0);
+            const netIncome = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
+            
+            document.getElementById('sales-count').textContent = salesCount;
+            document.getElementById('total-sales').textContent = totalSales.toFixed(2);
+            document.getElementById('total-tax').textContent = totalTax.toFixed(2);
+            document.getElementById('net-income').textContent = netIncome.toFixed(2);
+            
+            // อัพเดตประวัติการขาย
+            updateSalesHistory(filteredSales);
+        }
+        
+        // อัพเดตประวัติการขาย
+        function updateSalesHistory(sales = salesHistory) {
+            const tbody = document.getElementById('sales-history-body');
+            tbody.innerHTML = '';
+            
+            sales.forEach(sale => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${sale.date}</td>
+                    <td>${sale.products.length} รายการ</td>
+                    <td>${sale.subtotal.toFixed(2)}</td>
+                    <td>${sale.tax.toFixed(2)}</td>
+                    <td>${sale.total.toFixed(2)}</td>
+                    <td>
+                        <button onclick="viewSaleDetail(${sale.id})" class="info touch-target">👁️</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // ดูรายละเอียดการขาย
+        function viewSaleDetail(saleId) {
+            const sale = salesHistory.find(s => s.id === saleId);
+            if (sale) {
+                const detail = sale.products.map(p => `${p.name} x${p.quantity} = ${p.total.toFixed(2)}`).join('\n');
+                alert(`รายละเอียดการขาย\nวันที่: ${sale.date}\n\n${detail}\n\nรวม: ${sale.total.toFixed(2)} บาท`);
+            }
+        }
+        
+        // โหลดข้อมูลจาก localStorage
+        function loadData() {
+            const savedDatabase = localStorage.getItem('productDatabase');
+            if (savedDatabase) {
+                productDatabase = JSON.parse(savedDatabase);
+            }
+            
+            const savedHistory = localStorage.getItem('stockHistory');
+            if (savedHistory) {
+                stockHistory = JSON.parse(savedHistory);
+            }
+            
+            const savedSales = localStorage.getItem('salesHistory');
+            if (savedSales) {
+                salesHistory = JSON.parse(savedSales);
+            }
+            
+            updateDatabaseList();
+            updateStockHistory();
+            updateIncomeSummary();
+        }
+        
+        // ตั้งค่า event listeners เมื่อโหลดหน้าเว็บเสร็จ
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listeners สำหรับปุ่มต่างๆ
+            document.getElementById('start-button').addEventListener('click', startScanner);
+            document.getElementById('stop-button').addEventListener('click', stopScanner);
+            document.getElementById('add-product').addEventListener('click', addProduct);
+            document.getElementById('add-new-product').addEventListener('click', function() {
+                openProductModal();
+            });
+            document.getElementById('scan-new-product').addEventListener('click', function() {
+                stopScanner();
+                startScanner();
+            });
+            
+            // Event listeners สำหรับตัวเลือกสินค้าใหม่
+            document.getElementById('add-to-database').addEventListener('click', function() {
+                openProductModal(currentScannedCode);
+            });
+            
+            document.getElementById('sell-without-save').addEventListener('click', function() {
+                document.getElementById('product-name').value = 'สินค้าชั่วคราว';
+                document.getElementById('product-price').value = '0';
+                document.getElementById('new-product-options').classList.add('hidden');
+                document.getElementById('product-price').focus();
+            });
+            
+            document.getElementById('cancel-new-product').addEventListener('click', function() {
+                document.getElementById('product-code').value = '';
+                document.getElementById('new-product-options').classList.add('hidden');
+                startScanner();
+            });
+            
+            // Event listeners สำหรับ modal
+            document.getElementById('modal-save').addEventListener('click', saveProduct);
+            document.getElementById('modal-cancel').addEventListener('click', closeModal);
+            document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+            
+            // Event listeners สำหรับป้อนรหัสมือ
+            document.getElementById('manual-input').addEventListener('click', openManualInput);
+            document.getElementById('manual-confirm').addEventListener('click', processManualCode);
+            document.querySelectorAll('.manual-close, .manual-cancel').forEach(btn => {
+                btn.addEventListener('click', closeManualInput);
+            });
+            
+            // Event listeners สำหรับจัดการสต็อก
+            document.getElementById('scan-stock').addEventListener('click', function() {
+                stopScanner();
+                startScanner();
+            });
+            document.getElementById('manual-stock').addEventListener('click', function() {
+                openManualInput();
+            });
+            document.getElementById('apply-stock').addEventListener('click', updateStock);
+            
+            // Event listeners สำหรับการชำระเงิน
+            document.getElementById('checkout-button').addEventListener('click', checkout);
+            document.getElementById('calculate-change').addEventListener('click', calculateChange);
+            document.getElementById('cash-received').addEventListener('input', calculateChange);
+            document.getElementById('clear-cart').addEventListener('click', function() {
+                if (confirm('ต้องการล้างรายการสินค้าทั้งหมดใช่หรือไม่?')) {
+                    products = [];
+                    updateProductList();
+                    updateSummary();
+                }
+            });
+            
+            // Event listeners สำหรับ Toggle ภาษี
+            document.getElementById('tax-toggle').addEventListener('change', function() {
+                includeTax = this.checked;
+                document.getElementById('tax-status').textContent = includeTax ? 'เปิด' : 'ปิด';
+                updateSummary();
+            });
+            
+            // Event listeners สำหรับสรุปรายรับ
+            document.getElementById('today-income').addEventListener('click', function() {
+                updateIncomeSummary('today');
+            });
+            document.getElementById('week-income').addEventListener('click', function() {
+                updateIncomeSummary('week');
+            });
+            document.getElementById('month-income').addEventListener('click', function() {
+                updateIncomeSummary('month');
+            });
+            document.getElementById('all-income').addEventListener('click', function() {
+                updateIncomeSummary('all');
+            });
+            
+            // Event listeners สำหรับ Mobile Navigation
+            document.querySelectorAll('.mobile-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // หยุดสแกนเมื่อเปลี่ยนแท็บ
+                    stopScanner();
+                    
+                    // ลบคลาส active จากแท็บทั้งหมด
+                    document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+                    // เพิ่มคลาส active ให้แท็บที่คลิก
+                    this.classList.add('active');
+                    
+                    // ซ่อนเนื้อหาแท็บทั้งหมด
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // แสดงเนื้อหาแท็บที่เลือก
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    // อัพเดตรายรับเมื่อเปิดแท็บรายรับ
+                    if (tabId === 'income') {
+                        updateIncomeSummary();
+                    }
+                    
+                    // Scroll to top
+                    window.scrollTo(0, 0);
+                });
+            });
+            
+            // ปิด modal เมื่อคลิกนอกพื้นที่ modal
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        if (this.id === 'product-modal') {
+                            closeModal();
+                        } else if (this.id === 'manual-input-modal') {
+                            closeManualInput();
+                        }
+                    }
+                });
+            });
+            
+            // ปิด modal ด้วยปุ่ม ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (!document.getElementById('product-modal').classList.contains('hidden')) {
+                        closeModal();
+                    }
+                    if (!document.getElementById('manual-input-modal').classList.contains('hidden')) {
+                        closeManualInput();
+                    }
+                }
+            });
+            
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // โหลดข้อมูล
+            loadData();
+        });
+    </script>
+</body>
+</html>
