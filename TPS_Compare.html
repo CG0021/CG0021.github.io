@@ -55,16 +55,21 @@
             font-weight: 600;
             margin: 0;
         }
-
+        
+        .search-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
         .search-box {
             position: relative;
-            width: 400px;
+            width: 300px;
         }
 
         .province-box {
             position: relative;
-            width: 350px;
+            width: 250px;
             display: flex;
             gap: 5px;
         }
@@ -97,11 +102,10 @@
             color: #999;
         }
 
-        .btn-add-all {
+        .btn {
             padding: 10px 15px;
             border: none;
             border-radius: 20px;
-            background: #27ae60;
             color: white;
             cursor: pointer;
             font-family: 'IBM Plex Sans Thai', sans-serif;
@@ -109,16 +113,22 @@
             transition: background 0.3s;
         }
 
+        .btn-add-all {
+            background: #27ae60;
+        }
         .btn-add-all:hover {
             background: #2ecc71;
+        }
+        .btn-analyze {
+            background: #e67e22;
+        }
+        .btn-analyze:hover {
+            background: #f39c12;
         }
 
         .nav-buttons {
             display: flex;
             gap: 10px;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
         }
 
         .nav-btn {
@@ -381,6 +391,127 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
+        
+        /* Report Modal */
+        .report-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .report-modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 1200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+        
+        .report-header {
+            padding: 15px 25px;
+            background: #34495e;
+            color: white;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-close-btn {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .report-close-btn:hover,
+        .report-close-btn:focus {
+            color: #fff;
+        }
+
+        .report-body {
+            padding: 20px 25px;
+            overflow-y: auto;
+        }
+        
+        @keyframes fadeIn {
+            from {opacity: 0}
+            to {opacity: 1}
+        }
+
+        .report-section {
+            margin-bottom: 25px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .report-section-title {
+            background: #e9ecef;
+            padding: 10px 15px;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+        }
+        .report-section-body {
+            padding: 15px;
+        }
+        .report-summary {
+            font-weight: 500;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .report-summary.pass { color: #27ae60; }
+        .report-summary.fail { color: #e74c3c; }
+        .report-summary.mixed { color: #f39c12; }
+
+        .report-ranking {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .rank-list h4 {
+            font-weight: 600;
+            margin-bottom: 8px;
+            border-bottom: 2px solid;
+            padding-bottom: 4px;
+        }
+        .rank-list.best h4 { border-color: #27ae60; }
+        .rank-list.worst h4 { border-color: #e74c3c; }
+        .rank-list ol {
+            list-style-position: inside;
+            padding-left: 5px;
+        }
+        .rank-list li {
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .rank-list .value {
+            font-weight: 500;
+        }
+        .report-group-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
     </style>
 </head>
 
@@ -394,19 +525,19 @@
 
             <div class="nav-buttons">
                 <a href="https://cg0021.github.io/TPS.html" class="nav-btn">ระบบวิเคราะห์ TPS</a>
-                <a href="https://cg0021.github.io/TPS_Compare.html" class="nav-btn active">ระบบเปรียบเทียบ TPS</a>
             </div>
 
             <div class="search-group">
                 <div class="province-box">
                     <input type="text" id="provinceInput" placeholder="ระบุจังหวัด">
                     <div class="suggestions" id="provinceSuggestions"></div>
-                    <button class="btn-add-all" onclick="addAllByProvince()">เพิ่มทั้งจังหวัด</button>
+                    <button class="btn btn-add-all" onclick="addAllByProvince()">เพิ่มทั้งจังหวัด</button>
                 </div>
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="ค้นหาและเพิ่มโรงพยาบาล..." disabled>
                     <div class="suggestions" id="suggestions"></div>
                 </div>
+                 <button class="btn btn-analyze" onclick="generateComparisonReport()">วิเคราะห์เปรียบเทียบ</button>
             </div>
         </div>
 
@@ -430,6 +561,19 @@
         <div class="spinner"></div>
         <p style="margin-top: 10px; color: #3498db; font-weight: 500;">กำลังโหลดข้อมูล...</p>
     </div>
+    
+    <div id="reportModal" class="report-modal">
+        <div class="report-modal-content">
+            <div class="report-header">
+                <h2>ผลการวิเคราะห์เปรียบเทียบ</h2>
+                <span class="report-close-btn" onclick="closeReport()">&times;</span>
+            </div>
+            <div id="reportBody" class="report-body">
+                <!-- Report content will be injected here -->
+            </div>
+        </div>
+    </div>
+
 
     <script>
         // State
@@ -519,11 +663,11 @@
         function showLoading() { document.getElementById('loading').style.display = 'flex'; }
         function hideLoading() { document.getElementById('loading').style.display = 'none'; }
 
-        function formatNumber(num) {
-            if (num === null || num === undefined || num === '') return '0';
-            if (typeof num === 'string') num = parseFloat(num.replace(/,/g, ''));
-            if (isNaN(num)) return '0';
-            return new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+        function formatNumber(num, fractionDigits = 2) {
+            if (num === null || num === undefined || num === '') return '-';
+            let parsedNum = typeof num === 'string' ? parseFloat(num.replace(/,/g, '')) : num;
+            if (isNaN(parsedNum)) return '-';
+            return new Intl.NumberFormat('th-TH', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }).format(parsedNum);
         }
 
         function isZero(val) {
@@ -572,28 +716,47 @@
 
         async function fetchHospitalDetails(code) {
             return new Promise((resolve, reject) => {
-                // showLoading(); // Removed global loading
                 const callbackName = 'cb_data_' + Date.now();
                 window[callbackName] = (data) => {
                     delete window[callbackName];
                     document.body.removeChild(script);
-                    // hideLoading(); // Removed global loading
                     if (data.error) reject(data.message);
                     else resolve(data);
                 };
                 const script = document.createElement('script');
                 script.src = `https://script.google.com/macros/s/AKfycbyO26iU11w8EnwnWIz3d1S5uEYmBbUrzIgK3PXooMajmblDAppEuPAqsykGN7XY8uFB/exec?action=data&code=${code}&callback=${callbackName}`;
                 script.onerror = () => {
-                    // hideLoading(); 
                     reject('Load failed');
                 };
                 document.body.appendChild(script);
             });
         }
 
+        async function fetchHospitalDetailsWithRetry(code, retries = 3, timeout = 15000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const result = await Promise.race([
+                        fetchHospitalDetails(code),
+                        new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Timeout')), timeout)
+                        )
+                    ]);
+                    return result; 
+                } catch (error) {
+                    console.warn(`Attempt ${i + 1}/${retries} failed for hospital ${code}:`, error.message);
+                    if (i === retries - 1) {
+                        throw new Error(`Failed to load data for hospital ${code} after ${retries} attempts.`);
+                    }
+                    await new Promise(res => setTimeout(res, 500));
+                }
+            }
+        }
+
         // --- Core Logic ---
 
         function getCellData(hospital, config) {
+            if (!hospital || !hospital.data || !hospital.data.main) return { score: null, result: null, mean: null, diff: null };
+
             const mainHeaders = hospital.data.main[0];
             const mainRow = hospital.data.main[1];
             const code = getValue(mainRow, mainHeaders, 'รหัส');
@@ -603,7 +766,6 @@
             let mean = null;
             let diff = null;
 
-            // 1. Get Score (Usually from Main Sheet)
             if (config.calcSum) {
                 let sum = 0;
                 config.calcSum.forEach(childId => {
@@ -618,7 +780,6 @@
                 score = getValue(mainRow, mainHeaders, config.key);
             }
 
-            // 2. Get Result/Details (Might be in other sheets)
             let targetSheet = null;
             if (config.sheet) {
                 if (config.sheet === 'qm') targetSheet = hospital.data.qm;
@@ -633,28 +794,37 @@
                     if (config.diffKey) diff = getValue(sheetData.row, sheetData.headers, config.diffKey);
                 }
             } else {
-                // Default to main sheet for result if resultKey exists
                 if (config.resultKey) {
                     result = getValue(mainRow, mainHeaders, config.resultKey);
                 }
             }
+            
+            const parseToFloat = (val) => {
+                 if (val === null || val === undefined || val === '') return null;
+                 if (typeof val === 'string') val = val.replace(/,/g, '');
+                 const num = parseFloat(val);
+                 return isNaN(num) ? null : num;
+            };
 
-            return { score, result, mean, diff, unit: config.unit };
+            return { 
+                score: parseToFloat(score), 
+                result: parseToFloat(result), 
+                mean: parseToFloat(mean), 
+                diff: parseToFloat(diff), 
+                unit: config.unit 
+            };
         }
 
         function renderTable() {
             const theadRow = document.getElementById('headerRow');
             const tbody = document.getElementById('tableBody');
 
-            // 1. Reset Headers (Keep first 2)
             while (theadRow.children.length > 2) {
                 theadRow.removeChild(theadRow.lastChild);
             }
 
-            // 2. Add Hospital Headers
             selectedHospitals.forEach((h, index) => {
                 const th = document.createElement('th');
-
                 let headerContent = '';
                 if (h.loading) {
                     headerContent = `
@@ -676,7 +846,6 @@
                 th.innerHTML = headerContent;
                 th.style.minWidth = '120px';
 
-                // Drag and Drop Attributes (only if not loading)
                 if (!h.loading) {
                     th.draggable = true;
                     th.classList.add('draggable');
@@ -690,68 +859,55 @@
                 theadRow.appendChild(th);
             });
 
-            // 3. Render Body
             tbody.innerHTML = '';
-
             rowConfig.forEach(row => {
                 const tr = document.createElement('tr');
-
-                // Style based on type
                 if (row.type === 'section') tr.className = 'section-header';
                 else if (row.type === 'header') tr.className = 'sub-header';
 
-                // Col 1: Item Name
                 const tdName = document.createElement('td');
                 tdName.style.paddingLeft = row.id.split('.').length > 2 ? (row.id.split('.').length * 10 + 'px') : '15px';
                 tdName.textContent = row.label;
                 tr.appendChild(tdName);
 
-                // Col 2: Full Score
                 const tdFull = document.createElement('td');
                 tdFull.className = 'full-score';
                 tdFull.textContent = row.full !== undefined ? row.full.toFixed(1) : '';
                 tr.appendChild(tdFull);
 
-                // Col 3+: Hospital Data
                 selectedHospitals.forEach(h => {
                     const td = document.createElement('td');
                     td.className = 'score-cell';
 
                     if (h.loading) {
                         td.innerHTML = '<div class="spinner-small"></div>';
-                    } else {
+                    } else if (h.data && !h.data.error) {
                         if (row.type === 'section') {
                             if (row.key) {
                                 const data = getCellData(h, row);
-                                td.textContent = data.score || '';
+                                td.textContent = data.score !== null ? formatNumber(data.score, 1) : '';
                             }
                         } else {
                             const data = getCellData(h, row);
-
-                            // Display Score
-                            td.textContent = data.score || '0';
+                            td.textContent = data.score !== null ? formatNumber(data.score, 1) : '0.0';
                             if (isZero(data.score)) td.classList.add('zero');
 
-                            // Tooltip Content
-                            if (data.result || data.mean || data.diff) {
+                            if (data.result !== null || data.mean !== null || data.diff !== null) {
                                 const tooltip = document.createElement('div');
                                 tooltip.className = 'custom-tooltip';
-
                                 let html = `<div style="font-weight:bold; margin-bottom:5px; border-bottom:1px solid #777; padding-bottom:3px;">${row.label}</div>`;
-
-                                if (data.result) html += `<div class="tooltip-row"><span class="tooltip-label">ผลลัพธ์:</span> <span class="tooltip-val">${formatNumber(data.result)} ${data.unit || ''}</span></div>`;
-                                if (data.mean) html += `<div class="tooltip-row"><span class="tooltip-label">ค่ากลาง:</span> <span class="tooltip-val">${formatNumber(data.mean)}</span></div>`;
-                                if (data.diff) html += `<div class="tooltip-row"><span class="tooltip-label">ผลต่าง:</span> <span class="tooltip-val">${formatNumber(data.diff)}</span></div>`;
-
+                                if (data.result !== null) html += `<div class="tooltip-row"><span class="tooltip-label">ผลลัพธ์:</span> <span class="tooltip-val">${formatNumber(data.result)} ${data.unit || ''}</span></div>`;
+                                if (data.mean !== null) html += `<div class="tooltip-row"><span class="tooltip-label">ค่ากลาง:</span> <span class="tooltip-val">${formatNumber(data.mean)}</span></div>`;
+                                if (data.diff !== null) html += `<div class="tooltip-row"><span class="tooltip-label">ผลต่าง:</span> <span class="tooltip-val">${formatNumber(data.diff)}</span></div>`;
                                 tooltip.innerHTML = html;
                                 td.appendChild(tooltip);
                             }
                         }
+                    } else {
+                        td.innerHTML = '<span style="color: #e74c3c;">Error</span>';
                     }
-
                     tr.appendChild(td);
                 });
-
                 tbody.appendChild(tr);
             });
         }
@@ -772,9 +928,7 @@
         function handleDrop(e) {
             if (e.stopPropagation) e.stopPropagation();
             const targetIndex = parseInt(this.dataset.index);
-
             if (draggedColIndex !== null && draggedColIndex !== targetIndex) {
-                // Reorder array
                 const item = selectedHospitals.splice(draggedColIndex, 1)[0];
                 selectedHospitals.splice(targetIndex, 0, item);
                 renderTable();
@@ -787,92 +941,320 @@
             draggedColIndex = null;
         }
 
+        // --- Hospital Management ---
         async function addHospital(code, knownName = '') {
-            // Check if already exists
-            if (selectedHospitals.find(h => h.code === code)) {
+            // Prevent adding duplicates
+            if (selectedHospitals.some(h => h.code === code)) {
                 return;
             }
 
-            // 1. Add placeholder (Loading State)
-            const placeholder = {
-                code: code,
-                name: knownName || code,
-                loading: true,
-                data: null
-            };
+            const placeholder = { code, name: knownName || code, loading: true, data: null };
             selectedHospitals.push(placeholder);
             renderTable();
 
             try {
-                const data = await fetchHospitalDetails(code);
-
-                // 2. Update with real data
+                const data = await fetchHospitalDetailsWithRetry(code);
                 const target = selectedHospitals.find(h => h.code === code);
+
+                // Check for valid data, if not, treat as an error
+                if (!data.main || data.main.length < 2) {
+                    throw new Error('Incomplete data received');
+                }
+
                 if (target) {
-                    if (data.main && data.main.length >= 2) {
-                        const headers = data.main[0];
-                        const row = data.main[1];
-                        const name = getValue(row, headers, 'โรงพยาบาล');
-
-                        target.name = name;
-                        target.data = data;
-                        target.loading = false;
-
-                        renderTable();
-                        document.getElementById('searchInput').value = '';
-                    } else {
-                        console.warn('ไม่พบข้อมูลรายละเอียดสำหรับ ' + code);
-                        // Remove if failed
-                        const idx = selectedHospitals.indexOf(target);
-                        if (idx > -1) selectedHospitals.splice(idx, 1);
-                        renderTable();
-                    }
+                    const name = getValue(data.main[1], data.main[0], 'โรงพยาบาล');
+                    target.name = name || knownName;
+                    target.data = data;
+                    target.loading = false;
+                    renderTable();
+                    document.getElementById('searchInput').value = '';
                 }
             } catch (e) {
-                console.error('Error adding hospital:', e);
-                // Remove if failed
-                const idx = selectedHospitals.findIndex(h => h.code === code);
-                if (idx > -1) selectedHospitals.splice(idx, 1);
+                console.error(`Removing hospital ${code} due to load failure: ${e.message}`);
+                // Find and remove the hospital from the array
+                const index = selectedHospitals.findIndex(h => h.code === code);
+                if (index > -1) {
+                    selectedHospitals.splice(index, 1);
+                }
+                // Re-render the table to reflect the removal
                 renderTable();
             }
         }
 
         async function addAllByProvince() {
             const province = document.getElementById('provinceInput').value.trim();
-            if (!province) {
-                alert('กรุณาระบุชื่อจังหวัด');
-                return;
-            }
+            if (!province) return;
 
-            // Strictly filter by province column (p)
-            const matches = hospitalList.filter(h =>
-                h.p && h.p.toString().includes(province)
-            );
-
+            const matches = hospitalList.filter(h => h.p && h.p.toString().includes(province));
             if (matches.length === 0) {
-                // Check if we even have province data loaded
-                const hasProvinceData = hospitalList.some(h => h.p);
-                if (!hasProvinceData) {
-                    alert('ไม่พบข้อมูลจังหวัดในระบบ (กรุณาอัปเดต Google Apps Script ให้ส่งค่า p มาด้วย)');
-                } else {
-                    alert('ไม่พบโรงพยาบาลในจังหวัดที่ระบุ');
-                }
-                return;
+                 alert('ไม่พบโรงพยาบาลในจังหวัดที่ระบุ');
+                 return;
             }
+            if (matches.length > 20 && !confirm(`พบ ${matches.length} โรงพยาบาล การโหลดอาจใช้เวลานาน ยืนยันหรือไม่?`)) return;
 
-            if (matches.length > 20) {
-                if (!confirm(`พบ ${matches.length} โรงพยาบาล การโหลดอาจใช้เวลานาน ยืนยันหรือไม่?`)) return;
-            }
-
-            // Non-blocking load
-            matches.forEach(h => {
-                addHospital(h.c, h.n);
-            });
+            matches.forEach(h => addHospital(h.c, h.n));
         }
 
         function removeHospital(index) {
             selectedHospitals.splice(index, 1);
             renderTable();
+        }
+
+        // --- Report Generation ---
+        const reportIndicators = [
+            { group: '1. ตัวชี้วัดกระบวนการ (Process Indicators)' },
+            { subgroup: '1.1 การบริหารแผนทางการเงินเปรียบเทียบผลการดำเนินงานผลต่าง' },
+            {
+                title: '1.1.1 มิติรายได้ ± ไม่เกิน 5 %', rowId: '1.1.1',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: '%',
+                sortBest: (a, b) => Math.abs(a.value) - Math.abs(b.value),
+                sortWorst: (a, b) => Math.abs(b.value) - Math.abs(a.value),
+            },
+            {
+                title: '1.1.2 มิติค่าใช้จ่าย ± ไม่เกิน 5 %', rowId: '1.1.2',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: '%',
+                sortBest: (a, b) => Math.abs(a.value) - Math.abs(b.value),
+                sortWorst: (a, b) => Math.abs(b.value) - Math.abs(a.value),
+            },
+            { subgroup: '1.2 การบริหารสินทรัพย์หมุนเวียนและหนี้สินหมุนเวียน' },
+            {
+                title: '1.2.1 ระยะเวลาชำระเจ้าหนี้การค้ายา&เวชภัณฑ์มิใช่ยา ≤ 90 วัน', rowId: '1.2.1', // Note: 180 day rule not implemented
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'วัน',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.2.2 ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้สิทธิ UC ≤60 วัน', rowId: '1.2.2',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'วัน',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.2.3 ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้สิทธิข้าราชการ ≤60 วัน', rowId: '1.2.3',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'วัน',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.2.4 การบริหารสินคงคลัง (Inventory Management) ≤ 60 วัน', rowId: '1.2.4', // Note: Island rule not implemented
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'วัน',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            { subgroup: '1.3 การบริหารจัดการ' },
+            {
+                title: '1.3.1.1 Unit Cost for OP', rowId: '1.3.1.1',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => a.value - b.value, // Lower is better
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.3.1.2 Unit Cost for IP', rowId: '1.3.1.2',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.3.1.3 LC ค่าแรงบุคลากร', rowId: '1.3.1.3',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.3.1.4 MC ค่ายา', rowId: '1.3.1.4',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.3.1.5 MC ค่าวัสดุวิทยาศาสตร์และการแพทย์', rowId: '1.3.1.5',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.3.1.6 MC ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', rowId: '1.3.1.6',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => a.value - b.value,
+                sortWorst: (a, b) => b.value - a.value,
+            },
+            {
+                title: '1.3.2 คะแนนตรวจสอบงบทดลองเบื้องต้น', rowId: '1.3.2',
+                type: 'fail_only',
+                passFn: (d) => d.score > 0,
+            },
+            {
+                title: '1.3.3.1 อัตราครองเตียงผู้ป่วยใน ≥ 80 %', rowId: '1.3.3.1',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: '%',
+                sortBest: (a, b) => b.value - a.value, // Higher is better
+                sortWorst: (a, b) => a.value - b.value,
+            },
+            {
+                title: '1.3.3.2 SumAdjRW เกินค่ากลางกลุ่มรพ.', rowId: '1.3.3.2',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result,
+                sortBest: (a, b) => b.value - a.value, // Higher is better
+                sortWorst: (a, b) => a.value - b.value,
+            },
+            { group: '2. ตัวชี้วัดผลลัพท์การดำเนินงาน' },
+            { subgroup: '2.1 ความสามารถในการทำกำไร' },
+            {
+                title: '2.1.1 ประสิทธิภาพในการดำเนินงาน (Operating Margin)', rowId: '2.1.1',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: '%',
+                sortBest: (a, b) => b.value - a.value,
+                sortWorst: (a, b) => a.value - b.value,
+            },
+            {
+                title: '2.1.2 อัตราผลตอบแทนจากสินทรัพย์ (Return on Asset)', rowId: '2.1.2',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: '%',
+                sortBest: (a, b) => b.value - a.value,
+                sortWorst: (a, b) => a.value - b.value,
+            },
+            {
+                title: '2.1.3 ผลกำไรขาดทุนก่อนหักค่าเสื่อม (EBITDA) ≥ 0', rowId: '2.1.3',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => b.value - a.value,
+                sortWorst: (a, b) => a.value - b.value,
+            },
+            { subgroup: '2.2 การวัดสภาพคล่องทางการเงิน' },
+            {
+                title: '2.2.1 ทุนสำรองสุทธิ (Net Working Capital) ≥ 0', rowId: '2.2.1',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'บาท',
+                sortBest: (a, b) => b.value - a.value,
+                sortWorst: (a, b) => a.value - b.value,
+            },
+            {
+                title: '2.2.2 Cash Ratio ≥ 0.8', rowId: '2.2.2',
+                passFn: (d) => d.score > 0,
+                valueSelector: (d) => d.result, unit: 'เท่า',
+                sortBest: (a, b) => b.value - a.value,
+                sortWorst: (a, b) => a.value - b.value,
+            },
+        ];
+
+        function generateComparisonReport() {
+            const modal = document.getElementById('reportModal');
+            const reportBody = document.getElementById('reportBody');
+            reportBody.innerHTML = ''; // Clear previous report
+
+            const hospitals = selectedHospitals.filter(h => !h.loading && h.data && !h.data.error);
+
+            if (hospitals.length < 1) {
+                reportBody.innerHTML = '<p style="text-align:center; padding: 20px;">กรุณาเลือกและรอโหลดข้อมูลโรงพยาบาลอย่างน้อย 1 แห่ง</p>';
+                modal.style.display = 'block';
+                return;
+            }
+
+            let html = '';
+            reportIndicators.forEach(indicator => {
+                if (indicator.group) {
+                    html += `<h2 class="report-group-title">${indicator.group}</h2>`;
+                    return;
+                }
+                if (indicator.subgroup) {
+                    html += `<h3 class="report-group-title" style="font-size:1.2em; margin-top:15px; margin-bottom:10px;">${indicator.subgroup}</h3>`;
+                    return;
+                }
+
+                html += `<div class="report-section">`;
+                html += `<div class="report-section-title">${indicator.title}</div>`;
+                html += `<div class="report-section-body">`;
+
+                const hospitalData = hospitals.map(h => {
+                    const config = rowConfig.find(r => r.id === indicator.rowId);
+                    const data = getCellData(h, config);
+                    return {
+                        name: h.name,
+                        data: data,
+                        value: indicator.valueSelector ? indicator.valueSelector(data) : data.score,
+                    };
+                }).filter(h => h.value !== null && h.value !== undefined);
+
+                const passed = hospitalData.filter(h => indicator.passFn(h.data));
+                const failed = hospitalData.filter(h => !indicator.passFn(h.data));
+
+                // Summary
+                let summaryClass = 'mixed';
+                let summaryText = '';
+                if (failed.length === 0 && passed.length > 0) {
+                    summaryClass = 'pass';
+                    summaryText = 'ทุกโรงพยาบาลผ่านตัวชี้วัดนี้';
+                } else if (passed.length === 0 && failed.length > 0) {
+                    summaryClass = 'fail';
+                    summaryText = 'ทุกโรงพยาบาลไม่ผ่านตัวชี้วัดนี้';
+                } else if (passed.length > 0 && failed.length > 0) {
+
+                    summaryText = `มี <strong style="color:#27ae60">ผ่าน</strong>  <strong style="color:#27ae60">${passed.length}</strong> โรงพยาบาล และ <strong style="color:#e74c3c">ไม่ผ่าน</strong> <strong style="color:#e74c3c">${failed.length}</strong> โรงพยาบาล ในตัวชี้วัดนี้`;
+              
+                
+                
+                } else {
+                    summaryText = 'ไม่พบข้อมูลสำหรับตัวชี้วัดนี้';
+                }
+                html += `<div class="report-summary ${summaryClass}">${summaryText}</div>`;
+
+                if (indicator.type === 'fail_only') {
+                     if(failed.length > 0) {
+                        html += '<div class="rank-list worst"><h4>โรงพยาบาลที่ไม่ผ่าน</h4><ol>';
+                        failed.forEach(h => {
+                            html += `<li><span>${h.name}</span></li>`;
+                        });
+                        html += '</ol></div>';
+                    }
+                } else {
+                    html += '<div class="report-ranking">';
+                    // Best 
+                    if (passed.length > 0) {
+                        passed.sort(indicator.sortBest);
+                        html += '<div class="rank-list best"><h4>โรงพยาบาลที่ผ่าน (เรียงตามผลงานดีที่สุด)</h4><ol>';
+                        passed.forEach(h => {
+                            html += `<li><span>${h.name}</span> <span class="value">${formatNumber(h.value)} ${indicator.unit || ''}</span></li>`;
+                        });
+                        html += '</ol></div>';
+                    } else {
+                        html += '<div class="rank-list best"><h4>โรงพยาบาลที่ผ่าน</h4><p>-</p></div>';
+                    }
+
+                    // Worst
+                    if (failed.length > 0) {
+                        failed.sort(indicator.sortWorst);
+                        html += '<div class="rank-list worst"><h4>โรงพยาบาลที่ไม่ผ่าน (เรียงตามผลงานที่ต้องปรับปรุง)</h4><ol>';
+                        failed.forEach(h => {
+                             html += `<li><span>${h.name}</span> <span class="value">${formatNumber(h.value)} ${indicator.unit || ''}</span></li>`;
+                        });
+                        html += '</ol></div>';
+                    } else {
+                         html += '<div class="rank-list worst"><h4>โรงพยาบาลที่ไม่ผ่าน</h4><p>-</p></div>';
+                    }
+                    html += '</div>'; // end report-ranking
+                }
+
+                html += `</div></div>`; // end report-section-body and report-section
+            });
+
+            reportBody.innerHTML = html;
+            modal.style.display = 'block';
+        }
+
+        function closeReport() {
+            document.getElementById('reportModal').style.display = 'none';
         }
 
         // --- Initialization ---
@@ -886,12 +1268,10 @@
                 searchInput.addEventListener('input', (e) => {
                     const val = e.target.value.toLowerCase();
                     const suggestions = document.getElementById('suggestions');
-
                     if (val.length < 2) {
                         suggestions.style.display = 'none';
                         return;
                     }
-
                     const matches = hospitalList.filter(h =>
                         (h.n && h.n.toString().toLowerCase().includes(val)) ||
                         (h.c && h.c.toString().includes(val)) ||
@@ -902,10 +1282,29 @@
                         suggestions.innerHTML = matches.map(h => `
                             <div class="suggestion-item" onclick="selectSuggestion('${h.c}', '${h.n}')">
                                 <div>${h.n}</div>
-                                <div style="font-size:0.8em; color:#888;">
-                                    ${h.p ? h.p + ' | ' : ''}${h.c}
-                                </div>
-                            </div>
+                                <div style="font-size:0.8em; color:#888;">${h.p ? h.p + ' | ' : ''}${h.c}</div>
+                            </div>`).join('');
+                        suggestions.style.display = 'block';
+                    } else {
+                        suggestions.style.display = 'none';
+                    }
+                });
+                
+                // Province Search Logic
+                const provinceInput = document.getElementById('provinceInput');
+                provinceInput.addEventListener('input', (e) => {
+                    const val = e.target.value.toLowerCase();
+                    const suggestions = document.getElementById('provinceSuggestions');
+                    if (val.length < 1) {
+                        suggestions.style.display = 'none';
+                        return;
+                    }
+                    const provinces = [...new Set(hospitalList.map(h => h.p).filter(p => p))];
+                    const matches = provinces.filter(p => p.toString().toLowerCase().includes(val)).slice(0, 10);
+
+                    if (matches.length > 0) {
+                        suggestions.innerHTML = matches.map(p => `
+                            <div class="suggestion-item" onclick="selectProvinceSuggestion('${p}')">${p}</div>
                         `).join('');
                         suggestions.style.display = 'block';
                     } else {
@@ -915,46 +1314,12 @@
 
                 // Close suggestions on click outside
                 document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.search-box')) {
-                        document.getElementById('suggestions').style.display = 'none';
-                    }
-                    if (!e.target.closest('.province-box')) {
-                        document.getElementById('provinceSuggestions').style.display = 'none';
-                    }
-                });
-
-                // Province Search Logic
-                const provinceInput = document.getElementById('provinceInput');
-                provinceInput.addEventListener('input', (e) => {
-                    const val = e.target.value.toLowerCase();
-                    const suggestions = document.getElementById('provinceSuggestions');
-
-                    if (val.length < 1) {
-                        suggestions.style.display = 'none';
-                        return;
-                    }
-
-                    // Extract unique provinces
-                    const provinces = [...new Set(hospitalList.map(h => h.p).filter(p => p))];
-
-                    const matches = provinces.filter(p =>
-                        p.toString().toLowerCase().includes(val)
-                    ).slice(0, 10);
-
-                    if (matches.length > 0) {
-                        suggestions.innerHTML = matches.map(p => `
-                            <div class="suggestion-item" onclick="selectProvinceSuggestion('${p}')">
-                                <div>${p}</div>
-                            </div>
-                        `).join('');
-                        suggestions.style.display = 'block';
-                    } else {
-                        suggestions.style.display = 'none';
-                    }
+                    if (!e.target.closest('.search-box')) document.getElementById('suggestions').style.display = 'none';
+                    if (!e.target.closest('.province-box')) document.getElementById('provinceSuggestions').style.display = 'none';
                 });
 
             } catch (e) {
-                alert('Failed to load hospital list');
+                alert('Failed to load hospital list: ' + e.message);
             }
         };
 
