@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ไลบรารี QR Code สำหรับสร้างรูป SVG -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodegen@1.8.0/js/qrcodegen.js"></script>
+    <!-- QR Code Library CDN (qrious) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
     <style>
         body {
             font-family: 'Kanit', sans-serif;
@@ -166,12 +166,23 @@
     <div id="qr-modal" class="modal-overlay hidden">
         <div class="modal-container">
             <button class="close-button" onclick="document.getElementById('qr-modal').classList.add('hidden')">&times;</button>
-            <div id="qrcode" class="p-2 bg-white rounded-lg inline-block"></div>
+            <canvas id="qrCodeCanvasModal" width="300" height="300" class="p-2 bg-white rounded-lg inline-block"></canvas>
+            <p id="qrcode-link-display" class="mt-4 text-gray-700 break-all"></p>
+            <div id="modalActionButtons" class="mt-4 flex flex-col sm:flex-row justify-center gap-4">
+                <button id="copyImageModalBtn"
+                        class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                    คัดลอกรูปภาพ
+                </button>
+                <button id="downloadImageModalBtn"
+                        class="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-purple-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg">
+                    ดาวน์โหลดรูปภาพ
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        window.onload = () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQzOYXJfz9KNdBbGFzbNH2zeBW9XN9w_Y3u5SsjPxY7a47APWwSBXwDs8fFPaa3dcOZIQ0mT7PhRGGx/pub?output=csv';
 
             const loadingEl = document.getElementById('loading');
@@ -181,7 +192,11 @@
             const sortButton = document.getElementById('sort-priority');
             // อ้างอิงองค์ประกอบสำหรับป๊อปอัพ QR Code
             const qrModal = document.getElementById('qr-modal');
-            const qrcodeContainer = document.getElementById('qrcode');
+            const qrCodeCanvasModal = document.getElementById('qrCodeCanvasModal');
+            const qrcodeLinkDisplay = document.getElementById('qrcode-link-display');
+            const copyImageModalBtn = document.getElementById('copyImageModalBtn');
+            const downloadImageModalBtn = document.getElementById('downloadImageModalBtn');
+
 
             let allData = [];
             let originalDataOrder = [];
@@ -209,15 +224,23 @@
                     });
             };
 
+            const normalizeUrl = (url) => {
+                if (!url) return '';
+                if (!/^(https?:\/\/)/i.test(url)) {
+                    return `https://${url}`;
+                }
+                return url;
+            };
+
             const parseCSV = (csv) => {
                 const rows = csv.split('\n').map(row => row.trim()).filter(row => row.length > 0);
                 const dataRows = rows.slice(1);
-                
+
                 const parseRow = (row) => {
                     const columns = [];
                     let inQuote = false;
                     let currentColumn = '';
-                    
+
                     for (let i = 0; i < row.length; i++) {
                         const char = row[i];
                         if (char === '"' && (i === 0 || row[i-1] === ',')) {
@@ -242,17 +265,17 @@
                     // นับจำนวนดาวที่ถูกเติมสำหรับเรียงลำดับ
                     const starString = columns[0] || '';
                     const filledStarsCount = (starString.match(/★/g) || []).length;
-                    
+
                     return {
                         priority: filledStarsCount,
                         starDisplay: starString,
                         projectName: columns[1] || '',
                         details: columns[2] || '',
-                        link: columns[3] || ''
+                        link: normalizeUrl(columns[3] || '')
                     };
                 }).filter(data => data !== null);
             };
-            
+
             const renderTable = (data) => {
                 tableBodyEl.innerHTML = '';
                 data.forEach(item => {
@@ -263,7 +286,7 @@
                             window.open(item.link, '_blank');
                         });
                     }
-                    
+
                     // เซลล์ Priority
                     const priorityCell = document.createElement('td');
                     priorityCell.classList.add('px-2', 'md:px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'font-medium', 'text-gray-900');
@@ -306,24 +329,28 @@
                     const qrButton = document.createElement('button');
                     qrButton.classList.add('text-blue-500', 'hover:text-blue-700');
                     qrButton.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mx-auto"><rect width="8" height="8" x="2" y="2" rx="2"/><path d="M14 2h6a2 2 0 0 1 2 2v6"/><path d="M22 14v6a2 2 0 0 1-2 2h-6"/><path d="M14 10v4a2 2 0 0 0 2 2h4"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mx-auto"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16.01V12l-4-.01"/><path d="M16 12h.01"/><path d="M21 12h.01"/><path d="M12 21h.01"/></svg>
                     `;
                     qrButton.addEventListener('click', (e) => {
                         e.stopPropagation();
                         if (item.link) {
-                            // เพิ่มการตรวจสอบว่าไลบรารี qrcodegen โหลดสมบูรณ์แล้ว
-                            if (typeof qrcodegen !== 'undefined') {
+                            if (typeof window.QRious !== 'undefined') {
                                 try {
-                                    // สร้าง QR Code เป็น SVG
-                                    const qr0 = qrcodegen.QrCode.encodeText(item.link, qrcodegen.QrCode.Ecc.HIGH);
-                                    const svg = qr0.toSvgString(4);
-                                    qrcodeContainer.innerHTML = svg;
-                                    qrModal.classList.remove('hidden'); // แสดงป๊อปอัพ
+                                    new window.QRious({
+                                        element: qrCodeCanvasModal,
+                                        value: item.link,
+                                        size: 300,
+                                        level: 'H',
+                                        background: 'white',
+                                        foreground: 'black'
+                                    });
+                                    qrcodeLinkDisplay.textContent = item.link;
+                                    qrModal.classList.remove('hidden');
                                 } catch (error) {
                                     console.error('Error generating QR code:', error);
                                 }
                             } else {
-                                console.error('Error: qrcodegen library is not defined. It may not have loaded correctly.');
+                                console.error('Error: QRious library is not defined. It may not have loaded correctly.');
                             }
                         }
                     });
@@ -349,12 +376,55 @@
                     sortedData = [...originalDataOrder];
                     sortIcon.style.transform = "rotate(90deg)"; // รีเซ็ตไอคอน
                 }
-                
+
                 renderTable(sortedData);
             });
 
+            // Event listener for the "คัดลอกรูปภาพ" button in the modal
+            copyImageModalBtn.addEventListener('click', async () => {
+                if (qrModal && !qrModal.classList.contains('hidden')) { // Check if modal and QR code is visible
+                    try {
+                        const imageDataUrl = qrCodeCanvasModal.toDataURL('image/png');
+                        const response = await fetch(imageDataUrl);
+                        const blob = await response.blob();
+
+                        await navigator.clipboard.write([
+                            new ClipboardItem({
+                                [blob.type]: blob,
+                            }),
+                        ]);
+                        alert('คัดลอกรูปภาพ QR Code ไปยังคลิปบอร์ดแล้ว');
+                    } catch (err) {
+                        console.error('Failed to copy image to clipboard:', err);
+                        if (err.name === 'NotAllowedError') {
+                            alert('ไม่สามารถคัดลอกรูปภาพได้: เบราว์เซอร์บล็อกการเข้าถึงคลิปบอร์ด (ลองใช้ปุ่มดาวน์โหลดแทน)');
+                        } else {
+                            alert('ไม่สามารถคัดลอกรูปภาพได้ กรุณาลองใหม่');
+                        }
+                    }
+                } else {
+                    alert('ยังไม่มี QR Code ให้คัดลอก');
+                }
+            });
+
+            // Event listener for the "ดาวน์โหลดรูปภาพ" button in the modal
+            downloadImageModalBtn.addEventListener('click', () => {
+                if (qrModal && !qrModal.classList.contains('hidden')) { // Check if modal and QR code is visible
+                    const imageDataUrl = qrCodeCanvasModal.toDataURL('image/png');
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = imageDataUrl;
+                    downloadLink.download = 'qrcode.png';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    alert('ดาวน์โหลดรูปภาพ QR Code แล้ว');
+                } else {
+                    alert('ยังไม่มี QR Code ให้ดาวน์โหลด');
+                }
+            });
+
             fetchData();
-        };
+        });
     </script>
 
 </body>
