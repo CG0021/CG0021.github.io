@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการหอพัก</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            <style>
+            body {
+                font-family: 'Prompt', sans-serif;
+                background-color: #f3f4f6;
+            }
+    
+            .nav-item.active {
+                color: #4F46E5;
+                border-top: 2px solid #4F46E5;
+                background: transparent;
+            }
+            /* Add this to hide the default marker */
+            summary::-webkit-details-marker {
+                display: none;
+            }
+            summary {
+                list-style: none;
+            }
+            .batch-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .batch-table th, .batch-table td {
+                text-align: left;
+                padding: 6px 4px;
+                border-bottom: 1px solid #e5e7eb;
+                font-size: 14px;
+            }
+            .batch-table th {
+                font-size: 12px;
+                font-weight: 600;
+                color: #4b5563;
+                background-color: #f9fafb;
+            }
+            .batch-table input[type="number"], .batch-table input[type="text"] {
+                width: 100%;
+                padding: 4px 6px;
+                border: 1px solid #d1d5db;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+             .batch-table input:focus {
+                outline: 2px solid #4F46E5;
+                border-color: transparent;
+            }
+            .batch-detail-row.hidden {
+                display: none;
+            }
+        </style>
+    </head>
+    
+    <body class="pb-20">
+    
+        <!-- Header -->
+        <div class="bg-indigo-600 text-white p-4 sticky top-0 z-50 shadow-lg">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold"><i class="fa-solid fa-building-user mr-2"></i>Dorm Manager</h1>
+                <button onclick="fetchData()" class="text-sm bg-indigo-500 hover:bg-indigo-700 px-3 py-1 rounded"><i
+                        class="fa-solid fa-sync"></i> รีเฟรช</button>
+            </div>
+        </div>
+    
+        <!-- Main Content -->
+        <div id="app" class="max-w-md mx-auto p-4">
+    
+            <!-- Loading State -->
+            <div id="loading" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white p-4 rounded-lg shadow-lg flex items-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-indigo-600 text-2xl mr-3"></i>
+                    <span>กำลังโหลดข้อมูล...</span>
+                </div>
+            </div>
+    
+            <!-- Tab: Dashboard -->
+            <div id="tab-dashboard" class="tab-content block space-y-4">
+                 <div class="bg-white p-3 rounded-xl card-shadow">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-gray-700">ภาพรวมเดือน</h3>
+                        <i id="dashboard-loading-spinner" class="fa-solid fa-sync fa-spin text-indigo-500 hidden"></i>
+                    </div>
+                     <div class="flex gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                        <select id="dashMonth"
+                            class="border-none bg-transparent font-bold text-indigo-700 flex-1 focus:ring-0 cursor-pointer"
+                            onchange="renderDashboard()">
+                            <option value="มกราคม">มกราคม</option>
+                            <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                            <option value="มีนาคม">มีนาคม</option>
+                            <option value="เมษายน">เมษายน</option>
+                            <option value="พฤษภาคม">พฤษภาคม</option>
+                            <option value="มิถุนายน">มิถุนายน</option>
+                            <option value="กรกฎาคม">กรกฎาคม</option>
+                            <option value="สิงหาคม">สิงหาคม</option>
+                            <option value="กันยายน">กันยายน</option>
+                            <option value="ตุลาคม">ตุลาคม</option>
+                            <option value="พฤศจิกายน">พฤศจิกายน</option>
+                            <option value="ธันวาคม">ธันวาคม</option>
+                        </select>
+                        <select id="dashYear"
+                            class="border-none bg-transparent font-bold text-indigo-700 w-20 focus:ring-0 cursor-pointer"
+                            onchange="renderDashboard()">
+                            <option value="2567">2567</option>
+                            <option value="2568">2568</option>
+                            <option value="2569">2569</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div class="bg-white p-4 rounded-xl card-shadow" id="dash-summary">
+                     <div class="text-center mb-4">
+                         <p class="text-gray-500 text-sm">รายรับรวมทุกรายการ (ตามบิล)</p>
+                        <p class="text-3xl font-bold text-indigo-700" id="summary-grand-total">0</p>
+                        <p class="text-xs text-gray-400">บาท</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm border-t pt-3">
+                        <div class="flex justify-between"><span>ค่าห้อง</span> <span class="font-bold" id="summary-rent">0</span></div>
+                        <div class="flex justify-between"><span>ค่าไฟ</span> <span class="font-bold" id="summary-elec">0</span></div>
+                        <div class="flex justify-between"><span>ค่าน้ำ</span> <span class="font-bold" id="summary-water">0</span></div>
+                        <div class="flex justify-between"><span>อื่นๆ</span> <span class="font-bold" id="summary-other">0</span></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded-xl card-shadow text-center">
+                        <p class="text-gray-500 text-sm">รายรับที่จ่ายแล้ว</p>
+                        <p class="text-2xl font-bold text-green-600" id="dash-total">0</p>
+                        <p class="text-xs text-gray-400">บาท</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl card-shadow text-center">
+                        <p class="text-gray-500 text-sm">ค้างชำระ</p>
+                        <p class="text-2xl font-bold text-red-500" id="dash-unpaid">0</p>
+                        <p class="text-xs text-gray-400">บาท</p>
+                    </div>
+                </div>
+    
+                <div class="bg-white p-4 rounded-xl card-shadow">
+                    <h3 class="font-bold text-gray-700 mb-3" id="room-status-header">สรุปสถานะห้องพัก</h3>
+                    <div class="space-y-3" id="room-status-list">
+                        <!-- Room items will be injected here -->
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Tab: Monthly Record (Batch) -->
+            <div id="tab-add" class="tab-content hidden">
+                <div class="bg-white p-4 rounded-xl card-shadow min-h-screen pb-24">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-gray-800">บันทึกรายเดือน</h2>
+                        <div class="flex gap-2">
+                            <button onclick="openManageBatchModal()"
+                                class="text-blue-600 text-sm bg-blue-50 px-3 py-1 rounded-full"><i
+                                    class="fa-solid fa-pen-to-square"></i> จัดการห้อง</button>
+                            <button onclick="loadBatchData()"
+                                class="text-indigo-600 text-sm bg-indigo-50 px-3 py-1 rounded-full"><i
+                                    class="fa-solid fa-sync"></i> โหลด</button>
+                        </div>
+                    </div>
+    
+                    <div class="flex gap-2 mb-4 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                        <select id="batchMonth"
+                            class="border-none bg-transparent font-bold text-indigo-700 flex-1 focus:ring-0 cursor-pointer"
+                            onchange="loadBatchData()">
+                            <option value="มกราคม">มกราคม</option>
+                            <option value="กุมภาพันธ์">กุมภาพันธ์</option>
+                            <option value="มีนาคม">มีนาคม</option>
+                            <option value="เมษายน">เมษายน</option>
+                            <option value="พฤษภาคม">พฤษภาคม</option>
+                            <option value="มิถุนายน">มิถุนายน</option>
+                            <option value="กรกฎาคม">กรกฎาคม</option>
+                            <option value="สิงหาคม">สิงหาคม</option>
+                            <option value="กันยายน">กันยายน</option>
+                            <option value="ตุลาคม">ตุลาคม</option>
+                            <option value="พฤศจิกายน">พฤศจิกายน</option>
+                            <option value="ธันวาคม">ธันวาคม</option>
+                        </select>
+                        <select id="batchYear"
+                            class="border-none bg-transparent font-bold text-indigo-700 w-20 focus:ring-0 cursor-pointer"
+                            onchange="loadBatchData()">
+                            <option value="2567">2567</option>
+                            <option value="2568" selected>2568</option>
+                            <option value="2569">2569</option>
+                        </select>
+                    </div>
+    
+                    <div id="batch-container" class="space-y-4">
+                        <!-- Dynamic Room Cards -->
+                        <div class="text-center text-gray-400 py-10">
+                            <i class="fa-solid fa-list-check text-4xl mb-2"></i>
+                            <p>เลือกเดือนและปีเพื่อโหลดข้อมูล</p>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Floating Save Button -->
+                <div class="fixed bottom-20 left-0 right-0 px-4 max-w-md mx-auto z-30">
+                    <button onclick="saveBatch()"
+                        class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-xl hover:bg-indigo-700 transition duration-300 flex justify-center items-center backdrop-blur-sm bg-opacity-90">
+                        <i class="fa-solid fa-save mr-2"></i> บันทึกทั้งหมด
+                    </button>
+                </div>
+            </div>
+    
+            <!-- Tab: History/List -->
+            <div id="tab-history" class="tab-content hidden">
+                 <div class="bg-white p-4 rounded-xl shadow">
+                    <div id="history-header" class="flex justify-between items-center cursor-pointer" onclick="toggleHistoryDetails()">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">ประวัติการชำระ</h2>
+                            <div id="history-summary-subheader" class="text-xs text-gray-500">
+                               <!-- Summary will be injected here by JS -->
+                            </div>
+                        </div>
+                        <i id="history-toggle-icon" class="fa-solid fa-chevron-up text-gray-500 transition-transform"></i>
+                    </div>
+    
+                    <div id="history-details-content" class="mt-4">
+                        <div class="relative mb-4">
+                             <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <i class="fa-solid fa-search text-gray-400"></i>
+                            </span>
+                            <input type="text" id="searchInput" onkeyup="filterHistory()" placeholder="ค้นหาห้อง, ชื่อ, เดือน..." class="w-full border rounded-lg pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="space-y-4">
+                            <details open class="group">
+                                <summary id="unpaid-summary" class="font-bold text-lg text-red-600 cursor-pointer group-open:mb-2 list-none">
+                                    <div class="flex items-center">
+                                        <i class="fa-solid fa-chevron-right text-xs mr-2 transition-transform group-open:rotate-90"></i>
+                                        ที่ยังไม่ชำระ
+                                    </div>
+                                </summary>
+                                <div class="space-y-3 pt-2 pl-2 border-l-2 border-gray-100" id="history-list-unpaid">
+                                    <!-- Unpaid items -->
+                                </div>
+                            </details>
+                            <details class="group">
+                                 <summary id="paid-summary" class="font-bold text-lg text-green-600 cursor-pointer group-open:mb-2 list-none">
+                                    <div class="flex items-center">
+                                        <i class="fa-solid fa-chevron-right text-xs mr-2 transition-transform group-open:rotate-90"></i>
+                                        ชำระแล้ว
+                                    </div>
+                                </summary>
+                                <div class="space-y-3 pt-2 pl-2 border-l-2 border-gray-100" id="history-list-paid">
+                                    <!-- Paid items -->
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+        </div>
+    
+        <!-- Bottom Navigation -->
+        <div
+            class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 pb-5 z-40 shadow-inner max-w-md mx-auto">
+            <button onclick="switchTab('dashboard')"
+                class="nav-item active flex flex-col items-center text-gray-500 w-full">
+                <i class="fa-solid fa-chart-pie text-xl mb-1"></i>
+                <span class="text-xs">ภาพรวม</span>
+            </button>
+            <button onclick="switchTab('add')" class="nav-item flex flex-col items-center text-gray-500 w-full">
+                <i class="fa-solid fa-circle-plus text-xl mb-1"></i>
+                <span class="text-xs">จดมิเตอร์</span>
+            </button>
+            <button onclick="switchTab('history')" class="nav-item flex flex-col items-center text-gray-500 w-full">
+                <i class="fa-solid fa-list text-xl mb-1"></i>
+                <span class="text-xs">รายการ</span>
+            </button>
+        </div>
+    
+        <!-- Manage Batch Modal -->
+        <div id="manage-batch-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">จัดการห้อง (สำหรับเดือนนี้)</h3>
+                    <button onclick="closeManageBatchModal()" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                </div>
+    
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">เพิ่มห้องใหม่ในรายการ</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="new-room-no-input" class="border w-full p-2 rounded" placeholder="กรอกเลขห้อง...">
+                        <button onclick="addRoomFromModal()" class="bg-green-500 text-white px-4 py-2 rounded shrink-0">เพิ่ม</button>
+                    </div>
+                </div>
+    
+                <div class="border-t pt-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">ห้องในรายการปัจจุบัน</h4>
+                    <div id="current-batch-room-list" class="space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Room list will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Settings Modal for URL -->
+        <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center">
+            <div class="bg-white p-6 rounded-lg w-10/12 max-w-sm">
+                <h3 class="font-bold text-lg mb-2">ตั้งค่าการเชื่อมต่อ</h3>
+                <p class="text-sm text-gray-600 mb-4">กรุณาใส่ Web App URL ที่ได้จากการ Deploy Google Apps Script</p>
+                <input type="text" id="webapp-url" class="border w-full p-2 rounded mb-4"
+                    placeholder="https://script.google.com/macros/s/...">
+                <button onclick="saveSettings()"
+                    class="bg-indigo-600 text-white w-full py-2 rounded">บันทึกและเริ่มใช้งาน</button>
+            </div>
+        </div>
+    
+        <script>
+            // --- Configuration ---
+            let WEB_APP_URL = localStorage.getItem('dorm_webapp_url') || 'https://script.google.com/macros/s/AKfycbw-cWeSMKZrXSmgVciy8ZZBSHWjbNLPDWi8imvZShzb7F0fY5dpiy1hAhxqm0veGKWz/exec';
+            let allData = [];
+    
+            // --- Initialization ---
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!WEB_APP_URL) {
+                    document.getElementById('settings-modal').classList.remove('hidden');
+                } else {
+                    document.getElementById('settings-modal').classList.add('hidden');
+                    fetchData();
+                }
+    
+                // Set default month and year for both dash and batch selectors
+                const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                const d = new Date();
+                const currentMonthName = monthNames[d.getMonth()];
+                const currentYear = d.getFullYear() + 543;
+    
+                document.getElementById('batchMonth').value = currentMonthName;
+                document.getElementById('dashMonth').value = currentMonthName;
+                
+                // Set year and create year options dynamically
+                const years = [];
+                for (let i = -1; i < 5; i++) {
+                    years.push(currentYear + i);
+                }
+                ['batchYear', 'dashYear'].forEach(id => {
+                    const select = document.getElementById(id);
+                    select.innerHTML = '';
+                    years.forEach(y => {
+                        const option = document.createElement('option');
+                        option.value = y;
+                        option.innerText = y;
+                        if (y === currentYear) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    });
+                });
+            });
+    
+            async function renderSummary(month, year) {
+                try {
+                    const response = await fetch(`${WEB_APP_URL}?action=get_summary&month=${month}&year=${year}`);
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        const summary = result.data;
+                        document.getElementById('summary-grand-total').innerText = summary.grandTotal.toLocaleString();
+                        document.getElementById('summary-rent').innerText = summary.totalRent.toLocaleString();
+                        document.getElementById('summary-elec').innerText = summary.totalElec.toLocaleString();
+                        document.getElementById('summary-water').innerText = summary.totalWater.toLocaleString();
+                        document.getElementById('summary-other').innerText = summary.totalOther.toLocaleString();
+                    }
+                } catch (error) {
+                    console.error('Could not load summary:', error);
+                }
+            }
+    
+            async function renderDashboard() {
+                const spinner = document.getElementById('dashboard-loading-spinner');
+                try {
+                    spinner.classList.remove('hidden');
+    
+                    let paidRevenue = 0;
+                    let unpaidTotal = 0;
+    
+                    const currentMonth = document.getElementById('dashMonth').value;
+                    const currentYear = document.getElementById('dashYear').value;
+                    
+                    // Sync batch selectors
+                    document.getElementById('batchMonth').value = currentMonth;
+                    document.getElementById('batchYear').value = currentYear;
+    
+                    // Render the new summary section
+                    await renderSummary(currentMonth, currentYear);
+                    renderHistory(); // <-- BUG FIX: Refresh history when month/year changes
+    
+                    const statusList = document.getElementById('room-status-list');
+                    statusList.innerHTML = '';
+                    
+                    const monthData = allData.filter(row => row['เดือน'] === currentMonth && row['ปี'].toString() === currentYear);
+    
+                    if (monthData.length === 0) {
+                         statusList.innerHTML = '<p class="text-center text-gray-400 py-4">ไม่มีข้อมูลสำหรับเดือนนี้</p>';
+                    }
+    
+                    monthData.sort((a, b) => a['เลขที่ห้อง'].localeCompare(b['เลขที่ห้อง']));
+    
+                    monthData.forEach(row => {
+                        const totalAmount = parseFloat(row['รวมที่ต้องชำระ']) || 0;
+                        if (row['สถานะชำระค่าหอ'] === 'จ่ายแล้ว') {
+                            paidRevenue += totalAmount;
+                        } else {
+                            unpaidTotal += totalAmount;
+                        }
+    
+                        const isPaid = row['สถานะชำระค่าหอ'] === 'จ่ายแล้ว';
+                        const statusColor = isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+                        const html = `
+                        <div class="flex justify-between items-center p-3 border rounded-lg">
+                            <div>
+                                <div class="font-bold text-gray-800">ห้อง ${row['เลขที่ห้อง']} <span class="text-xs font-normal text-gray-500">(${row['ชื่อผู้เช่า'] || 'ไม่มีชื่อ'})</span></div>
+                                <div class="text-xs text-gray-500">${row['เดือน']} ${row['ปี']}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-indigo-600">${totalAmount.toLocaleString()} ฿
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full ${statusColor}">${row['สถานะชำระค่าหอ']}</span>
+                            </div>
+                        </div>
+                        `;
+                        statusList.innerHTML += html;
+                    });
+    
+                    document.getElementById('dash-total').innerText = paidRevenue.toLocaleString();
+                    document.getElementById('dash-unpaid').innerText = unpaidTotal.toLocaleString();
+                    document.getElementById('room-status-header').innerText = `สรุปสถานะห้องพัก (${currentMonth} ${currentYear})`;
+                } finally {
+                    spinner.classList.add('hidden');
+                }
+            }
+    
+            function saveSettings() {
+                const url = document.getElementById('webapp-url').value.trim();
+                if (url) {
+                    localStorage.setItem('dorm_webapp_url', url);
+                    WEB_APP_URL = url;
+                    document.getElementById('settings-modal').classList.add('hidden');
+                    fetchData();
+                } else {
+                    alert('กรุณาใส่ URL');
+                }
+            }
+    
+            // --- Core Functions ---
+            async function fetchData() {
+                showLoading(true);
+                try {
+                    const response = await fetch(`${WEB_APP_URL}?action=get_data`);
+    
+                    if (!response.ok) {
+                        throw new Error(`Server returned ${response.status} ${response.statusText}`);
+                    }
+    
+                    const text = await response.text();
+                    let result;
+                    try {
+                        result = JSON.parse(text);
+                    } catch (e) {
+                        console.error("Response is not JSON:", text.substring(0, 100));
+                        throw new Error("รูปแบบข้อมูลไม่ถูกต้อง (อาจเกิดจากไม่ได้ตั้งค่าสิทธิ์เป็น 'Anyone')");
+                    }
+    
+                    if (result.status === 'success') {
+                        allData = result.data;
+                        renderDashboard();
+                        renderHistory();
+                    } else {
+                        alert('เกิดข้อผิดพลาดจากระบบ: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    const wantReset = confirm('ไม่สามารถเชื่อมต่อกับ Google Sheet ได้\n\nError: ' + error.message +
+                        '\n\nคุณต้องการรีเซ็ตการตั้งค่า URL เป็นค่าเริ่มต้นหรือไม่?');
+                    if (wantReset) {
+                        localStorage.removeItem('dorm_webapp_url');
+                        location.reload();
+                    } else {
+                        document.getElementById('settings-modal').classList.remove('hidden');
+                    }
+                } finally {
+                    showLoading(false);
+                }
+            }
+    
+            async function updateStatus(rowId, newStatus) {
+                if (!confirm('ยืนยันการเปลี่ยนสถานะ?')) return;
+    
+                showLoading(true);
+                try {
+                    const response = await fetch(`${WEB_APP_URL}?action=update_status&rowId=${rowId}&status=${newStatus}`);
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        fetchData();
+                    }
+                } catch (e) {
+                    alert('Error updating status');
+                } finally {
+                    showLoading(false);
+                }
+            }
+    
+            // --- Batch Functions ---
+            let batchState = [];
+    
+            function loadBatchData() {
+                const month = document.getElementById('batchMonth').value;
+                const year = document.getElementById('batchYear').value;
+    
+                const currentMonthData = allData.filter(r => r['เดือน'] === month && r['ปี'].toString() === year);
+                let uniqueRooms = [...new Set(allData.map(r => r['เลขที่ห้อง']))].sort();
+    
+                if (uniqueRooms.length === 0) {
+                   // uniqueRooms = ['101', '102', '103', '104', '105']; // Default
+                }
+    
+                batchState = uniqueRooms.map(roomNo => {
+                    const existing = currentMonthData.find(r => r['เลขที่ห้อง'] == roomNo);
+    
+                    if (existing) {
+                        return {
+                            roomNo: roomNo,
+                            tenant: existing['ชื่อผู้เช่า'],
+                            prevWaterMeter: existing['มิเตอร์ค่าน้ำณสิ้นเดือน'],
+                            currWaterMeter: existing['มิเตอร์ค่าน้ำปัจจุบัน'],
+                            prevElecMeter: existing['มิเตอร์ค่าไฟณสิ้นเดือน'],
+                            currElecMeter: existing['มิเตอร์ค่าไฟปัจจุบัน'],
+                            waterRate: existing['อัตราค่าน้ำ'],
+                            elecRate: existing['อัตราค่าไฟ'],
+                            rent: existing['ค่าเช่า'],
+                            other: existing['อื่นๆ'],
+                            status: existing['สถานะชำระค่าหอ'],
+                            rowId: existing.rowId,
+                            isNew: false
+                        };
+                    } else {
+                        const roomHistory = allData.filter(r => r['เลขที่ห้อง'] == roomNo);
+                        const lastRecord = roomHistory[roomHistory.length - 1];
+    
+                        return {
+                            roomNo: roomNo,
+                            tenant: lastRecord ? lastRecord['ชื่อผู้เช่า'] : '',
+                            prevWaterMeter: lastRecord ? lastRecord['มิเตอร์ค่าน้ำปัจจุบัน'] : 0,
+                            currWaterMeter: '',
+                            prevElecMeter: lastRecord ? lastRecord['มิเตอร์ค่าไฟปัจจุบัน'] : 0,
+                            currElecMeter: '',
+                            waterRate: lastRecord ? lastRecord['อัตราค่าน้ำ'] : 18,
+                            elecRate: lastRecord ? lastRecord['อัตราค่าไฟ'] : 7,
+                            rent: lastRecord ? lastRecord['ค่าเช่า'] : 3500,
+                            other: 0,
+                            status: 'ยังไม่จ่าย',
+                            rowId: null,
+                            isNew: true
+                        };
+                    }
+                });
+    
+                renderBatchForm();
+            }
+    
+            function openManageBatchModal() {
+                document.getElementById('manage-batch-modal').classList.remove('hidden');
+                renderCurrentBatchRoomList();
+            }
+    
+            function closeManageBatchModal() {
+                document.getElementById('manage-batch-modal').classList.add('hidden');
+                renderBatchForm(); // Re-render main form in case of changes
+            }
+    
+            function renderCurrentBatchRoomList() {
+                const listEl = document.getElementById('current-batch-room-list');
+                listEl.innerHTML = '';
+                if (batchState.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-400 text-sm">ไม่มีห้องในรายการ</p>';
+                    return;
+                }
+                // sort batchState before rendering
+                batchState.sort((a, b) => a.roomNo.localeCompare(b.roomNo));
+                batchState.forEach((room, index) => {
+                    const roomEl = document.createElement('div');
+                    roomEl.className = 'flex justify-between items-center p-2 border rounded bg-gray-50';
+                    roomEl.innerHTML = `
+                        <span class="font-medium text-gray-700">ห้อง ${room.roomNo}</span>
+                        <button onclick="removeBatchItemAndRefreshModal(${index})" class="text-red-500 hover:text-red-700 text-sm font-bold">ลบ</button>
+                    `;
+                    listEl.appendChild(roomEl);
+                });
+            }
+            
+            async function removeBatchItemAndRefreshModal(index) {
+                await removeBatchItem(index, true); // Pass a flag to prevent immediate re-render
+                renderCurrentBatchRoomList(); // Manually re-render the modal list
+            }
+    
+            function addRoomFromModal() {
+                const inputEl = document.getElementById('new-room-no-input');
+                const roomNo = inputEl.value.trim();
+                if (roomNo) {
+                    addNewRoom(roomNo, true); // Pass roomNo to addNewRoom and a flag
+                    inputEl.value = ''; // Clear input
+                    renderCurrentBatchRoomList(); // Refresh list in modal
+                }
+            }
+    
+            function addNewRoom(roomNo, fromModal = false) { // Now accepts an argument
+                if (!fromModal) { // If called without argument, use prompt
+                    roomNo = prompt("กรุณากรอกเลขห้อง:");
+                    if (!roomNo) return;
+                }
+    
+                if (batchState.find(r => r.roomNo === roomNo)) {
+                    alert("ห้องนี้มีในรายการแล้ว");
+                    return;
+                }
+    
+                // Find history for defaults
+                const roomHistory = allData.filter(r => r['เลขที่ห้อง'] == roomNo);
+                const lastRecord = roomHistory[roomHistory.length - 1];
+    
+                const newRoom = {
+                    roomNo: roomNo,
+                    tenant: lastRecord ? lastRecord['ชื่อผู้เช่า'] : '',
+                    prevWaterMeter: lastRecord ? lastRecord['มิเตอร์ค่าน้ำปัจจุบัน'] : 0,
+                    currWaterMeter: '',
+                    prevElecMeter: lastRecord ? lastRecord['มิเตอร์ค่าไฟปัจจุบัน'] : 0,
+                    currElecMeter: '',
+                    waterRate: lastRecord ? lastRecord['อัตราค่าน้ำ'] : 18,
+                    elecRate: lastRecord ? lastRecord['อัตราค่าไฟ'] : 7,
+                    rent: lastRecord ? lastRecord['ค่าเช่า'] : 3500,
+                    other: 0,
+                    status: 'ยังไม่จ่าย',
+                    rowId: null,
+                    isNew: true
+                };
+    
+                batchState.push(newRoom);
+                batchState.sort((a, b) => a.roomNo.localeCompare(b.roomNo));
+                
+                if (!fromModal) {
+                  renderBatchForm();
+                }
+            }
+    
+            async function removeBatchItem(index, fromModal = false) {
+                const item = batchState[index];
+    
+                if (item.rowId) {
+                    // Item exists in DB
+                    if (confirm(`รายการห้อง ${item.roomNo} ถูกบันทึกแล้ว\nต้องการลบออกจากฐานข้อมูลหรือไม่?\n(หน้าจอจะรีโหลดใหม่ ข้อมูลที่ยังไม่บันทึกจะหายไป)`)) {
+                        showLoading(true);
+                        try {
+                            await fetch(`${WEB_APP_URL}?action=delete_data&rowId=${item.rowId}`);
+                            alert('ลบข้อมูลเรียบร้อย');
+                            fetchData();
+                            setTimeout(() => loadBatchData(), 1000);
+                        } catch (e) {
+                            alert('เกิดข้อผิดพลาด: ' + e.message);
+                            showLoading(false);
+                        }
+                    }
+                } else {
+                    // Item is local only
+                    if (confirm(`ต้องการลบห้อง ${item.roomNo} ออกจากรายการนี้ใช่หรือไม่?`)) {
+                        batchState.splice(index, 1);
+                        if (!fromModal) {
+                            renderBatchForm();
+                        }
+                    }
+                }
+            }
+    
+            function toggleBatchDetail(index) {
+                const detailRow = document.getElementById(`batch-detail-${index}`);
+                const icon = document.getElementById(`batch-toggle-icon-${index}`);
+                if (detailRow) {
+                    detailRow.classList.toggle('hidden');
+                    icon.classList.toggle('fa-chevron-down');
+                    icon.classList.toggle('fa-chevron-up');
+                }
+            }
+    
+            function renderBatchForm() {
+                const container = document.getElementById('batch-container');
+                container.innerHTML = '';
+    
+                if (batchState.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center text-gray-400 py-10">
+                            <p>ไม่มีรายการห้อง</p>
+                            <button onclick="addNewRoom()" class="mt-2 text-indigo-600 font-bold hover:underline">+ เพิ่มห้อง</button>
+                        </div>`;
+                    return;
+                }
+    
+                let tableHtml = `<table class="batch-table">
+                    <thead>
+                        <tr>
+                            <th>ห้อง</th>
+                            <th class="w-1/4">มิเตอร์ไฟใหม่</th>
+                            <th class="w-1/4">มิเตอร์น้ำใหม่</th>
+                            <th class="w-1/4">อื่นๆ</th>
+                            <th>รวม</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+    
+                batchState.forEach((item, index) => {
+                    const elecCost = (item.currElecMeter && item.currElecMeter > item.prevElecMeter)
+                        ? (item.currElecMeter - item.prevElecMeter) * item.elecRate
+                        : 0;
+                    const waterCost = (item.currWaterMeter && item.currWaterMeter > item.prevWaterMeter)
+                        ? (item.currWaterMeter - item.prevWaterMeter) * item.waterRate
+                        : 0;
+                    const total = parseFloat(item.rent) + elecCost + waterCost + parseFloat(item.other);
+    
+                    tableHtml += `
+                        <tr class="${item.status === 'จ่ายแล้ว' ? 'bg-green-50' : 'bg-white'}">
+                            <td class="font-bold">${item.roomNo}</td>
+                            <td><input type="number" value="${item.currElecMeter}" oninput="updateBatchItem(${index}, 'currElecMeter', this.value)"></td>
+                            <td><input type="number" value="${item.currWaterMeter}" oninput="updateBatchItem(${index}, 'currWaterMeter', this.value)"></td>
+                            <td><input type="number" value="${item.other}" oninput="updateBatchItem(${index}, 'other', this.value)"></td>
+                            <td class="font-bold text-indigo-600" id="total-${index}">${total.toLocaleString()}</td>
+                            <td class="text-center">
+                                <button onclick="toggleBatchDetail(${index})" class="text-gray-400 hover:text-indigo-600">
+                                    <i id="batch-toggle-icon-${index}" class="fa-solid fa-chevron-down"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr id="batch-detail-${index}" class="batch-detail-row hidden ${item.status === 'จ่ายแล้ว' ? 'bg-green-50' : 'bg-white'}">
+                            <td colspan="6" class="p-0">
+                                <div class="p-3 bg-gray-50 border-t border-b border-gray-300">
+                                    <div class="grid grid-cols-3 gap-x-4 gap-y-2 text-xs">
+                                        <div>
+                                            <label class="font-semibold text-gray-600">ค่าเช่า</label>
+                                            <input type="number" value="${item.rent}" oninput="updateBatchItem(${index}, 'rent', this.value)">
+                                        </div>
+                                        <div>
+                                            <label class="font-semibold text-gray-600">ผู้เช่า</label>
+                                            <input type="text" value="${item.tenant}" onchange="updateBatchItem(${index}, 'tenant', this.value)">
+                                        </div>
+                                        <div class="flex items-end">
+                                            <button onclick="removeBatchItem(${index})" class="text-red-500 hover:underline text-xs">ลบรายการนี้</button>
+                                        </div>
+                                        <div>
+                                            <label>มิเตอร์ไฟเก่า</label>
+                                            <input type="number" value="${item.prevElecMeter}" onchange="updateBatchItem(${index}, 'prevElecMeter', this.value)" class="bg-gray-200">
+                                        </div>
+                                        <div>
+                                            <label>มิเตอร์น้ำเก่า</label>
+                                            <input type="number" value="${item.prevWaterMeter}" onchange="updateBatchItem(${index}, 'prevWaterMeter', this.value)" class="bg-gray-200">
+                                        </div>
+                                        <div>
+                                            <label>รวมค่าไฟ</label>
+                                            <div id="elec-cost-${index}" class="font-bold">${elecCost.toLocaleString()}</div>
+                                        </div>
+                                         <div>
+                                            <label>อัตราค่าไฟ</label>
+                                            <input type="number" value="${item.elecRate}" oninput="updateBatchItem(${index}, 'elecRate', this.value)">
+                                        </div>
+                                        <div>
+                                            <label>อัตราค่าน้ำ</label>
+                                            <input type="number" value="${item.waterRate}" oninput="updateBatchItem(${index}, 'waterRate', this.value)">
+                                        </div>
+                                        <div>
+                                            <label>รวมค่าน้ำ</label>
+                                            <div id="water-cost-${index}" class="font-bold">${waterCost.toLocaleString()}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+    
+                tableHtml += '</tbody></table>';
+                container.innerHTML = tableHtml;
+            }
+    
+            function updateBatchItem(index, field, value) {
+                batchState[index][field] = value;
+                recalcRow(index);
+            }
+    
+            function recalcRow(index) {
+                const item = batchState[index];
+                const prevElec = parseFloat(item.prevElecMeter) || 0;
+                const currElec = parseFloat(item.currElecMeter) || 0;
+                const elecRate = parseFloat(item.elecRate) || 0;
+    
+                const prevWater = parseFloat(item.prevWaterMeter) || 0;
+                const currWater = parseFloat(item.currWaterMeter) || 0;
+                const waterRate = parseFloat(item.waterRate) || 0;
+    
+                const rent = parseFloat(item.rent) || 0;
+                const other = parseFloat(item.other) || 0;
+    
+                let elecCost = 0;
+                if (currElec > prevElec) {
+                    elecCost = (currElec - prevElec) * elecRate;
+                }
+    
+                let waterCost = 0;
+                if (currWater > prevWater) {
+                    waterCost = (currWater - prevWater) * waterRate;
+                }
+    
+                const total = rent + elecCost + waterCost + other;
+    
+                const elecEl = document.getElementById(`elec-cost-${index}`);
+                const waterEl = document.getElementById(`water-cost-${index}`);
+                const totalEl = document.getElementById(`total-${index}`);
+    
+                if (elecEl) elecEl.innerText = elecCost.toLocaleString();
+                if (waterEl) waterEl.innerText = waterCost.toLocaleString();
+                if (totalEl) totalEl.innerText = total.toLocaleString();
+            }
+    
+            async function saveBatch() {
+                if (!confirm('ยืนยันการบันทึกข้อมูลทั้งหมด?')) return;
+    
+                showLoading(true);
+    
+                const month = document.getElementById('batchMonth').value;
+                const year = document.getElementById('batchYear').value;
+    
+                const payload = batchState.map(item => {
+                    const prevElec = parseFloat(item.prevElecMeter) || 0;
+                    const currElec = parseFloat(item.currElecMeter) || 0;
+                    const elecRate = parseFloat(item.elecRate) || 0;
+                    let elecCost = 0;
+                    if (currElec > prevElec) elecCost = (currElec - prevElec) * elecRate;
+    
+                    const prevWater = parseFloat(item.prevWaterMeter) || 0;
+                    const currWater = parseFloat(item.currWaterMeter) || 0;
+                    const waterRate = parseFloat(item.waterRate) || 0;
+                    let waterCost = 0;
+                    if (currWater > prevWater) waterCost = (currWater - prevWater) * waterRate;
+    
+                    return {
+                        roomNo: item.roomNo,
+                        tenantName: item.tenant,
+                        month: month,
+                        year: year,
+                        waterRate: waterRate,
+                        elecRate: elecRate,
+                        prevWaterMeter: prevWater,
+                        currWaterMeter: currWater,
+                        prevElecMeter: prevElec,
+                        currElecMeter: currElec,
+                        waterCost: waterCost,
+                        elecCost: elecCost,
+                        rent: parseFloat(item.rent) || 0,
+                        other: parseFloat(item.other) || 0,
+                        total: (parseFloat(item.rent) || 0) + elecCost + waterCost + (parseFloat(item.other) || 0),
+                        status: item.status || 'ยังไม่จ่าย',
+                        rowId: item.rowId
+                    };
+                });
+    
+                const params = new URLSearchParams();
+                params.append('action', 'save_batch');
+                params.append('jsonData', JSON.stringify(payload));
+    
+                try {
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: params
+                    });
+    
+                    alert('บันทึกข้อมูลเรียบร้อย!');
+                    setTimeout(fetchData, 1500);
+                } catch (error) {
+                    console.error(error);
+                    alert('เกิดข้อผิดพลาด: ' + error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
+    
+            // --- UI Logic ---
+            function switchTab(tabName) {
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+                document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+    
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    el.classList.remove('active', 'text-indigo-600');
+                    el.classList.add('text-gray-500');
+                });
+    
+                const btn = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
+                if (btn) {
+                    btn.classList.add('active', 'text-indigo-600');
+                    btn.classList.remove('text-gray-500');
+                }
+    
+                if (tabName === 'add') {
+                    loadBatchData();
+                }
+            }
+    
+            
+            function toggleHistoryDetails() {
+                const content = document.getElementById('history-details-content');
+                const icon = document.getElementById('history-toggle-icon');
+                const isHidden = content.style.display === 'none';
+                
+                if (isHidden) {
+                    content.style.display = 'block';
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    content.style.display = 'none';
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            }
+    
+    
+            function renderHistory() {
+                const paidList = document.getElementById('history-list-paid');
+                const unpaidList = document.getElementById('history-list-unpaid');
+                const paidSummary = document.getElementById('paid-summary');
+                const unpaidSummary = document.getElementById('unpaid-summary');
+                const subheader = document.getElementById('history-summary-subheader');
+                
+                paidList.innerHTML = '';
+                unpaidList.innerHTML = '';
+    
+                const monthOrder = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    
+                let paidByMonth = {};
+                let unpaidByMonth = {};
+                let unpaidTotalAmount = 0;
+                let paidCount = 0;
+                let unpaidCount = 0;
+    
+                // Group data by status and then by month
+                allData.forEach(row => {
+                    const monthYear = `${row['เดือน']} ${row['ปี']}`;
+                    const isPaid = row['สถานะชำระค่าหอ'] === 'จ่ายแล้ว';
+    
+                    if (isPaid) {
+                        if (!paidByMonth[monthYear]) paidByMonth[monthYear] = [];
+                        paidByMonth[monthYear].push(row);
+                        paidCount++;
+                    } else {
+                        if (!unpaidByMonth[monthYear]) unpaidByMonth[monthYear] = [];
+                        unpaidByMonth[monthYear].push(row);
+                        unpaidCount++;
+                        unpaidTotalAmount += parseFloat(row['รวมที่ต้องชำระ']) || 0;
+                    }
+                });
+    
+                // Update main summaries
+                paidSummary.querySelector('div').innerHTML = `<i class="fa-solid fa-chevron-right text-xs mr-2 transition-transform group-open:rotate-90"></i> ชำระแล้ว (${paidCount})`;
+                unpaidSummary.querySelector('div').innerHTML = `<i class="fa-solid fa-chevron-right text-xs mr-2 transition-transform group-open:rotate-90"></i> ที่ยังไม่ชำระ (${unpaidCount})`;
+    
+                // Update the new subheader
+                subheader.innerHTML = `ยังไม่ชำระ <span class="font-bold text-red-600">${unpaidCount}</span> | <span class="font-bold text-red-600">${unpaidTotalAmount.toLocaleString()} ฿</span> | ชำระแล้ว <span class="font-bold text-green-600">${paidCount}</span>`;
+    
+                // Function to render monthly groups
+                const renderMonthGroup = (container, dataByMonth, isPaid) => {
+                    // Sort months chronologically
+                    const sortedMonths = Object.keys(dataByMonth).sort((a, b) => {
+                        const [monthA, yearA] = a.split(' ');
+                        const [monthB, yearB] = b.split(' ');
+                        if (yearA !== yearB) return yearB - yearA;
+                        return monthOrder.indexOf(monthB) - monthOrder.indexOf(monthA);
+                    });
+    
+                    if (sortedMonths.length === 0) {
+                         container.innerHTML = `<p class="text-center text-gray-400 py-4">ไม่มีรายการ</p>`;
+                         return;
+                    }
+    
+                    sortedMonths.forEach(monthYear => {
+                        const items = dataByMonth[monthYear];
+                        let monthHtml = `<details class="pt-2" open>
+                            <summary class="font-semibold text-gray-700 cursor-pointer list-none">
+                                <div class="flex items-center">
+                                    <i class="fa-solid fa-chevron-right text-xs mr-2 transition-transform group-open:rotate-90"></i>
+                                    ${monthYear} (${items.length})
+                                </div>
+                            </summary>
+                            <div class="space-y-3 pt-2 pl-4">`;
+                        
+                        items.sort((a,b) => a['เลขที่ห้อง'].localeCompare(b['เลขที่ห้อง']));
+    
+                        items.forEach(row => {
+                            const btnAction = isPaid
+                                ? `<button onclick="updateStatus(${row.rowId}, 'ยังไม่จ่าย')" class="text-xs text-red-500 underline">ทำเครื่องหมายว่ายังไม่จ่าย</button>`
+                                : `<button onclick="updateStatus(${row.rowId}, 'จ่ายแล้ว')" class="text-xs text-green-600 font-bold border border-green-600 px-2 py-1 rounded hover:bg-green-50">แจ้งชำระเงิน</button>`;
+    
+                            monthHtml += `
+                            <div class="history-item bg-white p-4 rounded-lg shadow-sm border-l-4 ${isPaid ? 'border-green-500' : 'border-red-500'}">
+                                <div class="flex justify-between mb-2">
+                                    <h3 class="font-bold">ห้อง ${row['เลขที่ห้อง']} <span class="text-sm font-normal text-gray-500">(${row['ชื่อผู้เช่า'] || 'ไม่มีชื่อ'})</span></h3>
+                                    <span class="font-bold text-indigo-600">${parseFloat(row['รวมที่ต้องชำระ']).toLocaleString()} ฿</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-600 mb-2">
+                                    <span>${row['เดือน']} ${row['ปี']}</span>
+                                    <span>ไฟ: ${row['มิเตอร์ค่าไฟปัจจุบัน'] - row['มิเตอร์ค่าไฟณสิ้นเดือน']} | น้ำ: ${row['มิเตอร์ค่าน้ำปัจจุบัน'] - row['มิเตอร์ค่าน้ำณสิ้นเดือน']}</span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2 border-t pt-2">
+                                    <span class="text-xs ${isPaid ? 'text-green-600' : 'text-red-500'} font-bold">
+                                        <i class="fa-solid ${isPaid ? 'fa-check-circle' : 'fa-clock'}"></i> ${row['สถานะชำระค่าหอ']}
+                                    </span>
+                                    ${btnAction}
+                                </div>
+                            </div>`;
+                        });
+    
+                        monthHtml += `</div></details>`;
+                        container.innerHTML += monthHtml;
+                    });
+                };
+    
+                renderMonthGroup(paidList, paidByMonth, true);
+                renderMonthGroup(unpaidList, unpaidByMonth, false);
+            }
+    
+            function filterHistory() {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                document.querySelectorAll('.history-item').forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    const parentDetails = item.closest('details');
+                    const parentMonthDetails = item.closest('details[open]');
+    
+                    if (text.includes(query)) {
+                        item.style.display = 'block';
+                     } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+    
+            function showLoading(show) {
+                const el = document.getElementById('loading');
+                if (show) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            }
+        </script>
+    </body>
+    
+    </html>
