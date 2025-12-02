@@ -1,0 +1,1354 @@
+
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบนำเข้าและแสดงข้อมูลแผนการเงิน</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --header-bg: #f1f5f9;
+            --row-hover: #f8fafc;
+            --success-color: #16a34a;
+            --error-color: #dc2626;
+            --error-bg-soft: #fef2f2;
+            --error-border-soft: #fecaca;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Sarabun', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .toggle-switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+        }
+
+        .toggle-switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: var(--header-bg);
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+            background-color: white;
+            min-width: 350px;
+            font-weight: 500;
+        }
+        
+        /* Style for tooltips */
+        td.has-definition {
+            cursor: help;
+            border-bottom: 1px dotted #6b7280;
+        }
+
+        /* Style for error cells */
+        .cell-error {
+            background-color: var(--error-bg-soft) !important;
+            border: 1px solid var(--error-border-soft) !important;
+            color: var(--error-color) !important;
+            font-weight: 600;
+        }
+
+        .header-fixed th {
+             background-color: var(--header-bg);
+        }
+        .header-fixed th:first-child {
+            background-color: var(--header-bg);
+        }
+
+        tr:hover td {
+            background-color: var(--row-hover);
+        }
+        
+        #dataTable tbody tr {
+            cursor: pointer;
+        }
+
+        tr:hover td:first-child {
+            background-color: var(--row-hover);
+        }
+
+        .indent-1 { padding-left: 30px !important; }
+        .indent-2 { padding-left: 50px !important; }
+
+        .font-bold td { font-weight: 700; background-color: #f8fafc; }
+        
+        /* --- Column Group Colors --- */
+        /* Past 3 years - light indigo */
+        :is(th, td):nth-child(2),
+        :is(th, td):nth-child(3),
+        :is(th, td):nth-child(4) {
+            background-color: #eef2ff;
+        }
+
+        /* Future 3 years - light green */
+        :is(th, td):nth-child(5),
+        :is(th, td):nth-child(6),
+        :is(th, td):nth-child(7) {
+            background-color: #f0fdf4;
+        }
+        /* --- End Column Group Colors --- */
+
+        #status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--success-color);
+            text-align: center;
+            height: 20px;
+        }
+        
+        #validation-report {
+            margin-top: 30px;
+        }
+        #validation-report h2 {
+            font-size: 20px;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .report-item {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .report-success {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+        }
+        .report-error {
+            background-color: var(--error-bg-soft);
+            border: 1px solid var(--error-border-soft);
+            color: #b91c1c;
+        }
+        .report-error strong {
+            font-weight: 600;
+        }
+        .report-error u {
+            text-decoration-color: var(--warning-color);
+            text-decoration-thickness: 2px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+        #chart-title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #chart-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ระบบนำเข้าและแสดงข้อมูลแผนการเงิน</h1>
+        <p>นำเข้าไฟล์ Excel เพื่อแสดงผลข้อมูลย้อนหลัง 3 ปี และแผน 3 ปีหน้า</p>
+    </header>
+
+    <div class="controls">
+        <div class="file-input-wrapper">
+            <button class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                เลือกไฟล์ Excel
+            </button>
+            <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="handleFile(this)">
+        </div>
+        <button class="btn btn-outline" onclick="downloadTemplate()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            ดาวน์โหลดแม่แบบ
+        </button>
+        <div class="toggle-switch-container">
+            <label class="toggle-switch">
+                <input type="checkbox" id="formatNumberToggle" onchange="toggleNumberFormatting(this.checked)">
+                <span class="slider"></span>
+            </label>
+            <label for="formatNumberToggle" style="cursor: pointer;">แสดงเลขย่อ (M/K)</label>
+        </div>
+    </div>
+    <div id="status"></div>
+
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>รายการ</th>
+                    <th>2566</th>
+                    <th>2567</th>
+                    <th>2568</th>
+                    <th>2569</th>
+                    <th>2570</th>
+                    <th>2571</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows will be generated here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="validation-report" class="container" style="display: none;">
+    <h2>ผลการตรวจสอบข้อมูล</h2>
+    <div id="report-content"></div>
+</div>
+
+<!-- Modal for Chart -->
+<div id="chartModal" class="modal-overlay">
+    <div class="modal-content">
+        <div id="chart-title-container">
+            <h2 id="chart-title"></h2>
+            <div class="toggle-switch-container">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="showPercentageToggle" onchange="updateChart()">
+                    <span class="slider"></span>
+                </label>
+                <label for="showPercentageToggle" style="cursor: pointer;">แสดง % เปลี่ยนแปลง</label>
+            </div>
+        </div>
+        <canvas id="trendChart"></canvas>
+    </div>
+</div>
+
+
+<script>
+    const years = ["2566", "2567", "2568", "2569", "2570", "2571"];
+
+    const tableStructure = [
+        // --- รายรับ ---
+        { id: "header_revenue", name: "รายรับ", level: 0, bold: true },
+        { id: "header_op_revenue", name: "รายรับจากการดำเนินงาน", level: 1, bold: true },
+        { id: "rev_uc", name: "รายรับค่ารักษาพยาบาลสำหรับโครงการสุขภาพถ้วนหน้า UC", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าบริการทางการแพทย์จากเงินกองทุนเหมาจ่ายรายหัว UC OP/PP, IP, รายรับอื่นๆ จากสปสช., จากการตามเรียกเก็บสิทธิ UC (รวมของ รพ.สต.)" },
+        { id: "rev_uc_invest", name: "รายรับค่ารักษาพยาบาลสำหรับโครงการสุขภาพถ้วนหน้า UC งบลงทุน", level: 2, sumGroup: ["total_revenue"] },
+        { id: "rev_ems", name: "รายรับจากระบบปฏิบัติการฉุกเฉิน (EMS)", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าบริการทางการแพทย์จากระบบปฏิบัติการ EMS จาก สพฉ." },
+        { id: "rev_direct_claim", name: "รายรับค่ารักษาพยาบาลเบิกจ่ายตรงกรมบัญชีกลาง", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าบริการทางการแพทย์จากสิทธิข้าราชการเบิกจ่ายตรงจากกรมบัญชีกลาง" },
+        { id: "rev_reimburse", name: "รายรับค่ารักษาพยาบาลผู้ป่วยเบิกต้นสังกัด", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าบริการทางการแพทย์จากสิทธิ พนักงานของรัฐ รัฐวิสาหกิจ จากต้นสังกัด เช่น กฟภ. กฟฝ. การประปา รฟท. กสกช. บมจ.โทรคมนาคมแห่งชาติ" },
+        { id: "rev_local_gov", name: "รายรับค่ารักษาพยาบาลเบิกจาก อปท.", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าบริการทางการแพทย์สิทธิเบิกจ่ายตรง อปท. (อบต. เทศบาล อบจ. กทม. และเมืองพัทยา)" },
+        { id: "rev_social_security", name: "รายรับค่ารักษาพยาบาลจากกองทุนประกันสังคม", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าบริการทางการแพทย์เงินจัดสรรเหมาจ่ายรายหัว OP/IP, ภาระเสี่ยงโรคเรื้อรัง, HA, รายรับอื่นๆ จากกองทุนปกส., จากการเรียกเก็บสิทธิ ปกส." },
+        { id: "rev_foreign_worker", name: "รายรับค่ารักษาพยาบาลแรงงานต่างด้าว", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าขึ้นทะเบียนฯ (บัตรประกันสุขภาพ) ค่าตรวจสุขภาพคนต่างด้าวแรงงานต่างด้าว, ค่าธรรมเนียม 30 บาท, จากการเรียกเก็บสิทธิ คนต่างด้าวและแรงงานต่างด้าว" },
+        { id: "rev_other_service", name: "รายรับค่ารักษาพยาบาลและการบริการอื่น", level: 2, sumGroup: ["total_revenue"], definition: "รายรับค่าบริการทางการแพทย์จากสิทธิชำระเงิน, พรบ., บุคคลที่มีปัญหาสถานะและสิทธิ,ค่าตรวจสุขภาพบุคคลภายนอก, ค่าสิ่งส่งตรวจ, ค่าใบรับรองแพทย์, ค่าธรรมเนียม UC, ค่าบริการอื่นๆ" },
+        { id: "header_other_revenue", name: "รายรับอื่นๆ", level: 1, bold: true },
+        { id: "rev_aid", name: "รายรับเงินช่วยเหลือ", level: 2, sumGroup: ["total_revenue"], definition: "รายรับเงินโดยสมัครใจจากรัฐบาลต่างประเทศ หรือองค์กรระหว่างประเทศ" },
+        { id: "rev_subsidy", name: "รายรับเงินอุดหนุน", level: 2, sumGroup: ["total_revenue"], definition: "รายรับเงินสนับสนุนการดำเนินงาน หรือเพื่อการลงทุน จากส่วนราชการ หรือหน่วยงานของรัฐ (เช่น โครงการจัดซื้อครุภัณฑ์ฯจากกรมพัฒนาพลังงานทดแทนและอนุรักษ์พลังงาน,โครงการสร้างเสริมสุขภาพ จากองค์กรปกครองส่วนท้องถิ่น, เงินสนับสนุนสำหรับโครงการผลิตแพทย์ จากมหาวิทยาลัยในกำกับของรัฐ" },
+        { id: "rev_donation", name: "รายรับจากการบริจาค", level: 2, sumGroup: ["total_revenue"], definition: "รายรับงินบริจาค บุคคลธรรมดา หรือภาคเอกชน โดยความสมัครใจ ทั้งระบุวัตถุประสงค์ และไม่ระบุวัตถุประสงค์ (ตัวอย่าง บุคคลทั่วไป บริจาคเงินเพื่อสนับสนุนการจัดหาครุภัณฑ์ทางการแพทย์, เงินสนับสนุนสำหรับโครงการผลิตแพทย์ จากมหาวิทยาลัยเอกชน เป็นต้น)" },
+        { id: "rev_interest", name: "รายรับดอกเบี้ยเงินฝากธนาคาร", level: 2, sumGroup: ["total_revenue"], definition: "รายรับดอกเบี้ยเงินฝากธนาคาร ประเภทเงินบำรุง เงินนอกงบประมาณอื่น ที่ได้รับอนุญาตให้ใช้จ่าย โดยไม่ต้องนำส่งเป็นรายได้แผ่นดิน" },
+        { id: "rev_other", name: "รายรับอื่น", level: 2, sumGroup: ["total_revenue"], definition: "รายรับเงินสนับสนุนจากหน่วยบริการในสังกัดสป.สธ. ตามข้อตกลง (เขต สสจ. รพศ.รพท. รพช. รพ.สต), รายรับจากการดำเนินการด้วยเงินบำรุงหรือทรัพย์สินจากเงินบำรุง เช่น ค่าบริการสถานที่จัดประชุม ค่าเช่าอาคาร ค่าขายแบบ ค่าปรับผิดสัญญา ค่าขายครุภัณฑ์ สิ่งก่อสร้าง เงินประกัน / เงินมัดจำ / เงินรับฝากอื่น ฯ" },
+        { id: "total_revenue", name: "รวมรายรับ", level: 0, bold: true, totalFor: "total_revenue" },
+        
+        // --- รายจ่าย ---
+        { id: "header_expense", name: "รายจ่าย", level: 0, bold: true },
+        { id: "header_personnel_exp", name: "รายจ่ายบุคลากร", level: 1, bold: true },
+        { id: "exp_temp_employee", name: "ค่าจ้างลูกจ้างชั่วคราว / พนักงานกระทรวง", level: 2, sumGroup: ["total_expense"], definition: "ได้แก่ ค่าจ้างชั่วคราวรายวัน รายเดือน รายคาบ พกส. ของหน่วยบริการ" },
+        { id: "exp_ot_service", name: "ค่าล่วงเวลางานบริการ / งานสนับสนุน", level: 2, sumGroup: ["total_expense"], definition: "ค่าตอบแทนปฏิบัติงานนอกเวลาตามระเบียบ กระทรวงการคลัง ปี พ.ศ. 2550" },
+        { id: "exp_night_shift", name: "ค่าตอบแทนการปฏิบัติงานเวรผลัดบ่ายหรือผลัดดึกของเจ้าหน้าที่", level: 2, sumGroup: ["total_expense"], definition: "ค่าเวรผลัดบ่ายหรือผลัดดึกของพยาบาล และเจ้าหน้าที่อื่น ตามหลักเกณฑ์ฯ พ.ศ. 2566" },
+        { id: "exp_no_private_practice", name: "ค่าตอบแทนเงินเพิ่มพิเศษไม่ทำเวชปฏิบัติส่วนตัว หรือปฏิบัติงาน รพ.เอกชน", level: 2, sumGroup: ["total_expense"], definition: "ค่าตอบแทน ไม่ทำเวชของแพทย์ ทันตแพทย์ เภสัชกร ตามหลักเกณฑ์ฯ พ.ศ. 2566" },
+        { id: "exp_allowance_11", name: "ค่าตอบแทนเบี้ยเลี้ยงเหมาจ่าย (ฉ.11)", level: 2, sumGroup: ["total_expense"], definition: "ค่าตอบแทนลักษณะเบี้ยเลี้ยงเหมาจ่าย ตามหลักเกณฑ์ ฯ พ.ศ. 2566" },
+        { id: "exp_performance_12", name: "ค่าตอบแทนตามผลการปฏิบัติงาน (ฉ.12)", level: 2, sumGroup: ["total_expense"], definition: "ค่าตอบแทนผลการปฏิบัติงาน ตามหลักเกณฑ์ ฯ พ.ศ. 2566" },
+        { id: "exp_pts", name: "เงินเพิ่ม (พ.ต.ส)", level: 2, sumGroup: ["total_expense"], definition: "ค่าตอบแทนเทียบเคียงเงินเพิ่ม (พตส.) สำหรับแพทย์ ทันตแพทย์ เภสัช และสหสาขาวิชาชีพ 7 สาขา" },
+        { id: "exp_ot_5", name: "ค่าตอบแทนเจ้าหน้าที่ปฏิบัติงานของเจ้าหน้าที่ (นอกเวลา) ฉ5", level: 2, sumGroup: ["total_expense"], definition: "ค่าตอบแทนในการปฏิบัติงานของเจ้าหน้าที่ ตามหลักเกณฑ์ ฯ พ.ศ. 2566" },
+        { id: "exp_smc", name: "ค่าตอบแทนเจ้าหน้าที่ปฏิบัติงานในคลินิกพิเศษเฉพาะทางนอกเวลาราชการ (SMC)", level: 2, sumGroup: ["total_expense"], definition: "ค่าตอบแทนการปฏิบัติงานในคลินิกพิเศษนอกเวลา ตามหลักเกณฑ์ฯ พ.ศ. 2566" },
+        { id: "exp_other_comp", name: "ค่าตอบแทนอื่น", level: 2, sumGroup: ["total_expense"], definition: "เช่น ค่าตอบแทนชันสูตรพลิกศพ, สาขาส่งเสริมพิเศษ, ส่งเสริมสุขภาพและเวชปฏิบัติ และค่าตอบแทนอื่นๆ" },
+        { id: "exp_other_personnel", name: "เงินค่าใช้จ่ายบุคลากรอื่น", level: 2, sumGroup: ["total_expense"], definition: "เช่น เงินสมทบกองทุนปกส.ส่วนของนายจ้าง เงินสมทบกองทุนสำรองเลี้ยงชีพพนักงานและเจ้าหน้าที่รัฐ (พกส.) เงินสมทบกองทุนทดแทน ปกส. เงินช่วยพิเศษกรณีเสียชีวิต (เงินนอกงบประมาณ)" },
+        { id: "exp_allowance_10", name: "ค่าตอบแทนเบี้ยเลี้ยงเหมาจ่าย (ฉ.10)", level: 2, sumGroup: ["total_expense"] },
+        
+        { id: "header_op_expense", name: "รายจ่ายจากการดำเนินงาน", level: 1, bold: true, definition: "รายจ่ายดำเนินงาน" },
+        { id: "exp_medicine", name: "ค่ายา", level: 2, sumGroup: ["total_expense"], definition: "ค่ายา (จากแผนบริหารจัดการเจ้าหนี้ ช่อง [7] แผนการจ่ายชำระปี 25xx ด้วยเงินนอกงบประมาณ)" },
+        { id: "exp_non_medicine_supplies", name: "เวชภัณฑ์มิใช่ยา", level: 2, sumGroup: ["total_expense"], definition: "ค่าวัสดุการแพทย์ /วัสดุวิทยาศาสตร์การแพทย์/ วัสดุเภสัช /วัสดุทันตกรรม /วัสดุเอ๊กซเรย์ (จากแผนบริหารจัดการเจ้าหนี้ ช่อง [7] แผนการจ่ายชำระปี 25xx ด้วยเงินนอกงบประมาณ)" },
+        { id: "exp_medical_supplies", name: "ค่าวัสดุการแพทย์", level: 2, sumGroup: ["total_expense"] },
+        { id: "exp_lab_supplies", name: "ค่าวัสดุวิทยาศาสตร์การแพทย์", level: 2, sumGroup: ["total_expense"] },
+        { id: "exp_pharma_supplies", name: "ค่าวัสดุเภสัช", level: 2, sumGroup: ["total_expense"] },
+        { id: "exp_dental_supplies", name: "ค่าวัสดุทันตกรรม", level: 2, sumGroup: ["total_expense"] },
+        { id: "exp_xray_supplies", name: "ค่าวัสดุเอ็กซเรย์", level: 2, sumGroup: ["total_expense"] },
+        { id: "exp_materials", name: "ค่าวัสดุ", level: 2, sumGroup: ["total_expense"], definition: "ค่าวัสดุบริโภค วัสดุเครื่องแต่งกาย วัสดุสำนักงาน วัสดุยานพาหนะและขนส่ง วัสดุเชื้อเพลิงและหล่อลื่น วัสดุไฟฟ้าและวิทยุ วัสดุโฆษณาและเผยแพร่ วัสดุคอมพิวเตอร์ วัสดุงานบ้านงานครัว วัสดุก่อสร้าง และวัสดุอื่น (จากแผนบริหารจัดการเจ้าหนี้ ช่อง [7] แผนการจ่ายชำระปี 25xx ด้วยเงินนอกงบประมาณ)" },
+        { id: "exp_utilities", name: "ค่าสาธารณูปโภค", level: 2, sumGroup: ["total_expense"], definition: "ค่าไฟฟ้า น้ำประปา ค่าบริการไปรษณีย์ ค่าบริการอินเตอร์เน็ต ค่าบริการเช่าสัญญาณเคเบิ้ลทีวี" },
+        { id: "exp_sundry", name: "ค่าใช้สอย", level: 2, sumGroup: ["total_expense"], definition: "ค่าใช้จ่ายเดินทางไปราชการ ฝึกอบรม, ค่าจ้างเหมา ค่าซ่อมแซมคอาคารและครุภัณฑ์, ค่าเช่าครุภัณฑ์, ค่าเบี้ยประกันภัย, ค่าธรรมเนียมธนาคาร" },
+        { id: "exp_other_op", name: "ค่าใช้จ่ายดำเนินงานอื่น", level: 2, sumGroup: ["total_expense"], definition: "ค่าใช้จ่ายตามโครงการ ตามแผนงานประจำเงินบำรุง หรือโครงการสร้างเสริมสุขภาพฯ เช่น PP UC , เงินต่างด้าว, เงินอุดหนุนบุคคลที่มีปัญหาสถานะและสิทธิ" },
+        
+        { id: "header_invest_expense", name: "รายจ่ายลงทุน", level: 1, bold: true },
+        { id: "exp_equipment", name: "ค่าครุภัณฑ์", level: 2, sumGroup: ["total_expense"] },
+        { id: "exp_equip_depreciation", name: "ค่าครุภัณฑ์งบค่าเสื่อม", level: 2, sumGroup: ["total_expense"], definition: "ค่าครุภัณฑ์ทางการแพทย์ หรือครุภัณฑ์ทั่วไป ที่เบิกจ่ายจากเงินกองทุน UC งบลงทุน" },
+        { id: "exp_equip_donation", name: "ค่าครุภัณฑ์เงินบริจาค", level: 2, sumGroup: ["total_expense"], definition: "ค่าครุภัณฑ์ทางการแพทย์ หรือครุภัณฑ์ทั่วไป ที่เบิกจ่ายด้วยเงินบริจาค" },
+        { id: "exp_equip_maintenance", name: "ค่าครุภัณฑ์เงินบำรุง", level: 2, sumGroup: ["total_expense"], definition: "ค่าครุภัณฑ์ทางการแพทย์ หรือครุภัณฑ์ทั่วไปที่เบิกจ่ายจากเงินบำรุงของหน่วยบริการ" },
+        { id: "exp_land_building", name: "ค่าที่ดินและสิ่งก่อสร้าง", level: 2, sumGroup: ["total_expense"] },
+        { id: "exp_lb_depreciation", name: "ค่าที่ดินและสิ่งก่อสร้างงบค่าเสื่อม", level: 2, sumGroup: ["total_expense"], definition: "ค่าอาคาร หรือสิ่งก่อสร้าง ที่เบิกจ่ายจากเงินกองทุน UC งบลงทุน" },
+        { id: "exp_lb_donation", name: "ค่าที่ดินและสิ่งก่อสร้างเงินบริจาค", level: 2, sumGroup: ["total_expense"], definition: "ค่าอาคาร หรือสิ่งก่อสร้าง ที่เบิกจ่ายที่เบิกจ่ายด้วยเงินบริจาค" },
+        { id: "exp_lb_maintenance", name: "ค่าที่ดินและสิ่งก่อสร้างเงินบำรุง", level: 2, sumGroup: ["total_expense"], definition: "ค่าอาคาร หรือสิ่งก่อสร้าง ที่เบิกจ่ายจากเงินบำรุงของหน่วยบริการ" },
+        
+        { id: "header_other_expense", name: "รายจ่ายอื่น", level: 1, bold: true },
+        { id: "exp_support_other_hospitals", name: "รายจ่ายสนับสนุน รพ.สต. รพช. รพท. รพศ. สสอ. สสจ.", level: 2, sumGroup: ["total_expense"], definition: "รายจ่ายสนับสนุนหน่วยบริการในสังกัดสป.สธ. ตามข้อตกลงฯ (สสอ. สสจ.รพศ. รพท. รพช. รพ.สต.) สนับสนุน รพ.สต. เช่น งบค่าเสื่อม Fixed cost" },
+        { id: "exp_misc", name: "รายจ่ายอื่นๆ", level: 2, sumGroup: ["total_expense"], definition: "เช่น ตามจ่ายค่ารักษาพยาบาล UC ต่างด้าว บุคคลที่มีปัญหาสถานะและสิทธิ ปกส. , เงินช่วยเหลือบุคลากรสาธารณสุขฯ (ระเบียบเงินบำรุงฯ ข้อ 9 (10) , สนับสนุนการศึกษาสาขาวิชาชีพที่ขาดแคลน (ระเบียบเงินบำรุงฯ ข้อ 9 (11) , โครงการผลิตแพทย์และบุคลากรทางการแพทย์ , เงินประกัน / เงินมัดจำ / เงินรับฝากอื่น ฯ" },
+        { id: "exp_central_fund", name: "งบกลาง (ไม่เกินร้อยละ 2-3.5 ของประมาณการรายจ่าย)", level: 1, sumGroup: ["total_expense"], definition: "รายจ่ายจากกรณีฉุกเฉิน จำเป็น เร่งด่วน ตามนโยบายผู้บริหาร ไม่เกินร้อยละ 2-3.5 ของประมาณการรายจ่าย" },
+        { id: "total_expense", name: "รวมรายจ่าย", level: 0, bold: true, totalFor: "total_expense" },
+        
+        { id: "net_income", name: "รายรับสูง (ต่ำกว่า) รายจ่ายสุทธิ", level: 0, bold: true },
+        { id: "brought_forward", name: "บวกเงินคงเหลือสะสมยกมา", level: 0 },
+        { id: "total_balance_1", name: "เงินคงเหลือทั้งสิ้น (1)", level: 0, bold: true },
+        { id: "fund_to_allocate", name: "กองทุนรอการจัดสรร (4)", level: 0 },
+        { id: "commitments", name: "ภาระผูกพัน (5)", level: 0 },
+        { id: "committed_goods", name: "หักก่อหนี้ภาระผูกพันพัสดุ (6)", level: 0 },
+        { id: "balance_after_deductions", name: "เงินคงเหลือหลังหักตาม ข้อ (4) และ ข้อ (5) ข้อ (6)", level: 0, bold: true },
+        
+        { id: "header_balance_breakdown", name: "เงินคงเหลือทั้งสิ้น ประกอบด้วย", level: 0, bold: true },
+        { id: "cash_equivalent", name: "เงินสด/เทียบเท่าเงินสด", level: 1, sumGroup: ["total_balance_2"] },
+        { id: "treasury_deposit", name: "เงินฝากคลัง", level: 1, sumGroup: ["total_balance_2"] },
+        { id: "bank_deposit", name: "เงินฝากธนาคาร", level: 1, bold: true },
+        { id: "fixed_deposit", name: "ประเภทประจำ", level: 2, sumGroup: ["total_balance_2"] },
+        { id: "savings_deposit", name: "ประเภทออมทรัพย์", level: 2, sumGroup: ["total_balance_2"] },
+        { id: "current_deposit", name: "ประเภทกระแสรายวัน", level: 2, sumGroup: ["total_balance_2"] },
+        { id: "total_balance_2", name: "รวมเงินคงเหลือทั้งสิ้น (2)", level: 0, bold: true, totalFor: "total_balance_2" }
+    ];
+
+    const emptyRowItems = tableStructure
+        .filter(item => item.level < 2 && !item.totalFor && !item.sumGroup)
+        .map(item => item.name);
+    
+        let trendChart = null;
+    
+        let activeChartData = null; // Store data for the currently displayed chart
+    
+    
+    
+        function formatNumber(num) {
+    
+            if (num === null || num === undefined) return '-';
+    
+            if (Math.abs(num) >= 1_000_000) {
+    
+                return (num / 1_000_000).toFixed(1) + 'M';
+    
+            }
+    
+            if (Math.abs(num) >= 100_000) {
+    
+                return (num / 1_000).toFixed(0) + 'K';
+    
+            }
+    
+            return num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+        }
+    
+    
+    
+        function toggleNumberFormatting(isToggled) {
+    
+            document.querySelectorAll('#tableBody td[data-original-value]').forEach(cell => {
+    
+                const originalValue = parseFloat(cell.dataset.originalValue);
+    
+                if (isNaN(originalValue)) {
+    
+                    cell.textContent = "-";
+    
+                } else {
+    
+                    cell.textContent = isToggled ? formatNumber(originalValue) : originalValue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+                }
+    
+            });
+    
+        }
+    
+    
+    
+        function initTable() {
+    
+            const tbody = document.getElementById('tableBody');
+    
+            tbody.innerHTML = '';
+    
+            tableStructure.forEach(item => {
+    
+                const tr = document.createElement('tr');
+    
+                tr.dataset.id = item.id;
+    
+                if (item.bold) tr.className = 'font-bold';
+    
+                
+    
+                const tdName = document.createElement('td');
+    
+                tdName.textContent = item.name;
+    
+                if (item.level > 0) tdName.classList.add(`indent-${item.level}`);
+    
+                
+    
+                // Add tooltip if definition exists
+    
+                if (item.definition) {
+    
+                    tdName.title = item.definition;
+    
+                    tdName.classList.add('has-definition');
+    
+                }
+    
+    
+    
+                tr.appendChild(tdName);
+    
+                years.forEach(year => {
+    
+                    const td = document.createElement('td');
+    
+                    td.dataset.year = year;
+    
+                    td.dataset.itemId = item.id;
+    
+                    td.textContent = (emptyRowItems.includes(item.name)) ? "" : "-";
+    
+                    tr.appendChild(td);
+    
+                });
+    
+                tbody.appendChild(tr);
+    
+            });
+    
+        }
+    
+    
+    
+        function handleFile(input) {
+    
+            const file = input.files[0];
+    
+            if (!file) return;
+    
+            const reader = new FileReader();
+    
+            reader.onload = function(e) {
+    
+                document.getElementById('validation-report').style.display = 'none';
+    
+                document.getElementById('report-content').innerHTML = '';
+    
+                document.querySelectorAll('.cell-error').forEach(cell => cell.classList.remove('cell-error'));
+    
+    
+    
+                const data = new Uint8Array(e.target.result);
+    
+                const workbook = XLSX.read(data, {type: 'array'});
+    
+                const firstSheetName = workbook.SheetNames[0];
+    
+                const worksheet = workbook.Sheets[firstSheetName];
+    
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false});
+    
+                
+    
+                processData(jsonData);
+    
+                document.getElementById('status').textContent = `นำเข้าข้อมูลสำเร็จ: ${file.name}`;
+    
+                validateData();
+    
+            };
+    
+            reader.readAsArrayBuffer(file);
+    
+        }
+    
+    
+    
+        function processData(rows) {
+    
+            let headerRowIndex = rows.findIndex(row => row && row.some(cell => cell && cell.toString().includes("2566")));
+    
+            if (headerRowIndex === -1) {
+    
+                alert("ไม่พบหัวตารางที่ถูกต้อง (ต้องมีปี 2566-2571)");
+    
+                return;
+    
+            }
+    
+            
+    
+            const colMap = {};
+    
+            rows[headerRowIndex].forEach((cell, index) => {
+    
+                if (cell) {
+    
+                    const strVal = cell.toString().trim();
+    
+                    if (years.includes(strVal)) colMap[strVal] = index;
+    
+                    else if (strVal.includes("รายการ")) colMap["item"] = index;
+    
+                }
+    
+            });
+    
+            if (colMap["item"] === undefined) colMap["item"] = 0;
+    
+    
+    
+            const uploadedData = {};
+    
+            for (let i = headerRowIndex + 1; i < rows.length; i++) {
+    
+                const row = rows[i];
+    
+                const itemName = row[colMap["item"]];
+    
+                if (itemName) {
+    
+                    uploadedData[itemName.toString().trim()] = row;
+    
+                }
+    
+            }
+    
+            
+    
+            const isFormattingToggled = document.getElementById('formatNumberToggle').checked;
+    
+            const tbody = document.getElementById('tableBody');
+    
+            tableStructure.forEach(item => {
+    
+                const tr = tbody.querySelector(`tr[data-id='${item.id}']`);
+    
+                if (!tr) return;
+    
+                const matchRow = uploadedData[item.name];
+    
+                if(matchRow) {
+    
+                     years.forEach((year, index) => {
+    
+                        const cell = tr.cells[index + 1];
+    
+                        const rawValue = matchRow[colMap[year]];
+    
+                         if (rawValue !== undefined && rawValue !== null && rawValue !== "") {
+    
+                            const numericValue = parseFloatFromStr(rawValue);
+    
+                            cell.dataset.originalValue = numericValue;
+    
+                            cell.textContent = isFormattingToggled ? formatNumber(numericValue) : numericValue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+                        } else {
+    
+                            cell.dataset.originalValue = "";
+    
+                            cell.textContent = "-";
+    
+                        }
+    
+                    });
+    
+                }
+    
+            });
+    
+        }
+    
+    
+    
+        function parseFloatFromStr(str) {
+    
+            if (str === null || str === undefined || str === "-") return 0;
+    
+            if (typeof str !== 'string') str = String(str);
+    
+            const num = parseFloat(str.replace(/,/g, ''));
+    
+            return isNaN(num) ? 0 : num;
+    
+        }
+    
+    
+    
+        function validateData() {
+    
+            const reportContainer = document.getElementById('validation-report');
+    
+            const reportContent = document.getElementById('report-content');
+    
+            document.querySelectorAll('.cell-error').forEach(cell => cell.classList.remove('cell-error'));
+    
+            reportContent.innerHTML = '';
+    
+            reportContainer.style.display = 'block';
+    
+    
+    
+            let errors = [];
+    
+            const dataById = {};
+    
+    
+    
+            document.querySelectorAll('#tableBody tr').forEach(tr => {
+    
+                const id = tr.dataset.id;
+    
+                if (!id) return;
+    
+                dataById[id] = {};
+    
+                tr.querySelectorAll('td[data-year]').forEach(td => {
+    
+                    // Use the original value for validation, not the displayed text
+    
+                    dataById[id][td.dataset.year] = parseFloatFromStr(td.dataset.originalValue || td.textContent);
+    
+                });
+    
+            });
+    
+    
+    
+            years.forEach((year, yearIndex) => {
+    
+                const check = (id, calculated, actual) => {
+    
+                    if (Math.abs(calculated - actual) > 0.01) {
+    
+                        const itemName = tableStructure.find(item => item.id === id).name;
+    
+                        errors.push({
+    
+                            year,
+    
+                            itemId: id,
+    
+                            message: `<li><b>${year}</b>: <strong>${itemName}</strong> ไม่ถูกต้อง. <u>ค่าที่คำนวณได้</u>: ${calculated.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits: 2})}, <u>ค่าในไฟล์</u>: ${actual.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits: 2})}</li>`
+    
+                        });
+    
+                    }
+    
+                };
+    
+                
+    
+                tableStructure.filter(item => item.totalFor).forEach(totalItem => {
+    
+                    const sumGroup = totalItem.totalFor;
+    
+                    let calculatedSum = 0;
+    
+                    tableStructure.filter(item => item.sumGroup && item.sumGroup.includes(sumGroup)).forEach(sumItem => {
+    
+                        calculatedSum += dataById[sumItem.id][year];
+    
+                    });
+    
+                    check(totalItem.id, calculatedSum, dataById[totalItem.id][year]);
+    
+                });
+    
+    
+    
+                const netIncome = dataById['total_revenue'][year] - dataById['total_expense'][year];
+    
+                check('net_income', netIncome, dataById['net_income'][year]);
+    
+    
+    
+                const totalBalance1 = dataById['net_income'][year] + dataById['brought_forward'][year];
+    
+                check('total_balance_1', totalBalance1, dataById['total_balance_1'][year]);
+    
+    
+    
+                if (yearIndex > 0) {
+    
+                    const prevYear = years[yearIndex - 1];
+    
+                    const expectedBroughtForward = dataById['total_balance_1'][prevYear];
+    
+                    if (Math.abs(expectedBroughtForward - dataById['brought_forward'][year]) > 0.01) {
+    
+                        errors.push({
+    
+                            year,
+    
+                            itemId: 'brought_forward',
+    
+                            message: `<li><b>${year}</b>: <strong>บวกเงินคงเหลือสะสมยกมา</strong> ไม่ถูกต้อง. ควรจะเป็นค่า <i>เงินคงเหลือทั้งสิ้น (1)</i> ของปีก่อนหน้า. <u>ค่าที่คาดหวัง</u>: ${expectedBroughtForward.toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits: 2})}, <u>ค่าในไฟล์</u>: ${dataById['brought_forward'][year].toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits: 2})}</li>`
+    
+                        });
+    
+                    }
+    
+                }
+    
+    
+    
+                const balanceAfterDeductions = dataById['total_balance_1'][year] - dataById['fund_to_allocate'][year] - dataById['commitments'][year] - dataById['committed_goods'][year];
+    
+                check('balance_after_deductions', balanceAfterDeductions, dataById['balance_after_deductions'][year]);
+    
+            });
+    
+    
+    
+            if (errors.length === 0) {
+    
+                reportContent.innerHTML = `<div class="report-item report-success">✔️ การคำนวณทั้งหมดถูกต้อง</div>`;
+    
+            } else {
+    
+                reportContent.innerHTML = `<div class="report-item report-error"><ul>${errors.map(e => e.message).join('')}</ul></div>`;
+    
+                errors.forEach(error => {
+    
+                    const cell = document.querySelector(`tr[data-id='${error.itemId}'] td[data-year='${error.year}']`);
+    
+                    if (cell) {
+    
+                        cell.classList.add('cell-error');
+    
+                    }
+    
+                });
+    
+            }
+    
+        }
+    
+    
+    
+        function downloadTemplate() {
+    
+            const wsData = [["รายการ", ...years]];
+    
+            tableStructure.forEach(item => wsData.push([item.name]));
+    
+            const wb = XLSX.utils.book_new();
+    
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+    
+            XLSX.utils.book_append_sheet(wb, ws, "FinancialPlan");
+    
+            XLSX.writeFile(wb, "Template_Financial_Plan.xlsx");
+    
+        }
+    
+    
+    
+        function showTrendChart(rowElement) {
+    
+            const rowData = [];
+    
+            const cells = rowElement.querySelectorAll('td[data-year]');
+    
+            if (cells.length === 0) return;
+    
+            
+    
+            let hasData = false;
+    
+            cells.forEach(cell => {
+    
+                // Use original value for chart accuracy
+    
+                const value = parseFloatFromStr(cell.dataset.originalValue || cell.textContent);
+    
+                if (value !== 0) hasData = true;
+    
+                rowData.push(value);
+    
+            });
+    
+    
+    
+            const rowId = rowElement.dataset.id;
+    
+            const itemInfo = tableStructure.find(i => i.id === rowId);
+    
+            if (!hasData || (itemInfo && emptyRowItems.includes(itemInfo.name))) {
+    
+                return;
+    
+            }
+    
+            
+    
+            const itemName = rowElement.cells[0].textContent;
+    
+            activeChartData = {
+    
+                itemName: itemName,
+    
+                rowData: rowData
+    
+            };
+    
+    
+    
+            const modal = document.getElementById('chartModal');
+    
+            const chartTitle = document.getElementById('chart-title');
+    
+            chartTitle.textContent = `กราฟแสดงแนวโน้ม: ${itemName}`;
+    
+            modal.classList.add('show');
+    
+            
+    
+            createOrUpdateChart();
+    
+        }
+    
+        
+    
+        function updateChart() {
+    
+            if (activeChartData) {
+    
+                createOrUpdateChart();
+    
+            }
+    
+        }
+    
+    
+    
+        function createOrUpdateChart() {
+    
+            const { itemName, rowData } = activeChartData;
+    
+            const showPercentage = document.getElementById('showPercentageToggle').checked;
+    
+    
+    
+            const ctx = document.getElementById('trendChart').getContext('2d');
+    
+            if (trendChart) {
+    
+                trendChart.destroy();
+    
+            }
+    
+            
+    
+            trendChart = new Chart(ctx, {
+    
+                type: 'line',
+    
+                data: {
+    
+                    labels: years,
+    
+                    datasets: [{
+    
+                        label: itemName,
+    
+                        data: rowData,
+    
+                        borderColor: 'rgba(37, 99, 235, 1)',
+    
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+    
+                        fill: true,
+    
+                        tension: 0.1
+    
+                    }]
+    
+                },
+    
+                plugins: [ChartDataLabels],
+    
+                options: {
+    
+                    responsive: true,
+    
+                    maintainAspectRatio: true,
+    
+                    scales: {
+    
+                        y: {
+    
+                            beginAtZero: false,
+    
+                            ticks: {
+    
+                                callback: function(value) {
+    
+                                    return formatNumber(value);
+    
+                                }
+    
+                            }
+    
+                        }
+    
+                    },
+    
+                    plugins: {
+    
+                        datalabels: {
+    
+                            display: showPercentage,
+    
+                            align: 'top',
+    
+                            color: '#333',
+    
+                            font: {
+    
+                                weight: 'bold'
+    
+                            },
+    
+                            formatter: (value, context) => {
+    
+                                if (context.dataIndex === 0) return null; // No percentage for the first point
+    
+                                const prevValue = context.dataset.data[context.dataIndex - 1];
+    
+                                if (prevValue === 0) return 'N/A';
+    
+                                const percentageChange = ((value - prevValue) / prevValue) * 100;
+    
+                                return (percentageChange >= 0 ? '+' : '') + percentageChange.toFixed(1) + '%';
+    
+                            }
+    
+                        },
+    
+                        tooltip: {
+    
+                            callbacks: {
+    
+                                label: function(context) {
+    
+                                    let label = context.dataset.label || '';
+    
+                                    if (label) label += ': ';
+    
+                                    if (context.parsed.y !== null) {
+    
+                                        label += context.parsed.y.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+                                    }
+    
+                                    return label;
+    
+                                }
+    
+                            }
+    
+                        }
+    
+                    }
+    
+                }
+    
+            });
+    
+        }
+    
+    
+    
+        initTable();
+    
+    
+    
+        document.addEventListener('DOMContentLoaded', (event) => {
+    
+            const table = document.getElementById('dataTable');
+    
+            if (!table) return;
+    
+            const tableBody = table.querySelector('#tableBody');
+    
+            const thead = table.querySelector('thead');
+    
+            const tableContainer = document.querySelector('.table-container');
+    
+            let placeholder = null;
+    
+            window.addEventListener('scroll', function() {
+    
+                const containerRect = tableContainer.getBoundingClientRect();
+    
+                if (containerRect.top < 0) {
+    
+                    if (!thead.classList.contains('header-fixed')) {
+    
+                        if (!placeholder) {
+    
+                            placeholder = document.createElement('div');
+    
+                            placeholder.style.height = `${thead.offsetHeight}px`;
+    
+                            table.parentNode.insertBefore(placeholder, table);
+    
+                        }
+    
+                        const firstRowTds = table.querySelector('tbody tr:first-child');
+    
+                        if(firstRowTds) {
+    
+                            const ths = thead.querySelectorAll('th');
+    
+                            const tds = firstRowTds.querySelectorAll('td');
+    
+                            ths.forEach((th, i) => {
+    
+                                if(tds[i]) { th.style.width = `${tds[i].offsetWidth}px`; }
+    
+                            });
+    
+                        }
+    
+                        thead.classList.add('header-fixed');
+    
+                        thead.style.width = `${tableContainer.offsetWidth}px`;
+    
+                    }
+    
+                } else {
+    
+                    if (thead.classList.contains('header-fixed')) {
+    
+                        thead.classList.remove('header-fixed');
+    
+                        thead.querySelectorAll('th').forEach(th => th.style.width = '');
+    
+                        thead.style.width = '';
+    
+                        if (placeholder) {
+    
+                            placeholder.remove();
+    
+                            placeholder = null;
+    
+                        }
+    
+                    }
+    
+                }
+    
+            });
+    
+            
+    
+            // --- Tooltip Logic ---
+    
+            tableBody.addEventListener('mouseover', function(e) {
+    
+                const cell = e.target.closest('td[data-year]');
+    
+                if (!cell || cell.dataset.year === years[0]) return; // No tooltip for the first year
+    
+    
+    
+                if(cell.title && cell.dataset.dynamicTitle) return; 
+    
+                
+    
+                const currentYearIndex = years.indexOf(cell.dataset.year);
+    
+                const prevYear = years[currentYearIndex - 1];
+    
+                const prevCell = cell.parentElement.querySelector(`td[data-year='${prevYear}']`);
+    
+                
+    
+                if (!prevCell) return;
+    
+    
+    
+                // Use original values for tooltip calculation
+    
+                const currentValue = parseFloatFromStr(cell.dataset.originalValue || cell.textContent);
+    
+                const prevValue = parseFloatFromStr(prevCell.dataset.originalValue || prevCell.textContent);
+    
+                
+    
+                if (prevValue === 0 && currentValue !== 0) {
+    
+                    cell.title = "เพิ่มขึ้นจาก 0";
+    
+                } else if (prevValue !== 0) {
+    
+                    const percentageChange = ((currentValue - prevValue) / prevValue) * 100;
+    
+                    let diffText = percentageChange >= 0 ? 'เพิ่มขึ้น' : 'ลดลง';
+    
+                    cell.title = `เทียบกับปีก่อน: ${diffText} ${Math.abs(percentageChange).toFixed(2)}%`;
+    
+                } else {
+    
+                     cell.title = "ไม่มีข้อมูลเทียบ";
+    
+                }
+    
+                cell.dataset.dynamicTitle = 'true';
+    
+            });
+    
+            
+    
+            tableBody.addEventListener('click', function(e) {
+    
+                const row = e.target.closest('tr');
+    
+                if (row) {
+    
+                    showTrendChart(row);
+    
+                }
+    
+            });
+    
+    
+    
+            // Close modal
+    
+            const chartModal = document.getElementById('chartModal');
+    
+            chartModal.addEventListener('click', function(e) {
+    
+                if (e.target === chartModal) {
+    
+                    chartModal.classList.remove('show');
+    
+                    if (trendChart) {
+    
+                        trendChart.destroy();
+    
+                        trendChart = null;
+    
+                        activeChartData = null;
+    
+                    }
+    
+                }
+    
+            });
+    
+        });
+    
+    </script>
+    
+    
+    
+    </body>
+    
+    </html>
+    
+    
