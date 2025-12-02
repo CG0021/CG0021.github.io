@@ -16,90 +16,133 @@
 
         body {
             font-family: 'IBM Plex Sans Thai', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #2c3e50;
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            /* Prevent body scroll, use container scroll */
         }
 
         .container {
-            max-width: 100%;
-            margin: 0 auto;
+            width: 100%;
+            height: 100vh;
+            margin: 0;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 95vh;
+            border-radius: 0;
+            box-shadow: none;
+            display: block;
+            /* Changed from flex to block for standard flow */
+            overflow: auto;
+            /* Main scroller for both X and Y */
         }
 
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #1A237E 0%, #4CAF50 100%);
             color: white;
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
             gap: 20px;
+            position: sticky;
+            /* Changed to sticky */
+            left: 0;
+            /* Stick to left edge */
+            z-index: 2000;
+            /* Increased to stay on top */
+            width: 100vw;
+            /* Force viewport width */
+            box-sizing: border-box;
         }
 
-        .header-title {
+        .header-left {
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
         }
 
         .header h1 {
             font-size: 1.5em;
             font-weight: 600;
             margin: 0;
+            margin-bottom: 5px;
         }
-        
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin: 0;
+            margin-bottom: 5px;
+        }
+
+        .search-group-container {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            z-index: 1500;
+            /* Increased to be above table headers (1100) */
+            position: sticky;
+            /* Changed to sticky */
+            left: 0;
+            /* Stick to left edge */
+            width: 100vw;
+            /* Force viewport width */
+            box-sizing: border-box;
+        }
+
         .search-group {
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+            justify-content: center;
         }
 
         .search-box {
             position: relative;
             width: 300px;
+            min-width: 200px;
+            flex-grow: 1;
         }
 
         .province-box {
             position: relative;
             width: 250px;
+            min-width: 180px;
             display: flex;
             gap: 5px;
+            flex-grow: 1;
         }
 
         input[type="text"] {
             width: 100%;
             padding: 10px 15px;
-            border: none;
+            border: 1px solid #ccc;
             border-radius: 20px;
             font-size: 14px;
             font-family: 'IBM Plex Sans Thai', sans-serif;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            backdrop-filter: blur(5px);
+            background: white;
+            color: #2c3e50;
             transition: all 0.3s ease;
         }
 
         input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: #999;
         }
 
         input[type="text"]:focus {
             outline: none;
-            background: white;
-            color: #2c3e50;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
         }
 
         input[type="text"]:focus::placeholder {
-            color: #999;
+            color: #777;
         }
 
         .btn {
@@ -116,12 +159,15 @@
         .btn-add-all {
             background: #27ae60;
         }
+
         .btn-add-all:hover {
             background: #2ecc71;
         }
+
         .btn-analyze {
             background: #e67e22;
         }
+
         .btn-analyze:hover {
             background: #f39c12;
         }
@@ -142,14 +188,31 @@
             white-space: nowrap;
         }
 
+        .credit-box {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            margin-top: 5px;
+            text-align: left;
+        }
+
+        /* CSS สำหรับชื่อโดยเฉพาะ */
+        .credit-box .credit-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
         .nav-btn:hover {
             background-color: rgba(255, 255, 255, 0.3);
         }
 
         .nav-btn.active {
-            background-color: #2980b9;
+            background-color: #2E7D32;
             font-weight: 600;
             cursor: default;
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         .suggestions {
@@ -162,12 +225,17 @@
             border-radius: 8px;
             max-height: 300px;
             overflow-y: auto;
-            z-index: 1000;
+            z-index: 2000;
+            /* Increased z-index to be above sticky headers */
             display: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             margin-top: 5px;
             color: #2c3e50;
         }
+
+        /* ... existing styles ... */
+
+
 
         .suggestion-item {
             padding: 10px 16px;
@@ -180,9 +248,12 @@
         }
 
         .table-wrapper {
-            flex: 1;
-            overflow: auto;
+            /* flex: 1; Removed */
+            overflow: visible;
+            /* Let container handle scroll */
             position: relative;
+            width: 100%;
+            padding-bottom: 20px;
         }
 
         table {
@@ -222,7 +293,8 @@
             position: sticky;
             left: 0;
             background: white;
-            z-index: 30;
+            z-index: 900;
+            /* Lower than header */
             border-right: 2px solid #bdc3c7;
             min-width: 350px;
             max-width: 350px;
@@ -235,11 +307,13 @@
             top: 0;
             background: #2c3e50;
             color: white;
-            z-index: 50;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         thead th:first-child {
-            z-index: 60; /* Higher z-index for the top-left corner */
+            z-index: 1100;
+            /* Highest z-index for the top-left corner */
         }
 
         /* Hospital Columns */
@@ -391,18 +465,19 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-        
+
         /* Report Modal */
         .report-modal {
             display: none;
             position: fixed;
-            z-index: 1000;
+            z-index: 3000;
+            /* Increased to be above everything else */
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             animation: fadeIn 0.3s;
         }
 
@@ -414,12 +489,12 @@
             width: 80%;
             max-width: 1200px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
             max-height: 90vh;
         }
-        
+
         .report-header {
             padding: 15px 25px;
             background: #34495e;
@@ -447,10 +522,15 @@
             padding: 20px 25px;
             overflow-y: auto;
         }
-        
+
         @keyframes fadeIn {
-            from {opacity: 0}
-            to {opacity: 1}
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
         }
 
         .report-section {
@@ -459,50 +539,73 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
         .report-section-title {
             background: #e9ecef;
             padding: 10px 15px;
             font-weight: 600;
             border-bottom: 1px solid #ddd;
         }
+
         .report-section-body {
             padding: 15px;
         }
+
         .report-summary {
             font-weight: 500;
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 1px solid #eee;
         }
-        .report-summary.pass { color: #27ae60; }
-        .report-summary.fail { color: #e74c3c; }
-        .report-summary.mixed { color: #f39c12; }
+
+        .report-summary.pass {
+            color: #27ae60;
+        }
+
+        .report-summary.fail {
+            color: #e74c3c;
+        }
+
+        .report-summary.mixed {
+            color: #f39c12;
+        }
 
         .report-ranking {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
+
         .rank-list h4 {
             font-weight: 600;
             margin-bottom: 8px;
             border-bottom: 2px solid;
             padding-bottom: 4px;
         }
-        .rank-list.best h4 { border-color: #27ae60; }
-        .rank-list.worst h4 { border-color: #e74c3c; }
+
+        .rank-list.best h4 {
+            border-color: #27ae60;
+        }
+
+        .rank-list.worst h4 {
+            border-color: #e74c3c;
+        }
+
         .rank-list ol {
             list-style-position: inside;
             padding-left: 5px;
         }
+
         .rank-list li {
             padding: 4px 0;
             display: flex;
             justify-content: space-between;
         }
+
         .rank-list .value {
             font-weight: 500;
         }
+
         .report-group-title {
             font-size: 1.5em;
             font-weight: 600;
@@ -512,21 +615,65 @@
             border-bottom: 2px solid #3498db;
             padding-bottom: 5px;
         }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-left {
+                align-items: center;
+                text-align: center;
+            }
+
+            .credit-box {
+                text-align: center;
+            }
+
+            .nav-buttons {
+                margin-top: 10px;
+            }
+
+            /* Disable sticky first column on mobile */
+            th:first-child,
+            td:first-child {
+                position: static;
+                border-right: none;
+                min-width: auto;
+                max-width: none;
+            }
+
+            /* Keep header sticky vertically only */
+            thead th:first-child {
+                position: sticky;
+                top: 0;
+                left: auto;
+                z-index: 1000;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-title">
+            <div class="header-left">
                 <h1>ระบบเปรียบเทียบประสิทธิภาพ TPS</h1>
-                <div class="header-subtitle">เปรียบเทียบข้อมูลหลายโรงพยาบาล</div>
+                <p>ได้รับการสนับสนุนโดย หลักสูตร การเงินการคลัง CFO CCO สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</p>
+                <div class="credit-box">
+                    ออกแบบและพัฒนาโดย <span class="credit-name">ดร.นพ.ชุมพล นุชผ่อง</span>
+                    นายแพทย์เชี่ยวชาญ เวชกรรมป้องกัน กองเศรษฐกิจสุขภาพและหลักประกันสุขภาพ สำนักงานปลัดกระทรวงสาธารณสุข
+                </div>
             </div>
 
             <div class="nav-buttons">
                 <a href="https://cg0021.github.io/TPS.html" class="nav-btn">ระบบวิเคราะห์ TPS</a>
+                <a href="https://cg0021.github.io/TPS_Compare.html" class="nav-btn active">ระบบเปรียบเทียบ TPS</a>
             </div>
+        </div>
 
+        <div class="search-group-container">
             <div class="search-group">
                 <div class="province-box">
                     <input type="text" id="provinceInput" placeholder="ระบุจังหวัด">
@@ -537,7 +684,7 @@
                     <input type="text" id="searchInput" placeholder="ค้นหาและเพิ่มโรงพยาบาล..." disabled>
                     <div class="suggestions" id="suggestions"></div>
                 </div>
-                 <button class="btn btn-analyze" onclick="generateComparisonReport()">วิเคราะห์เปรียบเทียบ</button>
+                <button class="btn btn-analyze" onclick="generateComparisonReport()">วิเคราะห์เปรียบเทียบ</button>
             </div>
         </div>
 
@@ -561,7 +708,7 @@
         <div class="spinner"></div>
         <p style="margin-top: 10px; color: #3498db; font-weight: 500;">กำลังโหลดข้อมูล...</p>
     </div>
-    
+
     <div id="reportModal" class="report-modal">
         <div class="report-modal-content">
             <div class="report-header">
@@ -741,7 +888,7 @@
                             setTimeout(() => reject(new Error('Timeout')), timeout)
                         )
                     ]);
-                    return result; 
+                    return result;
                 } catch (error) {
                     console.warn(`Attempt ${i + 1}/${retries} failed for hospital ${code}:`, error.message);
                     if (i === retries - 1) {
@@ -798,20 +945,20 @@
                     result = getValue(mainRow, mainHeaders, config.resultKey);
                 }
             }
-            
+
             const parseToFloat = (val) => {
-                 if (val === null || val === undefined || val === '') return null;
-                 if (typeof val === 'string') val = val.replace(/,/g, '');
-                 const num = parseFloat(val);
-                 return isNaN(num) ? null : num;
+                if (val === null || val === undefined || val === '') return null;
+                if (typeof val === 'string') val = val.replace(/,/g, '');
+                const num = parseFloat(val);
+                return isNaN(num) ? null : num;
             };
 
-            return { 
-                score: parseToFloat(score), 
-                result: parseToFloat(result), 
-                mean: parseToFloat(mean), 
-                diff: parseToFloat(diff), 
-                unit: config.unit 
+            return {
+                score: parseToFloat(score),
+                result: parseToFloat(result),
+                mean: parseToFloat(mean),
+                diff: parseToFloat(diff),
+                unit: config.unit
             };
         }
 
@@ -987,8 +1134,8 @@
 
             const matches = hospitalList.filter(h => h.p && h.p.toString().includes(province));
             if (matches.length === 0) {
-                 alert('ไม่พบโรงพยาบาลในจังหวัดที่ระบุ');
-                 return;
+                alert('ไม่พบโรงพยาบาลในจังหวัดที่ระบุ');
+                return;
             }
             if (matches.length > 20 && !confirm(`พบ ${matches.length} โรงพยาบาล การโหลดอาจใช้เวลานาน ยืนยันหรือไม่?`)) return;
 
@@ -1202,16 +1349,16 @@
                 } else if (passed.length > 0 && failed.length > 0) {
 
                     summaryText = `มี <strong style="color:#27ae60">ผ่าน</strong>  <strong style="color:#27ae60">${passed.length}</strong> โรงพยาบาล และ <strong style="color:#e74c3c">ไม่ผ่าน</strong> <strong style="color:#e74c3c">${failed.length}</strong> โรงพยาบาล ในตัวชี้วัดนี้`;
-              
-                
-                
+
+
+
                 } else {
                     summaryText = 'ไม่พบข้อมูลสำหรับตัวชี้วัดนี้';
                 }
                 html += `<div class="report-summary ${summaryClass}">${summaryText}</div>`;
 
                 if (indicator.type === 'fail_only') {
-                     if(failed.length > 0) {
+                    if (failed.length > 0) {
                         html += '<div class="rank-list worst"><h4>โรงพยาบาลที่ไม่ผ่าน</h4><ol>';
                         failed.forEach(h => {
                             html += `<li><span>${h.name}</span></li>`;
@@ -1237,11 +1384,11 @@
                         failed.sort(indicator.sortWorst);
                         html += '<div class="rank-list worst"><h4>โรงพยาบาลที่ไม่ผ่าน (เรียงตามผลงานที่ต้องปรับปรุง)</h4><ol>';
                         failed.forEach(h => {
-                             html += `<li><span>${h.name}</span> <span class="value">${formatNumber(h.value)} ${indicator.unit || ''}</span></li>`;
+                            html += `<li><span>${h.name}</span> <span class="value">${formatNumber(h.value)} ${indicator.unit || ''}</span></li>`;
                         });
                         html += '</ol></div>';
                     } else {
-                         html += '<div class="rank-list worst"><h4>โรงพยาบาลที่ไม่ผ่าน</h4><p>-</p></div>';
+                        html += '<div class="rank-list worst"><h4>โรงพยาบาลที่ไม่ผ่าน</h4><p>-</p></div>';
                     }
                     html += '</div>'; // end report-ranking
                 }
@@ -1268,47 +1415,64 @@
                 searchInput.addEventListener('input', (e) => {
                     const val = e.target.value.toLowerCase();
                     const suggestions = document.getElementById('suggestions');
+                    suggestions.innerHTML = ''; // Clear previous suggestions
+
                     if (val.length < 2) {
                         suggestions.style.display = 'none';
                         return;
                     }
                     const matches = hospitalList.filter(h =>
                         (h.n && h.n.toString().toLowerCase().includes(val)) ||
-                        (h.c && h.c.toString().includes(val)) ||
-                        (h.p && h.p.toString().includes(val))
+                        (h.c && h.c.toString().includes(val))
                     ).slice(0, 10);
 
                     if (matches.length > 0) {
-                        suggestions.innerHTML = matches.map(h => `
-                            <div class="suggestion-item" onclick="selectSuggestion('${h.c}', '${h.n}')">
-                                <div>${h.n}</div>
-                                <div style="font-size:0.8em; color:#888;">${h.p ? h.p + ' | ' : ''}${h.c}</div>
-                            </div>`).join('');
+                        matches.forEach(h => {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.textContent = `${h.c} - ${h.n}`;
+                            div.onclick = () => {
+                                addHospital(h.c, h.n);
+                                suggestions.style.display = 'none';
+                                searchInput.value = '';
+                            };
+                            suggestions.appendChild(div);
+                        });
                         suggestions.style.display = 'block';
                     } else {
                         suggestions.style.display = 'none';
                     }
                 });
-                
+
                 // Province Search Logic
                 const provinceInput = document.getElementById('provinceInput');
+                const provinceSuggestions = document.getElementById('provinceSuggestions');
+
                 provinceInput.addEventListener('input', (e) => {
                     const val = e.target.value.toLowerCase();
-                    const suggestions = document.getElementById('provinceSuggestions');
+                    provinceSuggestions.innerHTML = '';
+
                     if (val.length < 1) {
-                        suggestions.style.display = 'none';
+                        provinceSuggestions.style.display = 'none';
                         return;
                     }
                     const provinces = [...new Set(hospitalList.map(h => h.p).filter(p => p))];
                     const matches = provinces.filter(p => p.toString().toLowerCase().includes(val)).slice(0, 10);
 
                     if (matches.length > 0) {
-                        suggestions.innerHTML = matches.map(p => `
-                            <div class="suggestion-item" onclick="selectProvinceSuggestion('${p}')">${p}</div>
-                        `).join('');
-                        suggestions.style.display = 'block';
+                        matches.forEach(p => {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.textContent = p;
+                            div.onclick = () => {
+                                provinceInput.value = p;
+                                provinceSuggestions.style.display = 'none';
+                            };
+                            provinceSuggestions.appendChild(div);
+                        });
+                        provinceSuggestions.style.display = 'block';
                     } else {
-                        suggestions.style.display = 'none';
+                        provinceSuggestions.style.display = 'none';
                     }
                 });
 
@@ -1317,6 +1481,30 @@
                     if (!e.target.closest('.search-box')) document.getElementById('suggestions').style.display = 'none';
                     if (!e.target.closest('.province-box')) document.getElementById('provinceSuggestions').style.display = 'none';
                 });
+
+                // Add Hospital Button Logic
+                const btnAdd = document.getElementById('btnAddHospital');
+                if (btnAdd) {
+                    btnAdd.onclick = () => {
+                        const query = searchInput.value.toLowerCase();
+                        const suggestions = document.getElementById('suggestions');
+
+                        // Try to find exact match first
+                        const exactMatch = hospitalList.find(h => h.c.toString() === query || h.n.toLowerCase() === query);
+                        if (exactMatch) {
+                            addHospital(exactMatch.c, exactMatch.n);
+                            searchInput.value = '';
+                            suggestions.style.display = 'none';
+                        } else {
+                            // If no exact match, check if there's only one suggestion visible
+                            if (suggestions.children.length === 1) {
+                                suggestions.children[0].click();
+                            } else {
+                                alert('กรุณาเลือกโรงพยาบาลจากรายการ');
+                            }
+                        }
+                    };
+                }
 
             } catch (e) {
                 alert('Failed to load hospital list: ' + e.message);
