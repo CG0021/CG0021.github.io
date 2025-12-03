@@ -631,67 +631,72 @@
 
     <div class="container">
         <!-- Controls Bar -->
-        <div class="controls-bar">
-            <div class="file-input-wrapper">
-                <button class="btn btn-primary">
+        <!-- Controls Bar -->
+        <div class="controls-bar" style="justify-content: space-between;">
+            <div class="controls-left" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                <div class="file-input-wrapper">
+                    <button class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        นำเข้า Excel
+                    </button>
+                    <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="handleFile(this)">
+                </div>
+
+                <button class="btn btn-primary" onclick="downloadTemplate()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    นำเข้า Excel
+                    โหลดแม่แบบ
                 </button>
-                <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="handleFile(this)">
+
+                <button id="editDataBtn" class="btn btn-success" onclick="toggleEditMode()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-edit-2">
+                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                    </svg>
+                    แก้ไขข้อมูล
+                </button>
+
+                <div class="toggle-switch-container"
+                    style="margin-left: 10px; border-left: 1px solid #e2e8f0; padding-left: 15px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="formatNumberToggle" onchange="toggleNumberFormatting(this.checked)"
+                            checked>
+                        <span class="slider"></span>
+                    </label>
+                    <label for="formatNumberToggle" style="cursor: pointer;">แสดงเลขย่อ (M/K)</label>
+                </div>
+
+                <div class="toggle-switch-container"
+                    style="margin-left: 10px; border-left: 1px solid #e2e8f0; padding-left: 15px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="validationToggle" onchange="toggleValidation(this.checked)" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <label for="validationToggle" style="cursor: pointer;">แสดงผลการตรวจสอบ</label>
+                </div>
             </div>
 
-            <button class="btn btn-primary" onclick="downloadTemplate()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                โหลดแม่แบบ
-            </button>
-
-            <button id="editDataBtn" class="btn btn-success" onclick="toggleEditMode()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="feather feather-edit-2">
-                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                </svg>
-                แก้ไขข้อมูล
-            </button>
-
-            <button id="analyzePlanBtn" class="btn btn-warning" onclick="analyzePlan()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="feather feather-bar-chart-2">
-                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                </svg>
-                วิเคราะห์แผน
-            </button>
-
-            <div class="toggle-switch-container"
-                style="margin-left: 10px; border-left: 1px solid #e2e8f0; padding-left: 15px;">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="formatNumberToggle" onchange="toggleNumberFormatting(this.checked)"
-                        checked>
-                    <span class="slider"></span>
-                </label>
-                <label for="formatNumberToggle" style="cursor: pointer;">แสดงเลขย่อ (M/K)</label>
-            </div>
-
-            <div class="toggle-switch-container"
-                style="margin-left: 10px; border-left: 1px solid #e2e8f0; padding-left: 15px;">
-                <label class="toggle-switch">
-                    <input type="checkbox" id="validationToggle" onchange="toggleValidation(this.checked)">
-                    <span class="slider"></span>
-                </label>
-                <label for="validationToggle" style="cursor: pointer;">แสดงผลการตรวจสอบ</label>
+            <div class="controls-right">
+                <button id="analyzePlanBtn" class="btn btn-warning" onclick="analyzePlan()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-bar-chart-2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    วิเคราะห์แผน
+                </button>
             </div>
         </div>
         <div id="status"></div>
@@ -1718,6 +1723,10 @@
             const tableBody = table.querySelector('#tableBody');
             const thead = table.querySelector('thead');
             const tableContainer = document.querySelector('.table-container');
+
+            // Initialize toggles
+            toggleValidation(true);
+            toggleNumberFormatting(true);
 
             // --- Event delegation for editing ---
             tableBody.addEventListener('input', function (e) {
