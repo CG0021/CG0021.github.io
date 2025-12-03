@@ -244,8 +244,7 @@
             text-align: right;
             border-bottom: 1px solid var(--border-color);
             font-size: 14px;
-            white-space: normal;
-            word-break: break-word;
+            white-space: nowrap;
         }
 
         th {
@@ -270,7 +269,8 @@
         th:first-child {
             text-align: left;
             background-color: var(--table-header-bg);
-            min-width: 250px;
+            min-width: 180px;
+            white-space: normal;
         }
 
         td:first-child {
@@ -279,6 +279,14 @@
             /* Light gray for first column */
             font-weight: 500;
             color: #334155;
+            white-space: normal;
+            min-width: 180px;
+        }
+
+        /* Year Columns (2-7) */
+        th:nth-child(n+2):nth-child(-n+7),
+        td:nth-child(n+2):nth-child(-n+7) {
+            min-width: 100px;
         }
 
         /* Validation Colors */
@@ -359,7 +367,7 @@
         .analysis-cell {
             font-size: 12px;
             white-space: normal;
-            min-width: 200px;
+            min-width: 150px;
         }
 
         /* Status & Reports */
