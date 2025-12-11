@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคำนวณ TPS (TPS Calculator)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            background: linear-gradient(135deg, #56689d 0%, #7a6e9f 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a69bd 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.9em;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 600;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .card-header {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #34495e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .result-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .result-row:last-child {
+            margin-bottom: 0;
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #2c3e50;
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .score-pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .score-fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .total-section {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .total-score {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin: 10px 0;
+            color: #2ecc71;
+        }
+
+        .btn-calculate {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-export {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+        }
+
+        /* Style for the disabled fieldset overlay */
+        fieldset[disabled] {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .note {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ระบบคำนวณ TPS (Calculator)</h1>
+            <a href="TPS.html" class="nav-btn">กลับหน้าหลัก</a>
+        </div>
+
+        <div class="content">
+            <!-- Global Settings -->
+            <div class="card" style="border-left: 5px solid #3498db;">
+                <div class="card-header">
+                    ตั้งค่าข้อมูลทั่วไป (General Settings)
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>เลือกกลุ่มระดับบริการ (Service Level)</label>
+                        <select id="serviceLevel" onchange="handleServiceLevelChange()"
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                            <option value="">-- เลือกกลุ่มระดับบริการ --</option>
+                            <option value="รพช.F1 P<=50,000">รพช.F1 P<=50,000</option>
+                            <option value="รพช.F1 P50,000-100,000">รพช.F1 P50,000-100,000</option>
+                            <option value="รพช.F2 P<=30,000">รพช.F2 P<=30,000</option>
+                            <option value="รพช.F2 P30,000-60,000">รพช.F2 P30,000-60,000</option>
+                            <option value="รพช.F3 P<=15,000">รพช.F3 P<=15,000</option>
+                            <option value="รพช.F3 P15,000-25,000">รพช.F3 P15,000-25,000</option>
+                            <option value="รพช.M2 B<=100">รพช.M2 B<=100</option>
+                            <option value="รพช.M2 B>100">รพช.M2 B>100</option>
+                            <option value="รพท.M1 B>200">รพท.M1 B>200</option>
+                            <option value="รพท.S B<=400">รพท.S B<=400</option>
+                            <option value="รพท.S B>400">รพท.S B>400</option>
+                            <option value="รพศ.A B<=700">รพศ.A B<=700</option>
+                            <option value="รพศ.A B>700to1000">รพศ.A B>700to1000</option>
+                            <option value="รพศ.A B>1000">รพศ.A B>1000</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>เลือกไตรมาส (Quarter)</label>
+                        <select id="quarterSelect" onchange="handleServiceLevelChange()"
+                            style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+                            <option value="1">ไตรมาส 1 (Q1)</option>
+                            <option value="2">ไตรมาส 2 (Q2)</option>
+                            <option value="3">ไตรมาส 3 (Q3)</option>
+                            <option value="4">ไตรมาส 4 (Q4)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <fieldset id="calculatorForm">
+
+            <h2 class="section-title">1. ตัวชี้วัดกระบวนการ (Process Indicators)</h2>
+
+            <!-- 1.1 Financial Plan -->
+            <div class="card">
+                <div class="card-header">
+                    1.1 การบริหารแผนทางการเงิน (2 คะแนน)
+                </div>
+
+                <!-- 1.1.1 Revenue -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 1em; margin-bottom: 15px; color: #34495e;">1.1.1 มิติรายได้ (1 คะแนน)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>แผนประมาณการรวมรายได้ (บาท)</label>
+                            <input type="number" id="revenuePlan" placeholder="ระบุจำนวนเงิน" oninput="calculateTPS()">
+                            <div class="note">*ไม่รวม UC / งบลงทุน / รายได้อื่น (ระบบบัญชีอัตโนมัติ)</div>
+                        </div>
+                        <div class="form-group">
+                            <label>ผลการดำเนินงานรายไตรมาส (บาท)</label>
+                            <input type="number" id="revenueActual" placeholder="ระบุจำนวนเงิน"
+                                oninput="calculateTPS()">
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-row">
+                            <span>คำนวณ (แผน/ผล * 100):</span>
+                            <span id="revenuePercent">- %</span>
+                        </div>
+                        <div class="result-row">
+                            <span>ผลการประเมิน (± ไม่เกิน 5%):</span>
+                            <span id="revenueScoreBadge" class="score-badge">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.1.2 Expense -->
+                <div>
+                    <h3 style="font-size: 1em; margin-bottom: 15px; color: #34495e;">1.1.2 มิติค่าใช้จ่าย (1 คะแนน)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>แผนประมาณรวมค่าใช้จ่าย (บาท)</label>
+                            <input type="number" id="expensePlan" placeholder="ระบุจำนวนเงิน" oninput="calculateTPS()">
+                            <div class="note">*ไม่รวมค่าเสื่อม/ค่าตัดจำหน่าย/ค่าใช้จ่ายอื่น (ระบบบัญชีอัตโนมัติ)</div>
+                        </div>
+                        <div class="form-group">
+                            <label>ผลการดำเนินงานรายไตรมาส (บาท)</label>
+                            <input type="number" id="expenseActual" placeholder="ระบุจำนวนเงิน"
+                                oninput="calculateTPS()">
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-row">
+                            <span>คำนวณ (แผน/ผล * 100):</span>
+                            <span id="expensePercent">- %</span>
+                        </div>
+                        <div class="result-row">
+                            <span>ผลการประเมิน (± ไม่เกิน 5%):</span>
+                            <span id="expenseScoreBadge" class="score-badge">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1.2 Asset Management -->
+            <div class="card">
+                <div class="card-header">
+                    1.2 การบริหารสินทรัพย์หมุนเวียนและหนี้สินหมุนเวียน (3 คะแนน)
+                </div>
+
+                <!-- 1.2.1 Payable Period -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 1em; margin-bottom: 10px; color: #34495e;">1.2.1
+                        ระยะเวลาชำระเจ้าหนี้การค้ายา&เวชภัณฑ์มิใช่ยา (1 คะแนน)</h3>
+                    <div class="form-group">
+                        <label>จำนวนวัน (Days)</label>
+                        <input type="number" id="payablePeriod" placeholder="ระบุจำนวนวัน" oninput="calculateTPS()">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="cashRatioLow" onchange="calculateTPS()" style="width: auto;">
+                        <label for="cashRatioLow" style="margin: 0;">Cash Ratio น้อยกว่า 0.8 (เกณฑ์ผ่อนปรน ≤ 180
+                            วัน)</label>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-row">
+                            <span>ผลการประเมิน:</span>
+                            <span id="payableScoreBadge" class="score-badge">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.2.2 Collection Period UC -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 1em; margin-bottom: 10px; color: #34495e;">1.2.2
+                        ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้สิทธิ UC (0.5 คะแนน)</h3>
+                    <div class="form-group">
+                        <label>จำนวนวัน (Days)</label>
+                        <input type="number" id="collectionUC" placeholder="ระบุจำนวนวัน" oninput="calculateTPS()">
+                    </div>
+                    <div class="result-box">
+                        <div class="result-row">
+                            <span>เกณฑ์ ≤ 60 วัน:</span>
+                            <span id="collectionUCScoreBadge" class="score-badge">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.2.3 Collection Period Civil Servant -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 1em; margin-bottom: 10px; color: #34495e;">1.2.3
+                        ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้สิทธิข้าราชการ (0.5 คะแนน)</h3>
+                    <div class="form-group">
+                        <label>จำนวนวัน (Days)</label>
+                        <input type="number" id="collectionCivil" placeholder="ระบุจำนวนวัน" oninput="calculateTPS()">
+                    </div>
+                    <div class="result-box">
+                        <div class="result-row">
+                            <span>เกณฑ์ ≤ 60 วัน:</span>
+                            <span id="collectionCivilScoreBadge" class="score-badge">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.2.4 Inventory Management -->
+                <div>
+                    <h3 style="font-size: 1em; margin-bottom: 10px; color: #34495e;">1.2.4 การบริหารสินค้าคงคลัง (1
+                        คะแนน)</h3>
+                    <div class="form-group">
+                        <label>จำนวนวัน (Days)</label>
+                        <input type="number" id="inventoryPeriod" placeholder="ระบุจำนวนวัน" oninput="calculateTPS()">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="islandArea" onchange="calculateTPS()" style="width: auto;">
+                        <label for="islandArea" style="margin: 0;">รพ.พื้นที่เกาะ (เกณฑ์ผ่อนปรน ≤ 90 วัน)</label>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-row">
+                            <span>ผลการประเมิน:</span>
+                            <span id="inventoryScoreBadge" class="score-badge">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1.3 Management -->
+            <div class="card">
+                <div class="card-header">
+                    1.3 การบริหารจัดการ (5 คะแนน)
+                </div>
+
+                <!-- 1.3.1 Cost & Expense -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 1em; margin-bottom: 15px; color: #34495e;">1.3.1 การบริหารต้นทุนและค่าใช้จ่าย
+                        (คิดคะแนนเต็ม 2 คะแนน)</h3>
+                    <!-- Checkboxes for 1.3.1.x -->
+                    <div
+                        style="background:#f1f8ff; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.9em; color:#444;">
+                        <strong>หมายเหตุ:</strong> ค่า Mean ที่แสดงด้านล่างอ้างอิงจากกลุ่มระดับบริการที่ท่านเลือก
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                                <div class="form-group">
+                                    <label>1.3.1.1 Unit Cost for OP (1 คะแนน)</label>
+                                    <input type="number" id="unitCostOP" placeholder="ระบุค่า" oninput="calculateTPS()">
+                                    <span id="unitCostOPBadge" class="score-badge" style="display:block; text-align:center; margin-top: 5px;">รอข้อมูล</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>1.3.1.2 Unit Cost for IP (1 คะแนน)</label>
+                                    <input type="number" id="unitCostIP" placeholder="ระบุค่า" oninput="calculateTPS()">
+                                    <span id="unitCostIPBadge" class="score-badge" style="display:block; text-align:center; margin-top: 5px;">รอข้อมูล</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>1.3.1.3 LC ค่าแรงบุคลากร (0.5 คะแนน)</label>
+                                    <span id="refLC" style="font-size:0.85em; color:#888;">Ref Mean: -</span>
+                                    <input type="number" id="lcCost" placeholder="ระบุค่า" oninput="calculateTPS()">
+                                    <span id="lcCostBadge" class="score-badge" style="display:block; text-align:center; margin-top: 5px;">รอข้อมูล</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                                <div class="form-group">
+                                    <label>1.3.1.4 MC ค่ายา (0.5 คะแนน)</label>
+                                    <span id="refDrug" style="font-size:0.85em; color:#888;">Ref Mean: -</span>
+                                    <input type="number" id="drugMC" placeholder="ระบุค่า" oninput="calculateTPS()">
+                                    <span id="drugMCBadge" class="score-badge" style="display:block; text-align:center; margin-top: 5px;">รอข้อมูล</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>1.3.1.5 MC วัสดุวิทย์ (0.5 คะแนน)</label>
+                                    <span id="refLab" style="font-size:0.85em; color:#888;">Ref Mean: -</span>
+                                    <input type="number" id="scienceMC" placeholder="ระบุค่า" oninput="calculateTPS()">
+                                    <span id="scienceMCBadge" class="score-badge" style="display:block; text-align:center; margin-top: 5px;">รอข้อมูล</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>1.3.1.6 MC เวชภัณฑ์มิใช่ยา (0.5 คะแนน)</label>
+                                    <span id="refMed" style="font-size:0.85em; color:#888;">Ref Mean: -</span>
+                                    <input type="number" id="medSuppMC" placeholder="ระบุค่า" oninput="calculateTPS()">
+                                    <span id="medSuppMCBadge" class="score-badge" style="display:block; text-align:center; margin-top: 5px;">รอข้อมูล</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-row">
+                            <span>คะแนนหมวด 1.3.1 (max 2):</span>
+                            <span id="score131">0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1.3.2 Trial Balance -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 1em; margin-bottom: 10px; color: #34495e;">1.3.2 คะแนนตรวจสอบงบทดลองเบื้องต้น
+                        (1 คะแนน)</h3>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="checkbox" id="trialBalancePass" style="width:auto;" onchange="calculateTPS()">
+                        <label style="margin:0;">ผ่านการตรวจสอบ (Passed)</label>
+                    </div>
+                </div>
+
+                <!-- 1.3.3 Productivity -->
+                <div>
+                    <h3 style="font-size: 1em; margin-bottom: 15px; color: #34495e;">1.3.3 ผลผลิต (Productivity) (2
+                        คะแนน)</h3>
+
+                    <div style="margin-bottom:15px; border-bottom:1px dashed #ddd; padding-bottom:10px;">
+                        <label style="font-weight:600;">1.3.3.1 อัตราครองเตียงผู้ป่วยใน (Bed Occupancy Rate)</label>
+                        <div class="form-row" style="margin-top:10px;">
+                            <div class="form-group">
+                                <label>อัตราครองเตียง (%)</label>
+                                <input type="number" id="bedOccupancy" placeholder="%" oninput="calculateTPS()">
+                            </div>
+                            <div class="form-group" style="display:flex; align-items:flex-end;">
+                                <span id="bedOccBadge" class="score-badge"
+                                    style="width:100%; text-align:center;">รอข้อมูล</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-weight:600;">1.3.3.2 Sum of AdjRW</label>
+                        <div class="form-row" style="margin-top:10px;">
+                            <div class="form-group">
+                                <label>Sum AdjRW ของ รพ.</label>
+                                <input type="number" id="hospAdjRW" placeholder="" oninput="calculateTPS()">
+                            </div>
+                            <div class="form-group">
+                                <label>ค่ากลางกลุ่ม รพ. (Auto-ref)</label>
+                                <input type="number" id="medianAdjRW" placeholder="" readonly
+                                    style="background:#eee; cursor:not-allowed;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Sum AdjRW ปีก่อนหน้า</label>
+                                <input type="number" id="prevAdjRW" placeholder="" oninput="calculateTPS()">
+                            </div>
+                            <div class="form-group" style="display:flex; align-items:flex-end;">
+                                <span id="adjRWBadge" class="score-badge"
+                                    style="width:100%; text-align:center;">รอข้อมูล</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title" style="margin-top:40px;">2. ตัวชี้วัดผลลัพธ์การดำเนินงาน (Outcome Indicators)
+            </div>
+
+            <!-- 2.1 Profitability -->
+            <div class="card">
+                <div class="card-header">
+                    2.1 ความสามารถในการทำกำไร (3 คะแนน)
+                </div>
+
+                <div class="form-row">
+                    <!-- 2.1.1 Operating Margin -->
+                    <div class="form-group">
+                        <label>2.1.1 Operating Margin</label>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                            <input type="checkbox" id="opMarginPass" style="width:auto;" onchange="calculateTPS()">
+                            <label style="margin:0;">ผ่านเกณฑ์ (1 คะแนน)</label>
+                        </div>
+                    </div>
+                    <!-- 2.1.2 ROA -->
+                    <div class="form-group">
+                        <label>2.1.2 Return on Asset (ROA)</label>
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                            <input type="checkbox" id="roaPass" style="width:auto;" onchange="calculateTPS()">
+                            <label style="margin:0;">ผ่านเกณฑ์ (1 คะแนน)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2.1.3 EBITDA -->
+                <div class="form-group" style="padding-top:10px; border-top:1px solid #eee;">
+                    <label>2.1.3 EBITDA (คำนวณจาก รายได้ - ค่าใช้จ่าย)</label>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>EBITDA Value</label>
+                            <input type="number" id="ebitdaVal" placeholder="กรอกค่า หรือคำนวณอัตโนมัติ"
+                                oninput="calculateTPS()">
+                        </div>
+                        <div class="form-group" style="display:flex; align-items:flex-end;">
+                            <span id="ebitdaBadge" class="score-badge"
+                                style="width:100%; text-align:center;">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.2 Financial Liquidity -->
+            <div class="card">
+                <div class="card-header">
+                    2.2 การวัดสภาพคล่องทางการเงิน (2 คะแนน)
+                </div>
+
+                <div class="form-row">
+                    <!-- 2.2.1 Net Working Capital -->
+                    <div class="form-group">
+                        <label>2.2.1 Net Working Capital</label>
+                        <input type="number" id="nwcVal" placeholder="ระบุจำนวนเงิน" oninput="calculateTPS()">
+                        <div class="result-box">
+                            <span id="nwcBadge" class="score-badge"
+                                style="display:block; text-align:center;">รอข้อมูล</span>
+                        </div>
+                    </div>
+
+                    <!-- 2.2.2 Cash Ratio -->
+                    <div class="form-group">
+                        <label>2.2.2 Cash Ratio</label>
+                        <input type="number" id="cashRatioVal" placeholder="ระบุค่า Ratio" oninput="calculateTPS()">
+                        <div class="result-box">
+                            <span id="cashRatioBadge" class="score-badge"
+                                style="display:block; text-align:center;">รอข้อมูล</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="total-section">
+                <h3>คะแนนรวมทั้งหมด (Total Score)</h3>
+                <div class="total-score" id="totalScore">0.00</div>
+                <div>คะแนนเต็ม 15 คะแนน</div>
+                <button class="btn-export" onclick="exportResults()">Export to CSV</button>
+            </div>
+
+            </fieldset>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { document.getElementById('calculatorForm').disabled = true; });
+        // Data from User
+        const costData = {
+            "1": {
+                "รพช.F1 P<=50,000": { lc: 24132019.2, drug: 4104480.588, lab: 1379903.585, med: 1292026.936 },
+                "รพช.F1 P50,000-100,000": { lc: 30607673.94, drug: 5843049.04, lab: 1958078.303, med: 1779151.918 },
+                "รพช.F2 P<=30,000": { lc: 15949743.09, drug: 1905580.569, lab: 777348.3483, med: 662953.93 },
+                "รพช.F2 P30,000-60,000": { lc: 21900874.76, drug: 3257915.093, lab: 1271641.594, med: 1036580.113 },
+                "รพช.F3 P<=15,000": { lc: 9093175.793, drug: 948222.0094, lab: 454488.5119, med: 324644.767 },
+                "รพช.F3 P15,000-25,000": { lc: 9000851.878, drug: 1225678.795, lab: 715916.5709, med: 476818.3873 },
+                "รพช.M2 B<=100": { lc: 38112611.2, drug: 8215062.481, lab: 2664653.469, med: 3489014.705 },
+                "รพช.M2 B>100": { lc: 46918168.95, drug: 10380924.22, lab: 3228167.467, med: 5114751.371 },
+                "รพท.M1 B>200": { lc: 77541745.62, drug: 19237309.84, lab: 2494668.941, med: 12439372.51 },
+                "รพท.S B<=400": { lc: 108373217.3, drug: 33524385.19, lab: 3831608.934, med: 15576677.39 },
+                "รพท.S B>400": { lc: 173162324.8, drug: 57392139.64, lab: 6110638.534, med: 30848689.98 },
+                "รพศ.A B<=700": { lc: 254556362.4, drug: 100765952.9, lab: 12205318.99, med: 51559721.77 },
+                "รพศ.A B>700to1000": { lc: 333001130.5, drug: 166473226.2, lab: 13675668.01, med: 83838998.45 },
+                "รพศ.A B>1000": { lc: 541398862.1, drug: 275039633.6, lab: 32226834.21, med: 156821944 }
+            },
+            "2": {
+                "รพช.F1 P<=50,000": { lc: 50030143.41, drug: 8568853.521, lab: 2687644.847, med: 2825451.074 },
+                "รพช.F1 P50,000-100,000": { lc: 62183675.25, drug: 12319311.14, lab: 4075188.42, med: 3911011.442 },
+                "รพช.F2 P<=30,000": { lc: 31975474.29, drug: 3910312.263, lab: 1528799.481, med: 1399316.286 },
+                "รพช.F2 P30,000-60,000": { lc: 43977824.32, drug: 6676450.561, lab: 2597685.955, med: 2165895.193 },
+                "รพช.F3 P<=15,000": { lc: 18649499.36, drug: 2051001.544, lab: 907618.5522, med: 763842.0503 },
+                "รพช.F3 P15,000-25,000": { lc: 17959587.71, drug: 2847340.027, lab: 1328456.576, med: 1008530.309 },
+                "รพช.M2 B<=100": { lc: 76741496.01, drug: 16583896.04, lab: 4852651.913, med: 7250957.255 },
+                "รพช.M2 B>100": { lc: 93553486.59, drug: 21036055.8, lab: 6564496.599, med: 10320373.01 },
+                "รพท.M1 B>200": { lc: 157543798.2, drug: 39730904.66, lab: 5245784.711, med: 25362185.36 },
+                "รพท.S B<=400": { lc: 222384126.5, drug: 67945416.86, lab: 8540556.567, med: 33511049.71 },
+                "รพท.S B>400": { lc: 358821249.5, drug: 125680408.4, lab: 13828042.36, med: 62891980.28 },
+                "รพศ.A B<=700": { lc: 508629527.7, drug: 214509610.4, lab: 24777965.5, med: 112212885 },
+                "รพศ.A B>700to1000": { lc: 661406170.7, drug: 337877132, lab: 29482659.68, med: 168268698.9 },
+                "รพศ.A B>1000": { lc: 1046182742, drug: 555670506.1, lab: 52895052.27, med: 321539691.6 }
+            },
+            "3": {
+                "รพช.F1 P<=50,000": { lc: 75956976.89, drug: 13083858.66, lab: 3967375.914, med: 4212839.298 },
+                "รพช.F1 P50,000-100,000": { lc: 95715581.73, drug: 18560168.23, lab: 5824510.473, med: 5870845.104 },
+                "รพช.F2 P<=30,000": { lc: 48390759.27, drug: 5993435.491, lab: 2188473.096, med: 2115853.686 },
+                "รพช.F2 P30,000-60,000": { lc: 66285986.75, drug: 10096786.32, lab: 3715643.5, med: 3272514.725 },
+                "รพช.F3 P<=15,000": { lc: 28144401.37, drug: 3080807.035, lab: 1281243.534, med: 1095539.416 },
+                "รพช.F3 P15,000-25,000": { lc: 27495491.24, drug: 4413467.217, lab: 2081168.449, med: 1551812.922 },
+                "รพช.M2 B<=100": { lc: 116170947.9, drug: 24073021.56, lab: 6976886.488, med: 10803900.85 },
+                "รพช.M2 B>100": { lc: 142275337.1, drug: 32391340.96, lab: 9398539.425, med: 15662464.41 },
+                "รพท.M1 B>200": { lc: 240318841.9, drug: 60185433.21, lab: 8156323.155, med: 38625225.4 },
+                "รพท.S B<=400": { lc: 337382862.8, drug: 98835889.78, lab: 12319601.35, med: 51313352.73 },
+                "รพท.S B>400": { lc: 542456871.8, drug: 187243262, lab: 18820604.26, med: 94901991.34 },
+                "รพศ.A B<=700": { lc: 767221326.4, drug: 326489545.4, lab: 37205131.43, med: 169322061.1 },
+                "รพศ.A B>700to1000": { lc: 1004407915, drug: 509601879.1, lab: 46073379.65, med: 264828424.6 },
+                "รพศ.A B>1000": { lc: 1583373721, drug: 818344000, lab: 82410292.18, med: 488860010.7 }
+            },
+            "4": {
+                "รพช.F1 P<=50,000": { lc: 103347307.6, drug: 17881782.22, lab: 5113050.086, med: 5637447.162 },
+                "รพช.F1 P50,000-100,000": { lc: 128324729.6, drug: 25534353.19, lab: 7685937.623, med: 8158759.362 },
+                "รพช.F2 P<=30,000": { lc: 65612526.6, drug: 8226926.988, lab: 2854542.512, med: 2928971.984 },
+                "รพช.F2 P30,000-60,000": { lc: 90160796.99, drug: 13663730.49, lab: 4821493.371, med: 4588837.144 },
+                "รพช.F3 P<=15,000": { lc: 39187857.34, drug: 4116176.832, lab: 1658988.006, med: 1520500.796 },
+                "รพช.F3 P15,000-25,000": { lc: 37959164.57, drug: 6085594.585, lab: 2365746.462, med: 2243516.007 },
+                "รพช.M2 B<=100": { lc: 160735790, drug: 32935326.33, lab: 9350501.221, med: 15122000.69 },
+                "รพช.M2 B>100": { lc: 193400572.3, drug: 43627051.05, lab: 12172219.13, med: 21708586.07 },
+                "รพท.M1 B>200": { lc: 327705787.4, drug: 81234730.53, lab: 11400976.45, med: 51668635.67 },
+                "รพท.S B<=400": { lc: 460070173.7, drug: 132755870.4, lab: 18083824.95, med: 77572284.5 },
+                "รพท.S B>400": { lc: 740208764.5, drug: 256101993.6, lab: 26963882.44, med: 133354760.5 },
+                "รพศ.A B<=700": { lc: 1040245897, drug: 443199311.2, lab: 53185552.87, med: 229232866 },
+                "รพศ.A B>700to1000": { lc: 1371108923, drug: 717284192.7, lab: 64834804.55, med: 372486899.1 },
+                "รพศ.A B>1000": { lc: 2134383460, drug: 1078918269, lab: 102106913, med: 664545277.5 }
+            }
+        };
+
+        function handleServiceLevelChange() {
+            const serviceLevel = document.getElementById('serviceLevel').value;
+            const formContent = document.getElementById('calculatorForm');
+
+            // Enable form only if a service level is selected
+            formContent.disabled = !serviceLevel;
+
+            updateBenchmarks();
+            calculateTPS();
+        }
+
+        const adjRwData = {
+            "รพช.F3 P<=15,000": [194.02, 389.95, 605.46, 841.62],
+            "รพช.F3 P15,000-25,000": [280.06, 518.66, 785.15, 1060.31],
+            "รพช.F3 P>=25,000": [null, null, null, null],
+            "รพช.F2 P<=30,000": [419.54, 903.74, 1376.71, 1921.92],
+            "รพช.F2 P30,000-60,000": [644.65, 1352.55, 2076.95, 2837.44],
+            "รพช.F2 P60,000-90,000": [null, null, null, null],
+            "รพช.F1 P<=50,000": [750.88, 1777.75, 2689.03, 3801.13],
+            "รพช.F1 P50,000-100,000": [1190.86, 2601.94, 3845.13, 5346.36],
+            "รพช.M2 B<=100": [1596.87, 3334.54, 5096.84, 7319.23],
+            "รพช.M2 B>100": [2527.20, 5428.37, 8261.12, 11403.26],
+            "รพท.M1 B<=200": [null, null, null, null],
+            "รพท.M1 B>200": [4748.18, 10334.20, 15844.58, 21562.66],
+            "รพท.S B<=400": [7560.58, 15698.25, 23841.52, 33004.27],
+            "รพท.S B>400": [13867.62, 28205.59, 42634.76, 59061.32],
+            "รพศ.A B<=700": [17504.09, 37698.63, 56532.34, 80034.72],
+            "รพศ.A B>700to1000": [27985.80, 60042.80, 89945.79, 124778.59],
+            "รพศ.A B>1000": [40663.07, 92695.24, 143835.99, 193111.03]
+        };
+
+        function updateBenchmarks() {
+            const serviceLevel = document.getElementById('serviceLevel').value;
+            const quarter = document.getElementById('quarterSelect').value;
+
+            // 1. Update Cost Ref
+            const quarterlyCostData = costData[quarter] || {};
+            const serviceLevelCost = quarterlyCostData[serviceLevel];
+
+            if (serviceLevel && serviceLevelCost) {
+                document.getElementById('refLC').textContent = `Ref Mean: ` + serviceLevelCost.lc.toLocaleString();
+                document.getElementById('refDrug').textContent = `Ref Mean: ` + serviceLevelCost.drug.toLocaleString();
+                document.getElementById('refLab').textContent = `Ref Mean: ` + serviceLevelCost.lab.toLocaleString();
+                document.getElementById('refMed').textContent = `Ref Mean: ` + serviceLevelCost.med.toLocaleString();
+            } else {
+                ['refLC', 'refDrug', 'refLab', 'refMed'].forEach(id => {
+                    document.getElementById(id).textContent = 'Ref Mean: -';
+                });
+            }
+
+            // 2. Update AdjRW Ref
+            if (serviceLevel && adjRwData[serviceLevel]) {
+                // quarter is 1-based, array 0-based
+                const val = adjRwData[serviceLevel][parseInt(quarter) - 1];
+                document.getElementById('medianAdjRW').value = val !== null ? val : '';
+            } else {
+                document.getElementById('medianAdjRW').value = '';
+            }
+        }
+
+        function calculateTPS() {
+            // --- 1.1 Financial Plan (2 pts) ---
+            const revPlan = parseFloat(document.getElementById('revenuePlan').value) || 0;
+            const revActual = parseFloat(document.getElementById('revenueActual').value) || 0;
+            let revScore = 0;
+            if (revActual > 0) {
+                const revPercent = (revPlan / revActual) * 100;
+                document.getElementById('revenuePercent').textContent = revPercent.toFixed(2) + ' %';
+                if (revPercent >= 95 && revPercent <= 105) {
+                    revScore = 1;
+                    document.getElementById('revenueScoreBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('revenueScoreBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('revenueScoreBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('revenueScoreBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('revenuePercent').textContent = '- %';
+                document.getElementById('revenueScoreBadge').textContent = 'รอข้อมูล';
+                document.getElementById('revenueScoreBadge').className = 'score-badge';
+            }
+
+            const expPlan = parseFloat(document.getElementById('expensePlan').value) || 0;
+            const expActual = parseFloat(document.getElementById('expenseActual').value) || 0;
+            let expScore = 0;
+            if (expActual > 0) {
+                const expPercent = (expPlan / expActual) * 100;
+                document.getElementById('expensePercent').textContent = expPercent.toFixed(2) + ' %';
+                if (expPercent >= 95 && expPercent <= 105) {
+                    expScore = 1;
+                    document.getElementById('expenseScoreBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('expenseScoreBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('expenseScoreBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('expenseScoreBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('expensePercent').textContent = '- %';
+                document.getElementById('expenseScoreBadge').textContent = 'รอข้อมูล';
+                document.getElementById('expenseScoreBadge').className = 'score-badge';
+            }
+
+            // --- 1.2 Assets & Liabilities (3 pts) ---
+            // 1.2.1 Payable
+            let score121 = 0;
+            const payablePeriod = document.getElementById('payablePeriod').value;
+            // Check if input is not empty
+            if (payablePeriod !== '') {
+                const pDays = parseFloat(payablePeriod);
+                const isCashRatioLow = document.getElementById('cashRatioLow').checked;
+                const threshold = isCashRatioLow ? 180 : 90;
+                if (pDays <= threshold) {
+                    score121 = 1;
+                    document.getElementById('payableScoreBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('payableScoreBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('payableScoreBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('payableScoreBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('payableScoreBadge').textContent = 'รอข้อมูล';
+                document.getElementById('payableScoreBadge').className = 'score-badge';
+            }
+
+            // 1.2.2 & 1.2.3 Collection
+            let score122 = 0;
+            const colUC = document.getElementById('collectionUC').value;
+            if (colUC !== '') {
+                if (parseFloat(colUC) <= 60) {
+                    score122 = 0.5;
+                    document.getElementById('collectionUCScoreBadge').textContent = 'ผ่าน (0.5 คะแนน)';
+                    document.getElementById('collectionUCScoreBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('collectionUCScoreBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('collectionUCScoreBadge').className = 'score-badge score-fail';
+                }
+            }
+
+            let score123 = 0;
+            const colCivil = document.getElementById('collectionCivil').value;
+            if (colCivil !== '') {
+                if (parseFloat(colCivil) <= 60) {
+                    score123 = 0.5;
+                    document.getElementById('collectionCivilScoreBadge').textContent = 'ผ่าน (0.5 คะแนน)';
+                    document.getElementById('collectionCivilScoreBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('collectionCivilScoreBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('collectionCivilScoreBadge').className = 'score-badge score-fail';
+                }
+            }
+
+            // 1.2.4 Inventory
+            let score124 = 0;
+            const inventory = document.getElementById('inventoryPeriod').value;
+            if (inventory !== '') {
+                const invDays = parseFloat(inventory);
+                const isIsland = document.getElementById('islandArea').checked;
+                const invThreshold = isIsland ? 90 : 60;
+                if (invDays <= invThreshold) {
+                    score124 = 1;
+                    document.getElementById('inventoryScoreBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('inventoryScoreBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('inventoryScoreBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('inventoryScoreBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('inventoryScoreBadge').textContent = 'รอข้อมูล';
+                document.getElementById('inventoryScoreBadge').className = 'score-badge';
+            }
+
+            // --- 1.3 Management (5 pts) ---
+            // 1.3.1 (Max 2)
+            let score131_1 = 0, score131_2 = 0, score131_3 = 0, score131_4 = 0, score131_5 = 0, score131_6 = 0;
+            
+            // Helper for 1.3.1
+            function getScoreFromInput(inputId, badgeId, points, refValue) {
+                const inputVal = document.getElementById(inputId).value;
+                const badge = document.getElementById(badgeId);
+                if (inputVal === '') {
+                    badge.textContent = 'รอข้อมูล';
+                    badge.className = 'score-badge';
+                    return 0;
+                }
+                const val = parseFloat(inputVal);
+                // For Unit Cost OP/IP, there's no ref. Assume any value entered is a pass.
+                // For others, check against refValue.
+                if (refValue === null || val <= refValue) {
+                    badge.textContent = `ผ่าน (${points} คะแนน)`;
+                    badge.className = 'score-badge score-pass';
+                    return points;
+                } else {
+                    badge.textContent = `ไม่ผ่าน (0 คะแนน)`;
+                    badge.className = 'score-badge score-fail';
+                    return 0;
+                }
+            }
+
+            const serviceLevel = document.getElementById('serviceLevel').value;
+            const quarter = document.getElementById('quarterSelect').value;
+            const quarterlyCostData = costData[quarter] || {};
+            const serviceLevelCost = quarterlyCostData[serviceLevel];
+
+            // 1.3.1.1 Unit Cost OP - No reference, so any input passes
+            const unitCostOPVal = document.getElementById('unitCostOP').value;
+            if (unitCostOPVal !== '') {
+                score131_1 = 1;
+                document.getElementById('unitCostOPBadge').textContent = 'ผ่าน (1 คะแนน)';
+                document.getElementById('unitCostOPBadge').className = 'score-badge score-pass';
+            } else {
+                document.getElementById('unitCostOPBadge').textContent = 'รอข้อมูล';
+                document.getElementById('unitCostOPBadge').className = 'score-badge';
+            }
+
+            // 1.3.1.2 Unit Cost IP - No reference, so any input passes
+            const unitCostIPVal = document.getElementById('unitCostIP').value;
+            if (unitCostIPVal !== '') {
+                score131_2 = 1;
+                document.getElementById('unitCostIPBadge').textContent = 'ผ่าน (1 คะแนน)';
+                document.getElementById('unitCostIPBadge').className = 'score-badge score-pass';
+            } else {
+                document.getElementById('unitCostIPBadge').textContent = 'รอข้อมูล';
+                document.getElementById('unitCostIPBadge').className = 'score-badge';
+            }
+
+            // 1.3.1.3 to 1.3.1.6 with reference values
+            const refLC = serviceLevelCost ? serviceLevelCost.lc : null;
+            const refDrug = serviceLevelCost ? serviceLevelCost.drug : null;
+            const refLab = serviceLevelCost ? serviceLevelCost.lab : null;
+            const refMed = serviceLevelCost ? serviceLevelCost.med : null;
+
+            score131_3 = getScoreFromInput('lcCost', 'lcCostBadge', 0.5, refLC);
+            score131_4 = getScoreFromInput('drugMC', 'drugMCBadge', 0.5, refDrug);
+            score131_5 = getScoreFromInput('scienceMC', 'scienceMCBadge', 0.5, refLab);
+            score131_6 = getScoreFromInput('medSuppMC', 'medSuppMCBadge', 0.5, refMed);
+
+            const rawScore131 = score131_1 + score131_2 + score131_3 + score131_4 + score131_5 + score131_6;
+            const score131 = Math.min(2, rawScore131);
+            document.getElementById('score131').textContent = score131.toFixed(2);
+            if (rawScore131 > 2) {
+                 document.getElementById('score131').textContent += ` (Raw: ${rawScore131.toFixed(2)})`;
+            }
+
+            // 1.3.2 Trial Balance (1 pt)
+            const score132 = document.getElementById('trialBalancePass').checked ? 1 : 0;
+
+            // 1.3.3 Productivity (2 pts)
+            // 1.3.3.1 Bed Occ
+            let score133_1 = 0;
+            const bedOcc = document.getElementById('bedOccupancy').value;
+            if (bedOcc !== '') {
+                if (parseFloat(bedOcc) >= 80) {
+                    score133_1 = 1; // Assuming 1 pt allocation
+                    document.getElementById('bedOccBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('bedOccBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('bedOccBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('bedOccBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('bedOccBadge').textContent = 'รอข้อมูล';
+                document.getElementById('bedOccBadge').className = 'score-badge';
+            }
+
+            // 1.3.3.2 AdjRW
+            let score133_2 = 0;
+            const hRW = document.getElementById('hospAdjRW').value;
+            const mRW = document.getElementById('medianAdjRW').value;
+            const pRW = document.getElementById('prevAdjRW').value;
+
+            if (hRW !== '') {
+                const hospRW = parseFloat(hRW);
+                const medianRW = mRW !== '' ? parseFloat(mRW) : parseFloat(hRW) + 1; // if median empty, fail this cond unless prev logic works
+                let passedRW = false;
+
+                // Cond 1: > Median (using > based on "เกินค่ากลาง")
+                if (mRW !== '' && hospRW > medianRW) {
+                    passedRW = true;
+                }
+
+                // Cond 2: Increase 5%
+                if (!passedRW && pRW !== '') {
+                    const prevRW = parseFloat(pRW);
+                    if (prevRW > 0) {
+                        const increase = ((hospRW - prevRW) / prevRW) * 100;
+                        if (increase >= 5) passedRW = true;
+                    }
+                }
+
+                if (passedRW) {
+                    score133_2 = 1; // Assuming 1 pt allocation
+                    document.getElementById('adjRWBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('adjRWBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('adjRWBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('adjRWBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('adjRWBadge').textContent = 'รอข้อมูล';
+                document.getElementById('adjRWBadge').className = 'score-badge';
+            }
+
+            const score133 = score133_1 + score133_2;
+
+            // --- 2 Outcome (5 pts) ---
+            // 2.1 Profitability (3 pts)
+            const score211 = document.getElementById('opMarginPass').checked ? 1 : 0;
+            const score212 = document.getElementById('roaPass').checked ? 1 : 0;
+
+            // 2.1.3 EBITDA (Calculated from 1.1)
+            let score213 = 0;
+            const ebitdaInput = document.getElementById('ebitdaVal');
+            let ebitdaValue;
+
+            if (ebitdaInput.value !== '') {
+                ebitdaValue = parseFloat(ebitdaInput.value);
+            } else {
+                const rAct = parseFloat(document.getElementById('revenueActual').value);
+                const eAct = parseFloat(document.getElementById('expenseActual').value);
+                if (!isNaN(rAct) && !isNaN(eAct)) {
+                    ebitdaValue = rAct - eAct;
+                }
+            }
+
+            if (typeof ebitdaValue !== 'undefined') {
+                if (ebitdaValue >= 0) {
+                    score213 = 1;
+                    document.getElementById('ebitdaBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('ebitdaBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('ebitdaBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('ebitdaBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('ebitdaBadge').textContent = 'รอข้อมูล (กรอก 1.1)';
+                document.getElementById('ebitdaBadge').className = 'score-badge';
+            }
+
+            const score21 = score211 + score212 + score213;
+
+            // 2.2 Liquidity (2 pts)
+            let score221 = 0;
+            const nwc = document.getElementById('nwcVal').value;
+            if (nwc !== '') {
+                if (parseFloat(nwc) >= 0) {
+                    score221 = 1;
+                    document.getElementById('nwcBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('nwcBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('nwcBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('nwcBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('nwcBadge').textContent = 'รอข้อมูล';
+                document.getElementById('nwcBadge').className = 'score-badge';
+            }
+
+            let score222 = 0;
+            const cRatio = document.getElementById('cashRatioVal').value;
+            if (cRatio !== '') {
+                if (parseFloat(cRatio) >= 0.8) {
+                    score222 = 1;
+                    document.getElementById('cashRatioBadge').textContent = 'ผ่าน (1 คะแนน)';
+                    document.getElementById('cashRatioBadge').className = 'score-badge score-pass';
+                } else {
+                    document.getElementById('cashRatioBadge').textContent = 'ไม่ผ่าน (0 คะแนน)';
+                    document.getElementById('cashRatioBadge').className = 'score-badge score-fail';
+                }
+            } else {
+                document.getElementById('cashRatioBadge').textContent = 'รอข้อมูล';
+                document.getElementById('cashRatioBadge').className = 'score-badge';
+            }
+
+            // Total
+            const totalScore = revScore + expScore + score121 + score122 + score123 + score124
+                + score131 + score132 + score133
+                + score21 + score221 + score222;
+
+            document.getElementById('totalScore').textContent = totalScore.toFixed(2);
+        }
+
+        function exportResults() {
+            const serviceLevel = document.getElementById('serviceLevel').value || "N/A";
+            const quarter = document.getElementById('quarterSelect').value;
+
+            // Helper to get score from badge text
+            const getScore = (badgeId, fullPoints) => {
+                const text = document.getElementById(badgeId).textContent;
+                return text.includes('ผ่าน') ? fullPoints : 0;
+            };
+            
+            const getScoreFromText = (elementId) => {
+                return parseFloat(document.getElementById(elementId).textContent) || 0;
+            }
+
+            const getValue = (elemId) => document.getElementById(elemId).value || '#ERROR!';
+            const getPercent = (elemId) => document.getElementById(elemId).textContent;
+
+            const totalScore = parseFloat(document.getElementById('totalScore').textContent) || 0;
+            
+            const score111 = getScore('revenueScoreBadge', 1.0);
+            const score112 = getScore('expenseScoreBadge', 1.0);
+            const score121 = getScore('payableScoreBadge', 1.0);
+            const score122 = getScore('collectionUCScoreBadge', 0.5);
+            const score123 = getScore('collectionCivilScoreBadge', 0.5);
+            const score124 = getScore('inventoryScoreBadge', 1.0);
+            
+            const score131_1 = getScore('unitCostOPBadge', 1.0);
+            const score131_2 = getScore('unitCostIPBadge', 1.0);
+            const score131_3 = getScore('lcCostBadge', 0.5);
+            const score131_4 = getScore('drugMCBadge', 0.5);
+            const score131_5 = getScore('scienceMCBadge', 0.5);
+            const score131_6 = getScore('medSuppMCBadge', 0.5);
+            const totalScore131 = getScoreFromText('score131');
+
+            const score132 = document.getElementById('trialBalancePass').checked ? 1.0 : 0;
+            const score133_1 = getScore('bedOccBadge', 1.0);
+            const score133_2 = getScore('adjRWBadge', 1.0);
+            const totalScore133 = score133_1 + score133_2;
+            const totalScore13 = totalScore131 + score132 + totalScore133;
+
+            const score211 = document.getElementById('opMarginPass').checked ? 1.0 : 0;
+            const score212 = document.getElementById('roaPass').checked ? 1.0 : 0;
+            const score213 = getScore('ebitdaBadge', 1.0);
+            const totalScore21 = score211 + score212 + score213;
+
+            const score221 = getScore('nwcBadge', 1.0);
+            const score222 = getScore('cashRatioBadge', 1.0);
+            const totalScore22 = score221 + score222;
+
+            const data = [
+                ['เกณฑ์ประสิทธิภาพ', 'เต็ม', 'ได้', 'ค่า', 'หน่วย'],
+                ['รวม', '15.0', totalScore.toFixed(1), '', ''],
+                ['1.ตัวชี้วัดกระบวนการ (Process Indicators)', '', '', '', ''],
+                ['   1.1 การบริหารแผนทางการเงินเปรียบเทียบผลการดำเนินงานผลต่าง', '2.0', (score111 + score112).toFixed(1), '', 'ค่าทางการเงิน'],
+                ['         1.1.1 มิติรายได้ ± ไม่เกิน 5 %', '1.0', score111.toFixed(1), getPercent('revenuePercent'), '%'],
+                ['         1.1.2 มิติค่าใช้จ่าย ± ไม่เกิน 5 %', '1.0', score112.toFixed(1), getPercent('expensePercent'), '%'],
+                ['  1.2 การบริหารสินทรัพย์หมุนเวียนและหนี้สินหมุนเวียน (3 คะแนน)', '3.0', (score121 + score122 + score123 + score124).toFixed(1), '', ''],
+                ['        1.2.1 ระยะเวลาชำระเจ้าหนี้การค้ายา&เวชภัณฑ์มิใช่ยา ≤ 90 วัน หรือ ≤ 180 วัน', '1.0', score121.toFixed(1), getValue('payablePeriod'), 'วัน'],
+                ['        1.2.2 ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้สิทธิ UC ≤60 วัน', '0.5', score122.toFixed(1), getValue('collectionUC'), 'วัน'],
+                ['        1.2.3 ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้สิทธิข้าราชการ ≤60 วัน', '0.5', score123.toFixed(1), getValue('collectionCivil'), 'วัน'],
+                ['        1.2.4 การบริหารสินค้าคงคลัง (Inventory Management) ≤ 60 วัน ยกเว้น รพ.พื้นที่เกาะ ≤ 90 วัน', '1.0', score124.toFixed(1), getValue('inventoryPeriod'), 'วัน'],
+                ['  1.3 การบริหารจัดการ', '5.0', totalScore13.toFixed(1), '', ''],
+                ['       1.3.1 การบริหารต้นทุนและค่าใช้จ่าย (2 คะแนน)', '2.0', totalScore131.toFixed(1), '', ''],
+                ['                1.3.1.1 Unit Cost for OP', '1.0', score131_1.toFixed(1), getValue('unitCostOP'), 'บาท'],
+                ['                1.3.1.2 Unit Cost for IP', '1.0', score131_2.toFixed(1), getValue('unitCostIP'), 'บาท'],
+                ['                1.3.1.3 LC ค่าแรงบุคลากร', '0.5', score131_3.toFixed(1), getValue('lcCost'), 'บาท'],
+                ['                1.3.1.4 MC ค่ายา', '0.5', score131_4.toFixed(1), getValue('drugMC'), 'บาท'],
+                ['                1.3.1.5 MC ค่าวัสดุวิทยาศาสตร์และการแพทย์', '0.5', score131_5.toFixed(1), getValue('scienceMC'), 'บาท'],
+                ['                1.3.1.6 MC ค่าเวชภัณฑ์มิใช่ยาและวัสดุการแพทย์', '0.5', score131_6.toFixed(1), getValue('medSuppMC'), 'บาท'],
+                ['      1.3.2 คะแนนตรวจสอบงบทดลองเบื้องต้น', '1.0', score132.toFixed(1), score132, 'คะแนน'],
+                ['      1.3.3 ผลผลิต (Productivity) เป็นที่ยอมรับ (2 คะแนน)', '2.0', totalScore133.toFixed(1), '', ''],
+                ['              1.3.3.1 อัตราครองเตียงผู้ป่วยใน ≥ 80 %', '1.0', score133_1.toFixed(1), getValue('bedOccupancy'), '%'],
+                ['              1.3.3.2 SumAdjRW เกินค่ากลางกลุ่มรพ. หรือเพิ่มขึ้น 5 %', '1.0', score133_2.toFixed(1), getValue('hospAdjRW'), ''],
+                ['2. ตัวชี้วัดผลลัพท์การดำเนินงาน', '5.0', (totalScore21 + totalScore22).toFixed(1), '', ''],
+                ['    2.1 ความสามารถในการทำกำไร', '3.0', totalScore21.toFixed(1), '', ''],
+                ['         2.1.1 ประสิทธิภาพในการดำเนินงาน (Operating Margin)', '1.0', score211.toFixed(1), score211 ? 'ผ่าน' : 'ไม่ผ่าน', '%'],
+                ['         2.1.2 อัตราผลตอบแทนจากสินทรัพย์ (Return on Asset)', '1.0', score212.toFixed(1), score212 ? 'ผ่าน' : 'ไม่ผ่าน', '%'],
+                ['         2.1.3 ผลกำไรขาดทุนก่อนหักค่าเสื่อม (EBITDA) ≥0 (1 คะแนน)', '1.0', score213.toFixed(1), document.getElementById('ebitdaVal').value || (document.getElementById('revenueActual').value - document.getElementById('expenseActual').value), 'บาท'],
+                ['    2.2 การวัดสภาพคล่องทางการเงิน', '2.0', totalScore22.toFixed(1), '', ''],
+                ['         2.2.1 ทุนสำรองสุทธิ (Net Working Capital) ≥0 (1 คะแนน)', '1.0', score221.toFixed(1), getValue('nwcVal'), 'บาท'],
+                ['         2.2.2 Cash Ratio ≥0.8 (1 คะแนน)', '1.0', score222.toFixed(1), getValue('cashRatioVal'), 'เท่า'],
+            ];
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // \uFEFF for BOM
+            data.forEach(rowArray => {
+                let row = rowArray.join(",");
+                csvContent += row + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `TPS_Report_${serviceLevel.replace(/[^a-zA-Z0-9]/g, '_')}_Q${quarter}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+
+</html>
