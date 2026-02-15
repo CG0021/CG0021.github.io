@@ -1,0 +1,14 @@
+{
+  "name": "hospguide",
+  "version": "1.0.0",
+  "description": "Medical pricing guide app",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y serve .",
+    "dev": "npx -y serve ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}

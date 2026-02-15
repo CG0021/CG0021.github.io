@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HospGuide | ระบบช่วยเช็คราคาสิทธิการรักษา</title>
+    <meta name="description"
+        content="HospGuide - เครื่องมือช่วยเปรียบเทียบราคาและตรวจสอบสิทธิการเบิกจ่ายค่ารักษาพยาบาล">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <i data-lucide="hospital"></i>
+                <span class="logo-text">Hosp<span>Guide</span></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">หน้าหลัก</a></li>
+                <li><a href="moph2568.html">อัตรากระทรวง 2568</a></li>
+                <li><a href="#">เพดานราคา</a></li>
+                <li><a href="#">ติดต่อเรา</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero hero-compact" style="padding: 40px 0;">
+            <div class="container hero-content">
+                <h1 style="font-size: 2rem;">ค้นหาและตรวจสอบ Ceiling Price อัตราค่ารักษาพยาบาล</h1>
+            </div>
+        </section>
+
+        <section class="results-section container">
+            <div class="section-header" style="margin-bottom: 20px;">
+                <div>
+                    <h2 id="resultsCount">ฐานข้อมูล PHDB NHSO</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">
+                        เปรียบเทียบรหัสและอัตราค่าบริการตามสิทธิการรักษา</p>
+                </div>
+            </div>
+
+            <div class="cat-selector" id="catSelector">
+                <button class="cat-btn" data-cat="1">1 ค่ายา</button>
+                <button class="cat-btn" data-cat="2">2 เทคนิคการแพทย์/Lab</button>
+                <button class="cat-btn" data-cat="3">3 รังสีวิทยา</button>
+                <button class="cat-btn" data-cat="4">4 ตรวจรักษาทั่วไป</button>
+                <button class="cat-btn" data-cat="5">5 วิธีการพิเศษ</button>
+                <button class="cat-btn" data-cat="6">6 ทันตกรรม</button>
+                <button class="cat-btn" data-cat="7">7 วิสัญญี</button>
+                <button class="cat-btn" data-cat="8">8 ศัลยกรรม</button>
+                <button class="cat-btn" data-cat="9">9 แพทย์แผนไทย</button>
+                <button class="cat-btn" data-cat="10">10 เวชกรรมฟื้นฟู</button>
+                <button class="cat-btn" data-cat="11">11 สุขภาพจิต</button>
+                <button class="cat-btn" data-cat="12">12 พยาธิวิทยา/นิติเวช</button>
+                <button class="cat-btn active" data-cat="all">ทั้งหมด</button>
+
+                <div class="search-mini-wrapper">
+                    <div class="search-box mini">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="searchInput" placeholder="หารหัส, ชื่อรายการ, หรือ ADP...">
+                        <button id="searchBtn">ค้นหา</button>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="moph-table-container">
+                <table id="mainTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">รหัส (CODE)</th>
+                            <th style="width: 45%;">รายการ (Description)</th>
+                            <th style="width: 20%;" class="price-col">ไทย (บาท)</th>
+                            <th style="width: 20%;" class="price-col">ต่างชาติ (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- Results will be injected here -->
+                    </tbody>
+                </table>
+                <div id="loading" class="loading-state" style="text-align: center; padding: 40px;">
+                    <div class="loading-placeholder">กำลังเตรียมข้อมูลจากระบบ...</div>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination" style="display: none;">
+                <button id="prevPage">ก่อนหน้า</button>
+                <span id="pageInfo">หน้า 1 / 1</span>
+                <button id="nextPage">ถัดไป</button>
+            </div>
+        </section>
+
+
+    </main>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modalBody">
+                <!-- Detail content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 HospGuide. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
