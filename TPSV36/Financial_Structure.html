@@ -63,6 +63,17 @@
                         <option value="">ทั้งหมด</option>
                     </select>
                 </div>
+                <!-- Year Range Selectors -->
+                <div class="filter-group" style="gap: 4px; display: flex; align-items: center; margin-left: 0.5rem;">
+                    <label style="font-size:0.9rem; white-space:nowrap; font-weight: 600; color: #64748b;">ปี:</label>
+                    <select id="startYear" onchange="handleYearChange()"
+                        style="width: 80px; padding: 0.3rem; font-size: 0.9rem; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #f8fafc;">
+                    </select>
+                    <span style="color: #64748b; font-weight: 600;">-</span>
+                    <select id="endYear" onchange="handleYearChange()"
+                        style="width: 80px; padding: 0.3rem; font-size: 0.9rem; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #f8fafc;">
+                    </select>
+                </div>
             </div>
 
             <!-- Divider -->
@@ -76,17 +87,6 @@
                     onclick="event.stopPropagation(); showSuggestions()" oninput="applyFilters(); showSuggestions();">
                 <div class="input-spinner" id="searchSpinner" style="display: block;"></div>
                 <div class="suggestions" id="suggestions"></div>
-            </div>
-
-            <!-- Divider -->
-            <div style="width: 1px; height: 24px; background: #cbd5e1; margin: 0 0.2rem;"></div>
-
-            <!-- Access Code -->
-            <div id="accessCodeWrapper" style="display: flex; align-items: center; gap: 6px; padding-left: 0.5rem;">
-                <span title="รหัสเข้าถึง" style="cursor:help;">📘</span>
-                <input type="password" id="accessCode" placeholder="รหัส" autocomplete="off"
-                    style="border: none; outline: none; width: 60px; background: transparent; font-size: 0.9rem;"
-                    oninput="applyFilters()">
             </div>
 
         </div>

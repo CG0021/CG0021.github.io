@@ -87,7 +87,7 @@ const MGMT_HEADERS = [
     "A4121010,รายได้ค่ารักษาเบิกต้นสังกัด",
     "A4131050.0,รวมรายได้ค่ารักษาเบิกจ่ายตรงกรมบัญชีกลาง",
     "A4131010,รายได้ค่ารักษาเบิกจ่ายตรงกรมบัญชีกลาง OP",
-    "A4131050,รายได้ค่ารักษาเบิกจ่ายตรงกรมบัญชี IP สุทธิ",
+    "A4131050,รายได้ค่ารักษาเบิกจ่ายตรงกรมบัญชีกลาง IP สุทธิ",
     "A4131020,รายได้ค่ารักษาเบิกจ่ายตรงกรมบัญชีกลาง IP", "A4131030,หัก ส่วนต่างค่ารักษาที่สูงกว่าข้อตกลงในการจ่ายเบิกจ่ายตรงกรมบัญชีกลาง", "A4131040,บวก ส่วนต่างค่ารักษาที่ต่ำกว่าข้อตกลงในการจ่ายเบิกจ่ายตรงกรมบัญชีกลาง",
     "A413105S,รวมรายได้ค่ารักษาเบิกจ่ายตรง อปท.",
     "A4131050.1,รายได้ค่ารักษาเบิกจ่ายตรง อปท. OP",
@@ -254,7 +254,7 @@ async function initialize() {
         }
 
         hospitalList = uniqueData;
-        latestYearAvailable = window.latestHospitalYear || 2568;
+        latestYearAvailable = window.latestHospitalYear || 2569;
         comparisonYear = latestYearAvailable; // Set default comparison year
         populateFilters();
         document.getElementById('searchInput').disabled = false;
@@ -282,6 +282,9 @@ function populateFilters() {
     const groups = [...new Set(hospitalList.map(h => h.serviceLevelGroup))].filter(Boolean).sort();
     populateSelect('groupFilter', groups);
 
+    // 4. Initialize Year Range Filters
+    populateYearFilters();
+
     // Close suggestions when clicking outside
     document.addEventListener('click', (e) => {
         const searchInputGroup = e.target.closest('.search-input-group');
@@ -308,6 +311,76 @@ function populateSelect(elementId, items, prefix = '') {
         option.textContent = prefix + item;
         select.appendChild(option);
     });
+}
+
+function populateYearFilters() {
+    const startYearSelect = document.getElementById('startYear');
+    const endYearSelect = document.getElementById('endYear');
+    if (!startYearSelect || !endYearSelect) return;
+
+    const currentYear = latestYearAvailable || new Date().getFullYear() + 543;
+    const years = [];
+    for (let y = currentYear; y >= 2560; y--) {
+        years.push(y);
+    }
+
+    startYearSelect.innerHTML = '';
+    endYearSelect.innerHTML = '';
+
+    years.forEach(y => {
+        const optStart = document.createElement('option');
+        optStart.value = y;
+        optStart.textContent = y;
+        startYearSelect.appendChild(optStart);
+
+        const optEnd = document.createElement('option');
+        optEnd.value = y;
+        optEnd.textContent = y;
+        endYearSelect.appendChild(optEnd);
+    });
+
+    // Default to 5 years range, ending at current year
+    endYearSelect.value = currentYear;
+    startYearSelect.value = 2567; // Default start year as requested
+
+}
+
+function handleYearChange() {
+    const startYear = parseInt(document.getElementById('startYear').value);
+    const endYear = parseInt(document.getElementById('endYear').value);
+
+    if (startYear > endYear) {
+        alert('ปีเริ่มต้นไม่สามารถมากกว่าปีสิ้นสุดได้');
+        document.getElementById('startYear').value = endYear; // Reset to match end year (prevent jumping to 2564)
+        return;
+    }
+
+    comparisonYear = endYear; // Update comparisonYear to match the latest year in range
+
+    // Reset chart filter state when global filters change
+    if (window.chartFilterState) {
+        window.chartFilterState = null;
+    }
+
+    // If there are already hospitals in the list, we might want to refresh them
+    // or just let the user know they need to re-fetch/it will apply to next selections.
+    // For now, let's refresh the current view if any hospitals are loaded.
+    if (comparisonList.length > 0) {
+        refreshAllHospitals();
+    }
+}
+
+async function refreshAllHospitals() {
+    const codes = comparisonList.map(c => c.code);
+    // Clear list but keep codes to re-fetch
+    comparisonList = [];
+    sourceHeaders = [];
+    renderMainContent();
+
+    for (const code of codes) {
+        await selectHospital(code, true);
+    }
+    renderMainContent();
 }
 
 function updateRegionDependents() {
@@ -362,22 +435,13 @@ function updateProvinceDependents() {
 
 function applyFilters() {
     const query = (document.getElementById('searchInput').value || '').toLowerCase();
-    const accessCode = document.getElementById('accessCode') ? document.getElementById('accessCode').value : '';
 
     // Get dropdown values
     const regionFilter = document.getElementById('regionFilter') ? document.getElementById('regionFilter').value : '';
     const provinceFilter = document.getElementById('provinceFilter') ? document.getElementById('provinceFilter').value : '';
     const groupFilter = document.getElementById('groupFilter') ? document.getElementById('groupFilter').value : '';
 
-    // Relying entirely on hospital_data.js configuration
-    const config = window.hospitalAccessConfig;
-    const isUnlocked = config && accessCode === config.code;
-    const restrictedHospitals = config ? config.restrictedHospitals : [];
-
     filteredHospitals = (hospitalList || []).filter(h => {
-        // Access Restriction
-        if (!isUnlocked && !restrictedHospitals.includes(String(h.c))) return false;
-
         // Dropdown Filters
         if (regionFilter && String(h.r) !== regionFilter) return false;
         if (provinceFilter && h.p !== provinceFilter) return false;
@@ -387,7 +451,6 @@ function applyFilters() {
         const matchQuery = !query || query.length < 2 ? true : (h.n.toLowerCase().includes(query) || String(h.c).toLowerCase().includes(query));
         return matchQuery;
     });
-    // showSuggestions(); // Remove auto-show on filter change. Wait for user interaction.
 }
 
 function showSuggestions() {
@@ -495,9 +558,14 @@ async function selectHospital(code, silent = false) {
     if (!silent) renderMainContent(); // Show loading state
 
     try {
-        const yearToFetch = parseInt(comparisonYear);
-        // Load Management Budget data (current year) and TPS data (current + past 4 years)
-        const yearsToFetch = [yearToFetch, yearToFetch - 1, yearToFetch - 2, yearToFetch - 3, yearToFetch - 4];
+        const sYear = parseInt(document.getElementById('startYear').value);
+        const eYear = parseInt(document.getElementById('endYear').value);
+        const yearToFetch = eYear;
+        // Load Management Budget data (current year) and TPS data for the selected range
+        const yearsToFetch = [];
+        for (let y = eYear; y >= sYear; y--) {
+            yearsToFetch.push(y);
+        }
 
         const requestPromises = [
             jsonpRequest('getMgmtData', `code=${code}&year=${yearToFetch}`).catch(e => ({ headers: [], data: {} }))
@@ -519,7 +587,22 @@ async function selectHospital(code, silent = false) {
         tpsResults.forEach((res, idx) => {
             const y = yearsToFetch[idx];
             if (res.data) {
-                combinedTpsData = { ...combinedTpsData, ...res.data };
+                // Filter data to only include rows for the requested year
+                let filteredData = res.data;
+                if (res.headers && res.headers.length > 0) {
+                    const yIdx = res.headers.findIndex(h => String(h).trim() === 'ปี');
+                    // If 'ปี' column exists, filter rows
+                    if (yIdx >= 0) {
+                        filteredData = {};
+                        for (const key in res.data) {
+                            const row = res.data[key];
+                            if (row && String(row[yIdx]) === String(y)) {
+                                filteredData[key] = row;
+                            }
+                        }
+                    }
+                }
+                combinedTpsData = { ...combinedTpsData, ...filteredData };
             }
             if (res.headers && res.headers.length > 0) {
                 combinedTpsHeaders[y] = res.headers;
@@ -593,9 +676,13 @@ async function loadServiceDataInBackground(hospitalItem) {
         return;
     }
 
-    // Determine years to fetch (last 5 years)
-    const currentYear = new Date().getFullYear() + 543;
-    const years = [currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4];
+    // Determine years to fetch (based on selection)
+    const sYear = parseInt(document.getElementById('startYear').value);
+    const eYear = parseInt(document.getElementById('endYear').value);
+    const years = [];
+    for (let y = eYear; y >= sYear; y--) {
+        years.push(y);
+    }
 
     // Initialize storage
     if (!hospitalItem.serviceData) {
@@ -896,7 +983,7 @@ function addToComparison(code, data, isLoading = false, hMap = null) {
 
 
 
-function renderMainContent(defaultQuarter) {
+function renderMainContent(defaultQuarter = '4') {
     renderCompareMode(defaultQuarter);
 }
 
@@ -2690,9 +2777,15 @@ function renderComparisonChart(animationMode = 'progressive') {
                         boundaries.add(0);
                         boundaries.add(totalPoints - 1);
 
+                        let lastFY = null;
                         currentLabels.forEach((label, index) => {
-                            if (label.includes('-Q4')) {
+                            const fy = getFiscalYearOfIntervalStart(label);
+                            if (lastFY !== null && fy !== lastFY) {
                                 boundaries.add(index);
+                            }
+                            lastFY = fy;
+                            if (label.includes('-Q4')) {
+                                boundaries.add(index + 1);
                             }
                         });
 
@@ -2721,7 +2814,11 @@ function renderComparisonChart(animationMode = 'progressive') {
                                 ctx.font = 'bold 12px sans-serif';
                                 ctx.textAlign = 'center';
                                 ctx.textBaseline = 'top';
-                                ctx.fillText(fiscalYear, (xStart + xEnd) / 2, chartArea.bottom + 25);
+
+                                const qFilter = document.getElementById('chartQuarterFilter')?.value;
+                                if (!qFilter || qFilter === 'All') {
+                                    ctx.fillText(fiscalYear, (xStart + xEnd) / 2, chartArea.bottom + 25);
+                                }
                             }
                             ctx.restore();
                         }
@@ -2766,8 +2863,12 @@ function renderComparisonChart(animationMode = 'progressive') {
                                 ticks: {
                                     callback: function (val, index) {
                                         const label = this.getLabelForValue(val);
+                                        const qFilter = document.getElementById('chartQuarterFilter')?.value;
+                                        if (qFilter && qFilter !== 'All') {
+                                            return label; // Show full "2567-Q1" for clarity when filtered
+                                        }
                                         const parts = label.split('-');
-                                        return parts.length > 1 ? parts[1] : parts[0]; // Changed to parts[0] for year if no quarter
+                                        return parts.length > 1 ? parts[1] : parts[0];
                                     }
                                 }
                             },
