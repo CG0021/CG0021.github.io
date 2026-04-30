@@ -1,0 +1,3270 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="auth.js"></script>
+    <title>TPS Monthly Calculation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+    <script>
+        if (typeof Chart !== 'undefined' && typeof ChartZoom !== 'undefined') {
+            Chart.register(ChartZoom);
+        }
+    </script>
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-surface-hover: #f1f5f9;
+            --primary-color: #0ea5e9;
+            --primary-hover: #0284c7;
+            --secondary-color: #6366f1;
+            --text-main: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --font-th: 'Sarabun', sans-serif;
+            --font-en: 'Inter', sans-serif;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-th);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: auto;
+            /* Allow horizontal scroll on body */
+        }
+
+        .header {
+            background: var(--bg-surface);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-family: var(--font-th);
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header h1 span {
+            color: var(--text-main);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-family: var(--font-th);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            background: transparent;
+        }
+
+        .nav-btn:hover {
+            color: var(--primary-color);
+            background: #f0f9ff;
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            /* Increased for side-by-side */
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Side-by-side layout for Import and History */
+        .import-history-grid {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: stretch;
+            /* Ensure equal height */
+        }
+
+        .import-panel {
+            flex: 0 0 35%;
+            min-width: 350px;
+            transition: all 0.3s ease;
+        }
+
+        .import-panel.full-width {
+            flex: 1;
+            width: 100%;
+        }
+
+        .history-panel {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Consistent table wrapper height in the grid */
+        .import-history-grid .table-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 350px;
+            /* Increased for better visual balance */
+        }
+
+        @media (max-width: 1024px) {
+            .import-history-grid {
+                flex-direction: column;
+            }
+
+            .import-panel.full-width {
+                max-width: 100%;
+            }
+
+            .import-panel {
+                flex: 1;
+                width: 100%;
+            }
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .hero-section h2 {
+            font-size: 2.5rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .hero-section p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .upload-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            border: 2px dashed var(--border-color);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .upload-card:hover {
+            border-color: var(--primary-color);
+            background: #f0f9ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-card.dragging {
+            border-color: var(--secondary-color);
+            background: #eef2ff;
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .upload-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .result-container {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .stat-revenue::before {
+            background: var(--success);
+        }
+
+        .stat-expense::before {
+            background: var(--error);
+        }
+
+        .stat-net::before {
+            background: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: var(--font-en);
+            color: var(--text-main);
+        }
+
+        .stat-diff {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .table-section {
+            display: none;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            overflow: visible;
+            /* Important for sticky viewport */
+            animation: fadeInUp 0.7s ease-out;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            /* Required for sticky borders */
+            border-spacing: 0;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            padding: 1rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            position: sticky;
+            top: 64px;
+            /* Sticks BELOW the site header */
+            z-index: 900;
+            border-bottom: 2px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        /* Top-left corner cell (Items label) */
+        thead th:first-child {
+            position: sticky;
+            left: 0;
+            top: 64px;
+            /* Sticks BELOW the site header */
+            z-index: 910;
+            background: #f1f5f9;
+            border-right: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        tr:hover td {
+            background: #f1f5f9;
+        }
+
+        .numeric {
+            text-align: right;
+            font-family: var(--font-en);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-revenue {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-expense {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .glass-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .glass-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            border: 1px solid #888;
+            width: 90%;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: fadeInDown 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .close-modal {
+            color: #64748b;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Tablet & Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+                height: auto;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-btn {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .main-container {
+                padding: 1rem !important;
+            }
+
+            .import-history-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem !important;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+            }
+
+            /* Modal for Tablet */
+            .modal-content {
+                width: 95% !important;
+                margin: 5% auto !important;
+            }
+        }
+
+        /* Custom Dropdown Styling */
+        .custom-select-container {
+            position: relative;
+            user-select: none;
+            z-index: 2005;
+        }
+
+        .custom-select-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-select-trigger:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        .custom-options {
+            position: absolute;
+            top: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 14px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 2100;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            padding: 6px;
+        }
+
+        .custom-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .custom-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #475569;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .custom-option:hover {
+            background: rgba(14, 165, 233, 0.08);
+            color: var(--primary-color);
+        }
+
+        .custom-option.selected {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 700;
+        }
+
+        .dropdown-chevron {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.8;
+        }
+
+        .custom-select-container.open .dropdown-chevron {
+            transform: rotate(180deg);
+        }
+
+        @media screen and (max-width: 768px) {
+            .custom-options {
+                position: fixed;
+                top: auto;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+                transform: translateY(100%);
+                width: calc(100% - 40px);
+                margin: 0;
+                min-width: 0;
+                border-radius: 20px;
+                max-height: 50vh;
+                overflow-y: auto;
+            }
+
+            .custom-options.show {
+                transform: translateY(0);
+            }
+        }
+
+        /* Toggle Switch Styling */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Custom Legend Styling */
+        .chart-custom-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .legend-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .legend-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            background: white;
+            border-color: var(--primary-color);
+        }
+
+        .legend-pill.hidden {
+            opacity: 0.5;
+            filter: grayscale(1);
+            background: rgba(241, 245, 249, 0.5);
+            border-style: dashed;
+        }
+
+        .legend-color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            transition: transform 0.3s ease;
+        }
+
+        .legend-pill:hover .legend-color-box {
+            transform: scale(1.2);
+        }
+
+        .legend-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #475569;
+            font-family: 'Sarabun', sans-serif;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <h1>
+            <span
+                style="background:var(--primary-color); color:white; padding:4px 8px; border-radius:6px; font-size: 1rem;">
+                TPS Monthly</span>
+            <span>คำนวณรายได้-รายจ่ายรายเดือน</span>
+        </h1>
+        <div class="nav-buttons">
+            <a href="Financial_Structure.html" class="nav-btn">Financial Structure</a>
+            <a href="TPS_Analysis.html" class="nav-btn">TPS Analysis</a>
+            <a href="TPS_Monthly.html" class="nav-btn active">Monthly Report</a>
+            <button onclick="logout()" class="nav-btn"
+                style="color: #ef4444; border: 1px solid #fee2e2;">ออกจากระบบ</button>
+        </div>
+    </div>
+
+    <main class="main-container">
+        <div class="hero-section" style="margin-bottom: 2rem;">
+            <h2>Monthly TPS Calculator</h2>
+            <p>นำเข้าไฟล์ Excel งบทดลองรายเดือนเพื่อสะสมข้อมูลและเปรียบเทียบในรูปแบบตาราง</p>
+        </div>
+
+        <div id="errorAlert" class="alert alert-error"></div>
+
+        <!-- Input Section & History Section side-by-side -->
+        <div class="import-history-grid">
+            <!-- Left Side: Import Card -->
+            <div class="import-panel full-width" id="importPanel">
+                <div
+                    style="background: white; padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                    <h3 style="margin-bottom: 1.5rem; text-align: center;">นำเข้าไฟล์งบทดลอง</h3>
+                    <div class="upload-card" id="dropZone" onclick="document.getElementById('fileInput').click()"
+                        style="margin-bottom: 0; padding: 2rem; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <span class="upload-icon" style="font-size: 3rem; margin-bottom: 1rem;">📂</span>
+                        <p class="upload-text" style="font-size: 1.1rem;">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</p>
+                        <p class="upload-subtext">(.xlsx, .xls, .csv)</p>
+                        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
+                    </div>
+                    <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem; font-size: 0.9rem;">
+                        * หลังจากอัปโหลด ระบบจะให้เลือกเดือนและปีในขั้นตอนถัดไป<br>
+                        <a href="javascript:void(0)" onclick="downloadTemplate()"
+                            style="color: var(--primary-color); text-decoration: none; font-weight: 600; margin-top: 8px; display: inline-block;">
+                            📥 ดาวน์โหลดไฟล์ตัวอย่าง (Template)
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Side: Import History -->
+            <div class="history-panel table-section" id="historySection" style="display: none; margin-bottom: 0;">
+                <div class="table-header">
+                    <h3>ประวัติการนำเข้าไฟล์ (Import History)</h3>
+                </div>
+                <div class="table-wrapper">
+                    <table style="width: 100%;">
+                        <thead style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="top: 0; font-size: 0.75rem; padding: 0.5rem;">เดือน/ปี</th>
+                                <th style="top: 0; font-size: 0.75rem; padding: 0.5rem;">ชื่อไฟล์</th>
+                                <th style="top: 0; font-size: 0.75rem; padding: 0.5rem;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody" style="font-size: 0.85rem;">
+                            <!-- History rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Settings for Calculation -->
+        <div style="max-width: 100%; margin: 0 auto 2rem auto; animation: fadeInUp 0.6s ease-out;">
+            <div
+                style="background: white; padding: 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+                <h3 style="font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                    <span>⚙️</span> ตั้งค่าลูกหนี้ UC ต้นงวด (Beginning UC Balances)
+                </h3>
+                <div id="beginningUCContainer">
+                    <!-- Dynamic per-year inputs will be rendered here -->
+                    <div
+                        style="color: var(--text-secondary); font-size: 0.9rem; padding: 1rem; text-align: center; border: 1px dashed var(--border-color); border-radius: var(--radius-md);">
+                        กรุณานำเข้าข้อมูลเพื่อให้ระบบสร้างช่องกรอกตามปีงบประมาณ
+                    </div>
+                </div>
+                <div
+                    style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <small style="color: var(--text-secondary); line-height: 1.4; flex: 1; padding-right: 1rem;">
+                        * ใช้สำหรับการคำนวณ "ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้" (Average Collection Period)<br>
+                        * หากมีข้อมูลเดือน<b>กันยายน</b>ของปีที่แล้ว ระบบจะใช้จากไฟล์โดยอัตโนมัติ
+                        หากไม่มีจะใช้ค่าที่ระบุในช่องเหล่านี้
+                    </small>
+                    <button class="glass-btn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem; flex-shrink: 0;"
+                        onclick="recalculateAndRender()">
+                        <span>🔄</span> คำนวณใหม่
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Table -->
+        <div class="table-section" id="tableSection" style="display: block;">
+            <div class="table-header">
+                <h3>ตารางสรุปผลการดำเนินงานรายเดือน</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button class="glass-btn" style="background-color: var(--secondary-color);" onclick="openMetricChart({id: 'cashVsCL', label: 'วิเคราะห์สภาพคล่อง: เงินสดและลูกหนี้ vs หนี้สิน'})">
+                        <span>📈</span> กราฟสภาพคล่อง
+                    </button>
+                    <button class="glass-btn" style="background-color: #f59e0b;" onclick="openMetricChart({id: 'revVsExp', label: 'วิเคราะห์รายได้ vs รายจ่าย (สะสมรวม)'})">
+                        <span>📊</span> กราฟรายได้/รายจ่าย
+                    </button>
+                    <button class="glass-btn" style="background-color: #ef4444;" onclick="clearAllData()">
+                        <span>🗑️</span> ล้างข้อมูล
+                    </button>
+                    <button class="glass-btn" onclick="exportSummaryToExcel()">
+                        <span>📥</span> ดาวน์โหลด Excel
+                    </button>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="summaryTable">
+                    <thead>
+                        <tr id="headerRow">
+                            <th style="min-width: 300px;">รายการ (Items)</th>
+                            <!-- Month columns appended here -->
+                        </tr>
+                    </thead>
+                    <tbody id="summaryBody">
+                        <!-- Data rows appended here -->
+                    </tbody>
+                </table>
+            </div>
+            <div style="padding: 1rem; background: #f8fafc; text-align: center; color: var(--text-secondary);"
+                id="emptyStateMsg">
+                ยังไม่มีข้อมูล กรุณานำเข้าไฟล์งบทดลอง
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="editModal" class="loading-overlay" style="display:none; align-items:flex-start; padding-top: 100px;">
+            <div
+                style="background:white; padding:2rem; border-radius:var(--radius-lg); width: 400px; box-shadow: var(--shadow-lg);">
+                <h3 style="margin-bottom:1.5rem;">แก้ไขข้อมูล (Edit Data)</h3>
+                <input type="hidden" id="editIndex">
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">เดือน (Month)</label>
+                    <select id="editMonth"
+                        style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--border-color); font-family:var(--font-th);">
+                        <option value="1">มกราคม (Jan)</option>
+                        <option value="2">กุมภาพันธ์ (Feb)</option>
+                        <option value="3">มีนาคม (Mar)</option>
+                        <option value="4">เมษายน (Apr)</option>
+                        <option value="5">พฤษภาคม (May)</option>
+                        <option value="6">มิถุนายน (Jun)</option>
+                        <option value="7">กรกฎาคม (Jul)</option>
+                        <option value="8">สิงหาคม (Aug)</option>
+                        <option value="9">กันยายน (Sep)</option>
+                        <option value="10">ตุลาคม (Oct)</option>
+                        <option value="11">พฤศจิกายน (Nov)</option>
+                        <option value="12">ธันวาคม (Dec)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block; margin-bottom:0.5rem; font-weight:600;">ปี (Year)</label>
+                    <select id="editYear"
+                        style="width:100%; padding:0.5rem; border-radius:var(--radius-md); border:1px solid var(--border-color); font-family:var(--font-th);">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button class="glass-btn" style="background:#94a3b8;" onclick="closeEditModal()">ยกเลิก</button>
+                    <button class="glass-btn" onclick="saveEdit()">บันทึก</button>
+                </div>
+            </div>
+        </div>
+
+
+    </main>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Batch Import Confirmation Modal -->
+    <div id="confirmImportModal" class="loading-overlay"
+        style="display:none; align-items:center; justify-content:center;">
+        <div
+            style="background:white; padding:2rem; border-radius:var(--radius-lg); width: 850px; box-shadow: var(--shadow-lg); max-height: 90vh; display: flex; flex-direction: column;">
+            <h3 style="margin-bottom:1.5rem; text-align: center; color: var(--primary-color);">
+                ตรวจสอบและยืนยันข้อมูลนำเข้า</h3>
+
+            <div
+                style="flex: 1; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 100;">
+                        <tr>
+                            <th
+                                style="position: sticky; top: 0; background: #f8fafc; padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color); width: 40px; z-index: 110;">
+                                #</th>
+                            <th
+                                style="position: sticky; top: 0; background: #f8fafc; padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color); z-index: 110;">
+                                ชื่อไฟล์</th>
+                            <th
+                                style="position: sticky; top: 0; background: #f8fafc; padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color); width: 130px; z-index: 110;">
+                                เดือน</th>
+                            <th
+                                style="position: sticky; top: 0; background: #f8fafc; padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border-color); width: 100px; z-index: 110;">
+                                ปี (พ.ศ.)</th>
+                            <th
+                                style="position: sticky; top: 0; background: #f8fafc; padding: 0.75rem; text-align: center; border-bottom: 2px solid var(--border-color); width: 80px; z-index: 110;">
+                                ตรวจสอบ</th>
+                            <th
+                                style="position: sticky; top: 0; background: #f8fafc; padding: 0.75rem; text-align: center; border-bottom: 2px solid var(--border-color); width: 60px; z-index: 110;">
+                                ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchImportBody">
+                        <!-- Rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="batchGlobalWarning"
+                style="display:none; margin-bottom:1rem; padding:0.75rem; background:#fff7ed; border-radius:var(--radius-md); font-size:0.85rem; color:#9a3412;">
+                ⚠️ <b>คำเตือน:</b> บางไฟล์มีความผิดปกติ โปรดตรวจสอบสัญลักษณ์ ⚠️ ในคอลัมน์ตรวจสอบ
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items: center; gap:10px;">
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                    ทั้งหมด <span id="batchTotalCount" style="font-weight: 700; color: var(--primary-color);">0</span>
+                    รายการ
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="glass-btn" style="background:#64748b;" onclick="closeImportModal()">ยกเลิก</button>
+                    <button class="glass-btn" style="background:#10b981;" onclick="executeBatchImport()">💾
+                        นำเข้าและคำนวณทั้งหมด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // รายได้ (ไม่รวมงบลงทุน) - Revenue excluding investment budget
+        const REVENUE_CODES = new Set([
+            "4201020106.101", "4201020199.101", "4202010199.101", "4202020102.101", "4202030105.101",
+            "4203010101.101", "4205010104.101", "4205010110.101", "4206010102.101", "4206010199.101",
+            "4301010102.101", "4301010102.102", "4301010102.103", "4301010102.104", "4301020102.101",
+            "4301020102.102", "4301020102.103", "4301020102.104", "4301020102.105", "4301020102.106",
+            "4301020104.104", "4301020104.105", "4301020104.106", "4301020104.107", "4301020104.108",
+            "4301020104.109", "4301020104.110", "4301020104.111", "4301020104.401", "4301020104.402",
+            "4301020104.405", "4301020104.406", "4301020104.602", "4301020104.603", "4301020104.801",
+            "4301020104.802", "4301020104.803", "4301020104.804", "4301020104.805", "4301020104.806",
+            "4301020104.807", "4301020104.808", "4301020105.201", "4301020105.202", "4301020105.203",
+            "4301020105.205", "4301020105.207", "4301020105.214", "4301020105.217", "4301020105.222",
+            "4301020105.223", "4301020105.228", "4301020105.229", "4301020105.231", "4301020105.232",
+            "4301020105.239", "4301020105.240", "4301020105.241", "4301020105.242", "4301020105.243",
+            "4301020105.244", "4301020105.245", "4301020105.251", "4301020105.252", "4301020105.255",
+            "4301020105.256", "4301020105.257", "4301020105.258", "4301020105.260", "4301020105.263",
+            "4301020105.264", "4301020105.266", "4301020105.271", "4301020106.303", "4301020106.305",
+            "4301020106.306", "4301020106.307", "4301020106.308", "4301020106.309", "4301020106.310",
+            "4301020106.311", "4301020106.312", "4301020106.313", "4301020106.314", "4301020106.315",
+            "4301020106.317", "4301020106.319", "4301020106.320", "4301020106.321", "4301020106.322",
+            "4301020106.502", "4301020106.503", "4301020106.504", "4301020106.505", "4301020106.507",
+            "4301020106.509", "4301020106.510", "4301020106.511", "4301020106.512", "4301020106.513",
+            "4301020106.514", "4301020106.515", "4301020106.516", "4301020106.517", "4301020106.518",
+            "4301020106.519", "4301020106.701", "4301020106.703", "4301020106.704", "4301020106.705",
+            "4301020106.706", "4301020106.709", "4301020106.710", "4301020106.711", "4301020106.712",
+            "4301020108.101", "4301030102.101", "4301030104.101", "4302010101.101", "4302010106.101",
+            "4302010199.101", "4302030101.101", "4302030101.102", "4303010101.101", "4306010104.101",
+            "4306010110.101", "4306010110.102", "4307010103.201", "4307010105.101", "4307010106.101",
+            "4307010107.101", "4307010108.101", "4308010121.101", "4313010101.101", "4313010103.101",
+            "4313010199.101", "4313010199.102", "4313010199.105", "4313010199.108", "4313010199.109",
+            "4313010199.110", "4313010199.113", "4313010199.114", "4313010199.115", "4313010199.116",
+            "4313010199.117", "4313010199.119", "4313010199.120", "4313010199.121", "4313010199.122",
+            "4313010199.123", "4313010199.202"
+        ]);
+
+        // รวมรายได้ทั้งหมด - Total Revenue (all codes from user)
+        const REVENUE_CODES_ALL = new Set([
+            "4201020106.101", "4201020199.101", "4202010199.101", "4202020102.101", "4202030105.101",
+            "4203010101.101", "4205010104.101", "4205010110.101", "4206010102.101", "4206010199.101",
+            "4301010102.101", "4301010102.102", "4301010102.103", "4301010102.104", "4301020102.101",
+            "4301020102.102", "4301020102.103", "4301020102.104", "4301020102.105", "4301020102.106",
+            "4301020104.104", "4301020104.105", "4301020104.106", "4301020104.107", "4301020104.108",
+            "4301020104.109", "4301020104.110", "4301020104.111", "4301020104.401", "4301020104.402",
+            "4301020104.405", "4301020104.406", "4301020104.602", "4301020104.603", "4301020104.801",
+            "4301020104.802", "4301020104.803", "4301020104.804", "4301020104.805", "4301020104.806",
+            "4301020104.807", "4301020104.808", "4301020105.201", "4301020105.202", "4301020105.203",
+            "4301020105.205", "4301020105.207", "4301020105.211", "4301020105.214", "4301020105.217",
+            "4301020105.222", "4301020105.223", "4301020105.228", "4301020105.229", "4301020105.231",
+            "4301020105.232", "4301020105.239", "4301020105.240", "4301020105.241", "4301020105.242",
+            "4301020105.243", "4301020105.244", "4301020105.245", "4301020105.251", "4301020105.252",
+            "4301020105.255", "4301020105.256", "4301020105.257", "4301020105.258", "4301020105.260",
+            "4301020105.263", "4301020105.264", "4301020105.265", "4301020105.266", "4301020105.271",
+            "4301020106.303", "4301020106.305", "4301020106.306", "4301020106.307", "4301020106.308",
+            "4301020106.309", "4301020106.310", "4301020106.311", "4301020106.312", "4301020106.313",
+            "4301020106.314", "4301020106.315", "4301020106.317", "4301020106.319", "4301020106.320",
+            "4301020106.321", "4301020106.322", "4301020106.502", "4301020106.503", "4301020106.504",
+            "4301020106.505", "4301020106.507", "4301020106.509", "4301020106.510", "4301020106.511",
+            "4301020106.512", "4301020106.513", "4301020106.514", "4301020106.515", "4301020106.516",
+            "4301020106.517", "4301020106.518", "4301020106.519", "4301020106.701", "4301020106.703",
+            "4301020106.704", "4301020106.705", "4301020106.706", "4301020106.709", "4301020106.710",
+            "4301020106.711", "4301020106.712", "4301020108.101", "4301030102.101", "4301030104.101",
+            "4302010101.101", "4302010106.101", "4302010199.101", "4302020107.101", "4302020199.101",
+            "4302030101.101", "4302030101.102", "4302040101.101", "4303010101.101", "4306010104.101",
+            "4306010110.101", "4306010110.102", "4307010103.201", "4307010104.101", "4307010105.101",
+            "4307010106.101", "4307010107.101", "4307010108.101", "4307010112.101", "4308010101.101",
+            "4308010105.101", "4308010106.101", "4308010118.101", "4308010121.101", "4313010101.101",
+            "4313010103.101", "4313010199.101", "4313010199.102", "4313010199.105", "4313010199.108",
+            "4313010199.109", "4313010199.110", "4313010199.113", "4313010199.114", "4313010199.115",
+            "4313010199.116", "4313010199.117", "4313010199.118", "4313010199.119", "4313010199.120",
+            "4313010199.121", "4313010199.122", "4313010199.123", "4313010199.202"
+        ]);
+
+        // ค่าใช้จ่าย (ไม่รวมค่าเสื่อมราคาและค่าตัดจำหน่าย) - Expense excluding depreciation and amortization
+        const EXPENSE_CODES = new Set([
+            "5101010101.101", "5101010101.102", "5101010103.101", "5101010103.102", "5101010103.103",
+            "5101010108.101", "5101010109.101", "5101010109.102", "5101010109.103", "5101010109.104",
+            "5101010113.101", "5101010113.102", "5101010113.103", "5101010113.104", "5101010113.105",
+            "5101010113.106", "5101010113.107", "5101010113.108", "5101010115.101", "5101010115.102",
+            "5101010116.101", "5101010116.102", "5101010116.103", "5101010116.104", "5101010116.105",
+            "5101010116.106", "5101010199.101", "5101010199.102", "5101010199.103", "5101020101.101",
+            "5101020101.102", "5101020102.101", "5101020103.101", "5101020104.101", "5101020105.101",
+            "5101020106.101", "5101020106.102", "5101020108.101", "5101020112.101", "5101020114.107",
+            "5101020114.114", "5101020114.126", "5101020114.127", "5101020115.101", "5101020116.101",
+            "5101020116.102", "5101020199.105", "5101020199.106", "5101030101.101", "5101030205.101",
+            "5101030206.101", "5101030207.101", "5101030208.101", "5101030211.101", "5101040111.101",
+            "5101040202.101", "5101040204.101", "5101040205.101", "5101040206.101", "5101040207.101",
+            "5102010106.101", "5102010199.101", "5102010199.102", "5102030199.101", "5102030199.102",
+            "5103010102.101", "5103010102.102", "5103010103.101", "5103010103.102", "5103010199.101",
+            "5103010199.102", "5104010104.101", "5104010104.102", "5104010104.103", "5104010104.104",
+            "5104010104.105", "5104010104.106", "5104010104.107", "5104010104.108", "5104010104.109",
+            "5104010107.101", "5104010107.102", "5104010107.103", "5104010107.104", "5104010107.105",
+            "5104010107.106", "5104010107.107", "5104010107.108", "5104010107.109", "5104010107.110",
+            "5104010107.111", "5104010107.112", "5104010107.113", "5104010110.101", "5104010112.101",
+            "5104010112.103", "5104010112.106", "5104010112.108", "5104010112.110", "5104010112.111",
+            "5104010112.112", "5104010112.113", "5104010112.114", "5104010112.115", "5104010114.101",
+            "5104010115.101", "5104020101.101", "5104020103.101", "5104020105.101", "5104020106.101",
+            "5104020107.101", "5104030202.101", "5104030203.101", "5104030205.101", "5104030205.102",
+            "5104030205.103", "5104030205.104", "5104030205.112", "5104030205.113", "5104030205.117",
+            "5104030205.118", "5104030206.101", "5104030207.101", "5104030208.101", "5104030210.101",
+            "5104030212.101", "5104030217.101", "5104030218.101", "5104030219.101", "5104030220.101",
+            "5104030299.102", "5104030299.103", "5104030299.104", "5104030299.105", "5104030299.202",
+            "5104030299.203", "5104030299.501", "5104030299.502", "5104030299.701", "5104030299.702",
+            "5104040102.101", "5104040102.102", "5104040102.103", "5104040102.104", "5104040102.105",
+            "5104040102.106", "5104040102.107", "5104040102.108", "5104040102.109", "5104040102.110",
+            "5104040102.111", "5104040102.112", "5104040102.113", "5104040102.114", "5104040102.115",
+            "5104040102.116", "5104040102.117", "5104040102.118", "5104040102.119", "5104040102.120",
+            "5107010101.101", "5107010199.101", "5107020199.101", "5108010101.102", "5108010101.114",
+            "5108010101.115", "5108010101.203", "5108010107.102", "5108010107.104", "5108010107.105",
+            "5108010107.114", "5108010107.115", "5108010107.203", "5108010107.205", "5112010103.101",
+            "5203010105.101", "5203010106.101", "5203010107.101", "5203010109.101", "5203010110.101",
+            "5203010111.101", "5203010112.101", "5203010113.101", "5203010114.101", "5203010115.101",
+            "5203010117.101", "5203010119.101", "5203010120.101", "5203010122.101", "5203010126.101",
+            "5203010141.101", "5203010142.101", "5203010145.101", "5203010146.101", "5205010101.101",
+            "5210010121.101", "5211010101.101", "5211010102.101", "5212010199.101", "5212010199.102",
+            "5212010199.104", "5212010199.105", "5212010199.106", "5212010199.107", "5212010199.108",
+            "5212010199.109", "5212010199.110", "5212010199.111", "5212010199.112", "5212010199.113",
+            "5212010199.114", "5401010101.101"
+        ]);
+
+        // รวมรายจ่ายทั้งหมด - Total Expense (all codes from user)
+        const EXPENSE_CODES_ALL = new Set([
+            "5101010101.101", "5101010101.102", "5101010103.101", "5101010103.102", "5101010103.103",
+            "5101010108.101", "5101010109.101", "5101010109.102", "5101010109.103", "5101010109.104",
+            "5101010113.101", "5101010113.102", "5101010113.103", "5101010113.104", "5101010113.105",
+            "5101010113.106", "5101010113.107", "5101010113.108", "5101010115.101", "5101010115.102",
+            "5101010116.101", "5101010116.102", "5101010116.103", "5101010116.104", "5101010116.105",
+            "5101010116.106", "5101010199.101", "5101010199.102", "5101010199.103", "5101020101.101",
+            "5101020101.102", "5101020102.101", "5101020103.101", "5101020104.101", "5101020105.101",
+            "5101020106.101", "5101020106.102", "5101020108.101", "5101020112.101", "5101020114.107",
+            "5101020114.114", "5101020114.126", "5101020114.127", "5101020115.101", "5101020116.101",
+            "5101020116.102", "5101020199.105", "5101020199.106", "5101030101.101", "5101030205.101",
+            "5101030206.101", "5101030207.101", "5101030208.101", "5101030211.101", "5101040111.101",
+            "5101040202.101", "5101040204.101", "5101040205.101", "5101040206.101", "5101040207.101",
+            "5102010106.101", "5102010199.101", "5102010199.102", "5102030199.101", "5102030199.102",
+            "5103010102.101", "5103010102.102", "5103010103.101", "5103010103.102", "5103010199.101",
+            "5103010199.102", "5104010104.101", "5104010104.102", "5104010104.103", "5104010104.104",
+            "5104010104.105", "5104010104.106", "5104010104.107", "5104010104.108", "5104010104.109",
+            "5104010107.101", "5104010107.102", "5104010107.103", "5104010107.104", "5104010107.105",
+            "5104010107.106", "5104010107.107", "5104010107.108", "5104010107.109", "5104010107.110",
+            "5104010107.111", "5104010107.112", "5104010107.113", "5104010110.101", "5104010112.101",
+            "5104010112.103", "5104010112.106", "5104010112.108", "5104010112.110", "5104010112.111",
+            "5104010112.112", "5104010112.113", "5104010112.114", "5104010112.115", "5104010114.101",
+            "5104010115.101", "5104020101.101", "5104020103.101", "5104020105.101", "5104020106.101",
+            "5104020107.101", "5104030202.101", "5104030203.101", "5104030205.101", "5104030205.102",
+            "5104030205.103", "5104030205.104", "5104030205.112", "5104030205.113", "5104030205.117",
+            "5104030205.118", "5104030206.101", "5104030207.101", "5104030208.101", "5104030210.101",
+            "5104030212.101", "5104030217.101", "5104030218.101", "5104030219.101", "5104030220.101",
+            "5104030299.102", "5104030299.103", "5104030299.104", "5104030299.105", "5104030299.202",
+            "5104030299.203", "5104030299.204", "5104030299.501", "5104030299.502", "5104030299.701",
+            "5104030299.702", "5104040102.101", "5104040102.102", "5104040102.103", "5104040102.104",
+            "5104040102.105", "5104040102.106", "5104040102.107", "5104040102.108", "5104040102.109",
+            "5104040102.110", "5104040102.111", "5104040102.112", "5104040102.113", "5104040102.114",
+            "5104040102.115", "5104040102.116", "5104040102.117", "5104040102.118", "5104040102.119",
+            "5104040102.120", "5105010101.101", "5105010103.101", "5105010105.101", "5105010107.101",
+            "5105010107.102", "5105010107.103", "5105010107.104", "5105010107.105", "5105010107.106",
+            "5105010109.101", "5105010111.101", "5105010113.101", "5105010115.101", "5105010117.101",
+            "5105010119.101", "5105010121.101", "5105010125.101", "5105010127.101", "5105010129.101",
+            "5105010131.101", "5105010133.101", "5105010135.101", "5105010137.101", "5105010139.101",
+            "5105010148.101", "5105010149.102", "5105010158.101", "5105010160.101", "5105010160.102",
+            "5105010160.103", "5105010160.104", "5105010160.105", "5105010160.106", "5105010160.107",
+            "5105010160.108", "5105010160.109", "5105010161.101", "5105010161.102", "5105010161.103",
+            "5105010161.104", "5105010161.105", "5105010161.106", "5105010161.107", "5105010161.108",
+            "5105010161.109", "5105010161.110", "5105010164.101", "5105010164.103", "5105010194.101",
+            "5107010101.101", "5107010199.101", "5107020199.101", "5107030101.101", "5108010101.102",
+            "5108010101.114", "5108010101.115", "5108010101.203", "5108010107.102", "5108010107.104",
+            "5108010107.105", "5108010107.114", "5108010107.115", "5108010107.203", "5108010107.205",
+            "5112010103.101", "5203010105.101", "5203010106.101", "5203010107.101", "5203010109.101",
+            "5203010110.101", "5203010111.101", "5203010112.101", "5203010113.101", "5203010114.101",
+            "5203010115.101", "5203010117.101", "5203010119.101", "5203010120.101", "5203010122.101",
+            "5203010126.101", "5203010141.101", "5203010142.101", "5203010145.101", "5203010146.101",
+            "5205010101.101", "5209010112.101", "5210010101.101", "5210010102.101", "5210010103.101",
+            "5210010105.101", "5210010112.101", "5210010118.101", "5210010121.101", "5211010101.101",
+            "5211010102.101", "5212010199.101", "5212010199.102", "5212010199.104", "5212010199.105",
+            "5212010199.106", "5212010199.107", "5212010199.108", "5212010199.109", "5212010199.110",
+            "5212010199.111", "5212010199.112", "5212010199.113", "5212010199.114", "5401010101.101"
+        ]);
+
+        // เจ้าหนี้การค้า (Trade Payables) - Credit Net
+        const TRADE_PAYABLE_CODES = new Set([
+            "2101010102.102", "2101010102.103", "2101010102.105", "2101010102.130", "2101010102.131",
+            "2101010102.132", "2101010102.133", "2101010102.134", "2101010102.135", "2101010102.136",
+            "2101010102.137", "2101010102.138", "2101020198.102", "2101020198.103", "2101020198.105",
+            "2101020198.112", "2101020198.113", "2101020198.114", "2101020198.115", "2101020198.116",
+            "2101020198.117", "2101020198.120", "2101020198.121", "2101020198.122", "2101020199.134",
+            "2101020199.135", "2101020199.136", "2101020199.141", "2101020199.142", "2101020199.143",
+            "2101020199.144", "2101020199.145", "2101010103.103"
+        ]);
+
+        // ลูกหนี้ UC (UC Receivables) - Debit Net
+        const UC_RECEIVABLE_CODES = new Set([
+            "1102050101.202", "1102050101.203", "1102050101.204", "1102050101.216", "1102050101.217",
+            "1102050101.222", "1102050102.201"
+        ]);
+
+        // รายได้ UC สุทธิ (Net UC Revenue) - Debit Net
+        const UC_REVENUE_NET_CODES = new Set([
+            "4301020105.202", "4301020105.203", "4301020105.205", "4301020105.207", "4301020105.231",
+            "4301020105.232", "4301020105.239", "4301020105.240", "4301020105.244", "4301020105.245",
+            "4301020105.251", "4301020105.252", "4301020105.258", "4301020105.260", "4301020105.263"
+        ]);
+
+        // ลูกหนี้ CS (CS Receivables) - Debit Net
+        const CS_RECEIVABLE_CODES = new Set([
+            "1102050101.103", "1102050101.401", "1102050101.402"
+        ]);
+
+        // รายได้ CS สุทธิ (CS Revenue) - Net (Credit - Debit)
+        const CS_REVENUE_NET_CODES = new Set([
+            "4301020102.104", "4301020104.401", "4301020104.402", "4301020104.405", "4301020104.406"
+        ]);
+
+        // ลูกหนี้ SS (SS Receivables) - Debit Net
+        const SS_RECEIVABLE_CODES = new Set([
+            "1102050101.301", "1102050101.302"
+        ]);
+
+        // รายได้ SS (SS Revenue) - Debit Net
+        const SS_REVENUE_CODES = new Set([
+            "4301020106.305", "4301020106.306", "4301020106.315", "4301020106.317"
+        ]);
+
+        // วัสดุคงคลัง (ยา/วชช มิใช่ยา) - Debit Net
+        const INVENTORY_CODES = new Set([
+            "1105010103.102", "1105010103.103", "1105010103.104", "1105010103.105", "1105010103.106", "1105010103.107"
+        ]);
+
+        // วัสดุใช้ไป (ยา/วชช มิใช่ยา) - Debit Net
+        const MATERIALS_USED_CODES = new Set([
+            "5104030205.101", "5104030205.102", "5104030205.103", "5104030205.104", "5104030205.117", "5104030205.118"
+        ]);
+
+        // เงินบำรุง - Debit Net
+        const MAINTENANCE_FUND_CODES = new Set([
+            "1101010101.101", "1101020501.101", "1101020501.103", "1101020504.101", "1101020604.101",
+            "1101020606.101", "1101030101.101", "1101030101.102", "1101030101.103", "1101030102.101",
+            "1101030102.102", "1101030102.103", "1104010101.101"
+        ]);
+
+        // ภาระหนี้สิน - Debit Net
+        const LIABILITIES_CODES = new Set([
+            "2101010102.133", "2101010102.134", "2101010102.135", "2101010102.136", "2101010102.137",
+            "2101010102.138", "2101010102.139", "2101010102.140", "2101010103.102", "2101010103.103",
+            "2101020198.115", "2101020198.116", "2101020198.117", "2101020198.118", "2101020198.119",
+            "2101020198.120", "2101020199.134", "2101020199.135", "2101020199.136", "2101020199.137",
+            "2101020199.138", "2101020199.139", "2101020199.140", "2101020199.141", "2101020199.142",
+            "2101020199.143", "2101020199.144", "2101020199.145", "2101020199.146", "2101020199.147",
+            "2101020199.148", "2101020199.149", "2101020199.150", "2101020199.202", "2101020199.203",
+            "2101020199.204", "2101020199.301", "2101020199.501", "2101020199.502", "2101020199.503",
+            "2101020199.504", "2101020199.701", "2102040101.101", "2102040102.101", "2102040103.101",
+            "2102040104.101", "2102040106.101", "2102040110.101", "2102040110.102", "2102040110.103",
+            "2102040110.104", "2102040110.105", "2102040110.106", "2102040110.107", "2102040110.108",
+            "2102040110.109", "2102040110.110", "2102040110.111", "2102040110.112", "2102040110.113",
+            "2102040110.114", "2102040110.115", "2102040198.101", "2102040199.101", "2102040199.105",
+            "2103010103.101", "2103010103.502", "2104010101.101", "2109010199.101", "2109010199.201",
+            "2109010199.701", "2111020199.103", "2111020199.105", "2111020199.107", "2111020199.108",
+            "2111020199.110", "2111020199.201", "2111020199.204", "2111020199.205", "2111020199.206",
+            "2111020199.207", "2111020199.301", "2111020199.304", "2111020199.501", "2111020199.502",
+            "2111020199.503", "2112010101.101", "2112010199.101", "2112010199.102", "2112010199.103",
+            "2112010199.104", "2116010104.101", "2116010199.101", "2116010199.102", "2208010101.101",
+            "2208010103.101"
+        ]);
+
+        // สินทรัพย์หมุนเวียน - Credit Net
+        const CURRENT_ASSETS_CODES = new Set([
+            "1101010101.101", "1101010104.101", "1101010112.101", "1101010113.101", "1101020501.101",
+            "1101020501.103", "1101020504.101", "1101020601.101", "1101020603.101", "1101020604.101",
+            "1101020606.101", "1101030101.101", "1101030101.102", "1101030101.103", "1101030102.101",
+            "1101030102.102", "1101030102.103", "1102010101.101", "1102010102.101", "1102010108.101",
+            "1102050101.102", "1102050101.103", "1102050101.104", "1102050101.105", "1102050101.109",
+            "1102050101", "1102050101.202", "1102050101.203", "1102050101.204", "1102050101.209",
+            "1102050101.216", "1102050101.217", "1102050101.222", "1102050101.223", "1102050101.224",
+            "1102050101.301", "1102050101.302", "1102050101.303", "1102050101.304", "1102050101.307",
+            "1102050101.308", "1102050101.309", "1102050101.310", "1102050101.401", "1102050101.402",
+            "1102050101.501", "1102050101.502", "1102050101.503", "1102050101.504", "1102050101.505",
+            "1102050101.506", "1102050101.701", "1102050101.702", "1102050101.703", "1102050101.704",
+            "1102050102.102", "1102050102.103", "1102050102.104", "1102050102.105", "1102050102.106",
+            "1102050102.107", "1102050102.108", "1102050102.109", "1102050102.110", "1102050102.111",
+            "1102050102.201", "1102050102.301", "1102050102.302", "1102050102.602", "1102050102.603",
+            "1102050102.801", "1102050102.802", "1102050102.803", "1102050102.804", "1102050106.106",
+            "1102050107.103", "1102050107.104", "1102050107.105", "1102050107.106", "1102050107.201",
+            "1102050107.202", "1102050123.103", "1102050123.105", "1102050123.106", "1102050123.114",
+            "1102050123.115", "1102050123.203", "1102050123.205", "1102050124.101", "1102050194.101",
+            "1102050194.102", "1103020111.101", "1104010101.101", "1105010101.101", "1105010102.101",
+            "1105010103.101", "1105010103.102", "1105010103.103", "1105010103.104", "1105010103.105",
+            "1105010103.106", "1105010103.107", "1105010103.108", "1105010103.109", "1105010105.105",
+            "1105010105.106", "1105010105.107", "1105010105.108", "1105010105.109", "1105010105.110",
+            "1105010105.111", "1105010105.114", "1105010105.115", "1106010103.103", "1106010103.201",
+            "1106010112.101"
+        ]);
+
+        // เงินสดและรายการเทียบเท่าเงินสดและลูกหนี้ - Credit Net
+        const CASH_EQUIV_RECEIVABLES_CODES = new Set([
+            "1101010101.101", "1101010104.101", "1101010112.101", "1101010113.101", "1101020501.101",
+            "1101020501.103", "1101020504.101", "1101020601.101", "1101020603.101", "1101020604.101",
+            "1101020606.101", "1101030101.101", "1101030101.102", "1101030101.103", "1101030102.101",
+            "1101030102.102", "1101030102.103", "1102010101.101", "1102010102.101", "1102010108.101",
+            "1102050101.102", "1102050101.103", "1102050101.104", "1102050101.105", "1102050101.109",
+            "1102050101.201", "1102050101.202", "1102050101.203", "1102050101.204", "1102050101.209",
+            "1102050101.216", "1102050101.217", "1102050101.222", "1102050101.223", "1102050101.224",
+            "1102050101.301", "1102050101.302", "1102050101.303", "1102050101.304", "1102050101.307",
+            "1102050101.308", "1102050101.309", "1102050101.310", "1102050101.401", "1102050101.402",
+            "1102050101.501", "1102050101.502", "1102050101.503", "1102050101.504", "1102050101.505",
+            "1102050101.506", "1102050101.701", "1102050101.702", "1102050101.703", "1102050101.704",
+            "1102050102.102", "1102050102.103", "1102050102.104", "1102050102.105", "1102050102.106",
+            "1102050102.107", "1102050102.108", "1102050102.109", "1102050102.110", "1102050102.111",
+            "1102050102.201", "1102050102.301", "1102050102.302", "1102050102.602", "1102050102.603",
+            "1102050102.801", "1102050102.802", "1102050102.803", "1102050102.804", "1102050106.106",
+            "1102050107.103", "1102050107.104", "1102050107.105", "1102050107.106", "1102050107.201",
+            "1102050107.202", "1102050123.103", "1102050123.105", "1102050123.106", "1102050123.114",
+            "1102050123.115", "1102050123.203", "1102050123.205", "1102050124.101", "1102050194.101",
+            "1102050194.102", "1104010101.101"
+        ]);
+
+        // เงินสดและรายการเทียบเท่าเงินสด - Credit Net
+        const CASH_EQUIV_CODES = new Set([
+            "1101010101.101", "1101010104.101", "1101010112.101", "1101010113.101", "1101020501.101",
+            "1101020501.103", "1101020504.101", "1101020601.101", "1101020603.101", "1101020604.101",
+            "1101020606.101", "1101030101.101", "1101030101.102", "1101030101.103", "1101030102.101",
+            "1101030102.102", "1101030102.103", "1104010101.101"
+        ]);
+
+        // หนี้สินหมุนเวียน - Debit Net
+        const CURRENT_LIABILITIES_CODES = new Set([
+            "2101010102.102", "2101010102.103", "2101010102.105", "2101010102.116", "2101010102.129",
+            "2101010102.131", "2101010102.132", "2101010102.133", "2101010102.134", "2101010102.135",
+            "2101010102.136", "2101010102.137", "2101010102.138", "2101010102.139", "2101010102.140",
+            "2101010103.101", "2101010103.102", "2101010103.103", "2101010107.101", "2101020106.101",
+            "2101020198.102", "2101020198.103", "2101020198.105", "2101020198.107", "2101020198.111",
+            "2101020198.114", "2101020198.115", "2101020198.116", "2101020198.117", "2101020198.118",
+            "2101020198.119", "2101020198.120", "2101020199.134", "2101020199.135", "2101020199.136",
+            "2101020199.137", "2101020199.138", "2101020199.139", "2101020199.140", "2101020199.141",
+            "2101020199.142", "2101020199.143", "2101020199.144", "2101020199.145", "2101020199.146",
+            "2101020199.147", "2101020199.148", "2101020199.149", "2101020199.150", "2101020199.202",
+            "2101020199.203", "2101020199.204", "2101020199.301", "2101020199.501", "2101020199.502",
+            "2101020199.503", "2101020199.504", "2101020199.701", "2102040101.101", "2102040102.101",
+            "2102040103.101", "2102040104.101", "2102040106.101", "2102040110.101", "2102040110.102",
+            "2102040110.103", "2102040110.104", "2102040110.105", "2102040110.106", "2102040110.107",
+            "2102040110.108", "2102040110.109", "2102040110.110", "2102040110.111", "2102040110.112",
+            "2102040110.113", "2102040110.114", "2102040110.115", "2102040198.101", "2102040199.101",
+            "2102040199.105", "2103010103.101", "2103010103.502", "2104010101.101", "2109010199.101",
+            "2109010199.201", "2109010199.701", "2111020199.103", "2111020199.105", "2111020199.107",
+            "2111020199.108", "2111020199.109", "2111020199.110", "2111020199.201", "2111020199.204",
+            "2111020199.205", "2111020199.206", "2111020199.207", "2111020199.301", "2111020199.304",
+            "2111020199.501", "2111020199.502", "2111020199.503", "2112010101.101", "2112010199.101",
+            "2112010199.102", "2112010199.103", "2112010199.104", "2116010104.101", "2116010199.101",
+            "2116010199.102"
+        ]);
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorAlert = document.getElementById('errorAlert');
+
+        // State
+        let monthlySnapshots = [];
+        let fiscalYearBalances = JSON.parse(localStorage.getItem('fiscalYearBalances') || '{}');
+
+        // Configuration: Metric Definitions
+        const METRICS = [
+            { id: 'totalRevAll', label: 'รวมรายได้', section: 'Main' },
+            { id: 'totalExpAll', label: 'รวมรายจ่าย', section: 'Main' },
+            { id: 'netIncome', label: 'รายได้สูง(ต่ำ)กว่าค่าใช้จ่าย', section: 'Main', isNet: true },
+
+            { id: 'revenueExclInv', label: 'รายได้ (ไม่รวมงบลงทุน)', section: 'EBITDA' },
+            { id: 'expenseExclDep', label: 'ค่าใช้จ่าย (ไม่รวมค่าเสื่อมราคาและค่าตัดจำหน่าย)', section: 'EBITDA' },
+            { id: 'ebitda', label: 'EBITDA', section: 'EBITDA' },
+
+            // AP Group
+            { id: 'avgPayablePeriod', label: 'ระยะเวลาชำระหนี้เจ้าหนี้การค้า (วัน)', section: 'Debt', isParent: true },
+            { id: 'tradePayable', label: 'เจ้าหนี้การค้า(ยา วชช.)', section: 'Debt', parentId: 'avgPayablePeriod' },
+            { id: 'beginningTradePayableValue', label: 'เจ้าหนี้การค้า(ยา วชช.) ต้นงวด', section: 'Debt', parentId: 'avgPayablePeriod' },
+            { id: 'tradePayableCreditTotal', label: 'ผลรวมเจ้าหนี้การค้า(ยา วชช.)', section: 'Debt', parentId: 'avgPayablePeriod' },
+            { id: 'tradePayableTurnover', label: 'อัตราส่วนหมุนเวียนเจ้าหนี้การค้า', section: 'Debt', parentId: 'avgPayablePeriod' },
+
+            // UC Group
+            { id: 'avgCollectionPeriod', label: 'ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้ UC (วัน)', section: 'Debt', isParent: true },
+            { id: 'ucReceivable', label: 'ลูกหนี้ UC', section: 'Debt', parentId: 'avgCollectionPeriod' },
+            { id: 'beginningUCValue', label: 'ลูกหนี้ UC ต้นงวด', section: 'Debt', parentId: 'avgCollectionPeriod' },
+            { id: 'ucRevenueNetTotal', label: 'รายได้ UC สุทธิ (สะสม)', section: 'Debt', parentId: 'avgCollectionPeriod' },
+
+            // CS Group
+            { id: 'avgCollectionPeriodCS', label: 'ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้ CS (วัน)', section: 'Debt', isParent: true },
+            { id: 'csReceivable', label: 'ลูกหนี้ CS', section: 'Debt', parentId: 'avgCollectionPeriodCS' },
+            { id: 'beginningCSValue', label: 'ลูกหนี้ CS ต้นงวด', section: 'Debt', parentId: 'avgCollectionPeriodCS' },
+            { id: 'csRevenueNetTotal', label: 'รายได้ CS สุทธิ (สะสม)', section: 'Debt', parentId: 'avgCollectionPeriodCS' },
+
+            // SS Group
+            { id: 'avgCollectionPeriodSS', label: 'ระยะเวลาถัวเฉลี่ยในการเรียกเก็บหนี้ SS (วัน)', section: 'Debt', isParent: true },
+            { id: 'ssReceivable', label: 'ลูกหนี้ SS', section: 'Debt', parentId: 'avgCollectionPeriodSS' },
+            { id: 'beginningSSValue', label: 'ลูกหนี้ SS ต้นงวด', section: 'Debt', parentId: 'avgCollectionPeriodSS' },
+            { id: 'ssRevenueNetTotal', label: 'รายได้ SS (สะสม)', section: 'Debt', parentId: 'avgCollectionPeriodSS' },
+
+            // Inventory Group
+            { id: 'avgInventoryPeriod', label: 'ระยะเวลาหมุนเวียนคลัง (วัน)', section: 'Other', isParent: true },
+            { id: 'inventory', label: 'วัสดุคงคลัง (ยา/วชช มิใช่ยา)', section: 'Other', parentId: 'avgInventoryPeriod' },
+            { id: 'materialsUsed', label: 'วัสดุใช้ไป (ยา/วชช มิใช่ยา)', section: 'Other', parentId: 'avgInventoryPeriod' },
+
+            { id: 'maintenanceFund', label: 'เงินบำรุง', section: 'Other' },
+            { id: 'liabilities', label: 'ภาระหนี้สิน', section: 'Other' },
+            { id: 'currentAssets', label: 'สินทรัพย์หมุนเวียน', section: 'Other' },
+            { id: 'cashEquivReceivables', label: 'เงินสดและรายการเทียบเท่าเงินสดและลูกหนี้', section: 'Other' },
+            { id: 'cashEquiv', label: 'เงินสดและรายการเทียบเท่าเงินสด', section: 'Other' },
+            { id: 'currentLiabilities', label: 'หนี้สินหมุนเวียน', section: 'Other' },
+            { id: 'revVsExpCum', label: 'วิเคราะห์รายได้ vs รายจ่าย (สะสมรวม)', section: 'Main', hidden: true }
+        ];
+
+        // Track collapsed state (ID: true/false)
+        let parentCollapsed = {
+            'avgPayablePeriod': true,
+            'avgCollectionPeriod': true,
+            'avgCollectionPeriodCS': true,
+            'avgCollectionPeriodSS': true,
+            'avgInventoryPeriod': true
+        };
+
+        function toggleRowGroup(parentId) {
+            parentCollapsed[parentId] = !parentCollapsed[parentId];
+            renderSummaryTable();
+        }
+
+        // Init
+        populateYears();
+        renderBeginningInputs();
+
+
+        function recalculateAndRender() {
+            recalculateComplexMetrics();
+            renderBeginningInputs();
+            renderSummaryTable();
+        }
+
+        function calculateDayPeriod(month) {
+            // Start from Oct (10). Oct=30, Dec=90, Jan=120, Sep(9)=360
+            if (month >= 10) return (month - 9) * 30;
+            return (month + 3) * 30;
+        }
+
+        function recalculateComplexMetrics() {
+            monthlySnapshots.forEach(snap => {
+                const dayPeriod = calculateDayPeriod(snap.month);
+                const fiscalYear = (snap.month >= 10) ? snap.year + 1 : snap.year;
+                const targetPrevSepYear = fiscalYear - 1;
+
+                // Month order helper (Oct=0, Sep=11)
+                const getMonthOrder = (m) => (m >= 10 ? m - 10 : m + 2);
+                const currentOrder = getMonthOrder(snap.month);
+
+                // Cumulative movement within fiscal year
+                const snapshotsInFYToDate = monthlySnapshots.filter(s => {
+                    const sFY = (s.month >= 10) ? s.year + 1 : s.year;
+                    return sFY === fiscalYear && getMonthOrder(s.month) <= currentOrder;
+                });
+
+                const cumulativeUCRev = snapshotsInFYToDate.reduce((sum, s) => sum + (s.ucRevenueNet || 0), 0);
+                const cumulativeCSRev = snapshotsInFYToDate.reduce((sum, s) => sum + (s.csRevenueNet || 0), 0);
+                const cumulativeSSRev = snapshotsInFYToDate.reduce((sum, s) => sum + (s.ssRevenueNet || 0), 0);
+                const cumulativeAPCredit = snapshotsInFYToDate.reduce((sum, s) => sum + (s.tradePayableCredit || 0), 0);
+                const cumulativeInvCosts = snapshotsInFYToDate.reduce((sum, s) => sum + (s.materialsUsed || 0), 0);
+                const cumulativeRevAll = snapshotsInFYToDate.reduce((sum, s) => sum + (s.totalRevAll || 0), 0);
+                const cumulativeExpAll = snapshotsInFYToDate.reduce((sum, s) => sum + (s.totalExpAll || 0), 0);
+
+                snap.totalRevAllCum = cumulativeRevAll;
+                snap.totalExpAllCum = cumulativeExpAll;
+
+                snap.ucRevenueNetTotal = cumulativeUCRev;
+                snap.csRevenueNetTotal = cumulativeCSRev;
+                snap.ssRevenueNetTotal = cumulativeSSRev;
+                snap.tradePayableCreditTotal = cumulativeAPCredit;
+
+                // --- Trade Payable Calculation ---
+                let beginningAP = (fiscalYearBalances[fiscalYear] && fiscalYearBalances[fiscalYear].ap !== undefined)
+                    ? fiscalYearBalances[fiscalYear].ap : 0;
+                if (beginningAP === 0) {
+                    const prevSepSnapshot = monthlySnapshots.find(s => s.month === 9 && s.year === targetPrevSepYear);
+                    beginningAP = prevSepSnapshot ? (prevSepSnapshot.tradePayable || 0) : null;
+                }
+                snap.beginningTradePayableValue = beginningAP;
+
+                if (beginningAP !== null) {
+                    const avgAP = (snap.tradePayable + beginningAP) / 2;
+                    snap.tradePayableTurnover = avgAP !== 0 ? cumulativeAPCredit / avgAP : 0;
+                    snap.avgPayablePeriod = snap.tradePayableTurnover !== 0 ? dayPeriod / snap.tradePayableTurnover : 0;
+                } else {
+                    snap.tradePayableTurnover = null;
+                    snap.avgPayablePeriod = null;
+                }
+
+                // --- UC Calculation ---
+                let beginningUC = (fiscalYearBalances[fiscalYear] && fiscalYearBalances[fiscalYear].uc !== undefined)
+                    ? fiscalYearBalances[fiscalYear].uc
+                    : (typeof fiscalYearBalances[fiscalYear] === 'number' ? fiscalYearBalances[fiscalYear] : 0);
+
+                if (beginningUC === 0) {
+                    const prevSepSnapshot = monthlySnapshots.find(s => s.month === 9 && s.year === targetPrevSepYear);
+                    beginningUC = prevSepSnapshot ? (prevSepSnapshot.ucReceivable || 0) : null;
+                }
+                snap.beginningUCValue = beginningUC;
+                snap.avgCollectionPeriod = calculatePeriod(snap.ucReceivable, beginningUC, cumulativeUCRev, dayPeriod);
+
+                // --- CS Calculation ---
+                let beginningCS = (fiscalYearBalances[fiscalYear] && fiscalYearBalances[fiscalYear].cs !== undefined)
+                    ? fiscalYearBalances[fiscalYear].cs : 0;
+                if (beginningCS === 0) {
+                    const prevSepSnapshot = monthlySnapshots.find(s => s.month === 9 && s.year === targetPrevSepYear);
+                    beginningCS = prevSepSnapshot ? (prevSepSnapshot.csReceivable || 0) : null;
+                }
+                snap.beginningCSValue = beginningCS;
+                snap.avgCollectionPeriodCS = calculatePeriod(snap.csReceivable, beginningCS, cumulativeCSRev, dayPeriod);
+
+                // --- SS Calculation ---
+                let beginningSS = (fiscalYearBalances[fiscalYear] && fiscalYearBalances[fiscalYear].ss !== undefined)
+                    ? fiscalYearBalances[fiscalYear].ss : 0;
+                if (beginningSS === 0) {
+                    const prevSepSnapshot = monthlySnapshots.find(s => s.month === 9 && s.year === targetPrevSepYear);
+                    beginningSS = prevSepSnapshot ? (prevSepSnapshot.ssReceivable || 0) : null;
+                }
+                snap.beginningSSValue = beginningSS;
+                snap.avgCollectionPeriodSS = calculatePeriod(snap.ssReceivable, beginningSS, cumulativeSSRev, dayPeriod);
+
+                // --- Inventory Calculation ---
+                let beginningInv = (fiscalYearBalances[fiscalYear] && fiscalYearBalances[fiscalYear].inventory !== undefined)
+                    ? fiscalYearBalances[fiscalYear].inventory : 0;
+                if (beginningInv === 0) {
+                    const prevSepSnapshot = monthlySnapshots.find(s => s.month === 9 && s.year === targetPrevSepYear);
+                    beginningInv = prevSepSnapshot ? (prevSepSnapshot.inventory || 0) : null;
+                }
+                snap.avgInventoryPeriod = calculatePeriod(snap.inventory, beginningInv, cumulativeInvCosts, dayPeriod);
+            });
+        }
+
+        function calculatePeriod(currentRec, beginningRec, netRevenue, dayPeriod) {
+            if (beginningRec === null) return null;
+            const avgRec = (currentRec + beginningRec) / 2;
+            if (avgRec === 0) return 0;
+            const turnover = netRevenue / avgRec;
+            return turnover !== 0 ? dayPeriod / turnover : 0;
+        }
+
+        function renderBeginningInputs() {
+            const container = document.getElementById('beginningUCContainer');
+            if (monthlySnapshots.length === 0) {
+                container.innerHTML = `<div style="color: var(--text-secondary); font-size: 0.9rem; padding: 1rem; text-align: center; border: 1px dashed var(--border-color); border-radius: var(--radius-md);">กรุณานำเข้าข้อมูลเพื่อให้ระบบสร้างช่องกรอกตามปีงบประมาณ</div>`;
+                return;
+            }
+
+            const fiscalYears = Array.from(new Set(monthlySnapshots.map(snap => (snap.month >= 10) ? snap.year + 1 : snap.year))).sort((a, b) => a - b);
+            let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 1.5rem;">`;
+
+            fiscalYears.forEach(fy => {
+                const prevSepYear = fy - 1;
+                const balances = fiscalYearBalances[fy] || {};
+                const ucVal = balances.uc !== undefined ? balances.uc : (typeof fiscalYearBalances[fy] === 'number' ? fiscalYearBalances[fy] : 0);
+                const csVal = balances.cs || 0;
+                const ssVal = balances.ss || 0;
+                const apVal = balances.ap || 0;
+                const invVal = balances.inventory || 0;
+
+                const hasSepData = monthlySnapshots.some(s => s.month === 9 && s.year === prevSepYear);
+                const inputStatus = hasSepData ? `(พบข้อมูล ก.ย. ${prevSepYear} จากไฟล์แล้ว)` : '';
+
+                html += `
+                    <div style="background: #f8fafc; padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary-color); border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">
+                            ปีงบประมาณ ${fy} <small style="display:block; font-weight: normal; color: var(--text-secondary); margin-top: 4px;">ต้นงวด (ยอด ณ ก.ย. ${prevSepYear})</small>
+                        </h4>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 1.5rem;">
+                            <!-- AP -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px;">เจ้าหนี้การค้า(ยา วชช.) ต้นงวด</label>
+                                <input type="number" value="${apVal}" onchange="updateFiscalBalance(${fy}, 'ap', this.value)" 
+                                    style="width: 100%; padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            </div>
+                            <!-- UC -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px;">ลูกหนี้ UC ต้นงวด</label>
+                                <input type="number" value="${ucVal}" onchange="updateFiscalBalance(${fy}, 'uc', this.value)" 
+                                    style="width: 100%; padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            </div>
+                            <!-- CS -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px;">ลูกหนี้ CS ต้นงวด</label>
+                                <input type="number" value="${csVal}" onchange="updateFiscalBalance(${fy}, 'cs', this.value)" 
+                                    style="width: 100%; padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            </div>
+                             <!-- SS -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px;">ลูกหนี้ SS ต้นงวด</label>
+                                <input type="number" value="${ssVal}" onchange="updateFiscalBalance(${fy}, 'ss', this.value)" 
+                                    style="width: 100%; padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            </div>
+                            <!-- Inventory -->
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 4px;">วัสดุคงคลัง ต้นงวด</label>
+                                <input type="number" value="${invVal}" onchange="updateFiscalBalance(${fy}, 'inventory', this.value)" 
+                                    style="width: 100%; padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            </div>
+                        </div>
+                        <small style="color: var(--success); font-size: 0.75rem; display: block; margin-top: 8px;">${inputStatus}</small>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function updateFiscalBalance(year, type, value) {
+            if (!fiscalYearBalances[year] || typeof fiscalYearBalances[year] !== 'object') {
+                // Handle migration from old number format
+                const oldVal = typeof fiscalYearBalances[year] === 'number' ? fiscalYearBalances[year] : 0;
+                fiscalYearBalances[year] = { uc: oldVal, cs: 0, ss: 0, ap: 0, inventory: 0 };
+            }
+            fiscalYearBalances[year][type] = parseFloat(value) || 0;
+            localStorage.setItem('fiscalYearBalances', JSON.stringify(fiscalYearBalances));
+            recalculateAndRender();
+        }
+
+
+        function populateYears() {
+            const selectEdit = document.getElementById('editYear');
+            const selectModal = document.getElementById('modalSelectYear');
+            const currentYear = new Date().getFullYear() + 543;
+
+            [selectEdit, selectModal].forEach(select => {
+                if (!select) return;
+                select.innerHTML = '';
+                for (let i = currentYear - 3; i <= currentYear + 1; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = i;
+                    if (i === currentYear) opt.selected = true;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+
+        // Drag & Drop Handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragging');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragging');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragging');
+            const files = e.dataTransfer.files;
+            if (files.length) handleMultipleFiles(Array.from(files));
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleMultipleFiles(Array.from(e.target.files));
+        });
+
+        function showError(msg) {
+            errorAlert.textContent = msg;
+            errorAlert.style.display = 'block';
+            setTimeout(() => { errorAlert.style.display = 'none'; }, 6000);
+        }
+
+        let batchQueue = [];
+
+        async function handleMultipleFiles(files) {
+            batchQueue = [];
+            loadingOverlay.style.display = 'flex';
+            errorAlert.style.display = 'none';
+
+            for (const file of files) {
+                try {
+                    const data = await readFile(file);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    if (!rows || rows.length === 0) throw new Error('ไม่พบข้อมูลในไฟล์');
+
+                    let headerIndex = -1;
+                    const KEYWORDS = ['รหัส', 'รหัสบัญชี', 'account code', 'code', 'accountcode'];
+                    for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                        const rowText = (rows[i] || []).map(cell => String(cell || '').toLowerCase().trim());
+                        if (KEYWORDS.some(k => rowText.includes(k))) { headerIndex = i; break; }
+                    }
+                    if (headerIndex === -1) headerIndex = 0;
+
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerIndex });
+                    const parsed = parseFileName(file.name);
+                    const validation = validateFileContent(jsonData);
+
+                    batchQueue.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        filename: file.name,
+                        data: jsonData,
+                        month: parsed.month || (new Date().getMonth() + 1),
+                        year: parsed.year || (new Date().getFullYear() + 543),
+                        validation: validation
+                    });
+                } catch (err) {
+                    console.error(err);
+                    showError(`ไฟล์ ${file.name}: ` + err.message);
+                }
+            }
+
+            loadingOverlay.style.display = 'none';
+            if (batchQueue.length > 0) {
+                renderBatchModal();
+            }
+        }
+
+        function renderBatchModal() {
+            const body = document.getElementById('batchImportBody');
+            const totalCount = document.getElementById('batchTotalCount');
+            const warning = document.getElementById('batchGlobalWarning');
+            body.innerHTML = '';
+            totalCount.textContent = batchQueue.length;
+
+            let hasWarning = false;
+            let hasBatchDuplicate = false;
+
+            // Count occurrences in the current batch
+            const batchCounts = {};
+            batchQueue.forEach(item => {
+                const key = `${item.month}-${item.year}`;
+                batchCounts[key] = (batchCounts[key] || 0) + 1;
+            });
+
+            batchQueue.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const isInvalid = item.validation.missingColumns.length > 0;
+                const hasMissingCodes = item.validation.missingCodes.length > 0;
+
+                const key = `${item.month}-${item.year}`;
+                const isDuplicateInBatch = batchCounts[key] > 1;
+                const isDuplicateInSystem = monthlySnapshots.some(s => s.month === item.month && s.year === item.year);
+
+                if (isInvalid || hasMissingCodes || isDuplicateInBatch) hasWarning = true;
+                if (isDuplicateInBatch) hasBatchDuplicate = true;
+
+                // Build status icon and details
+                let statusHtml = '';
+                if (isInvalid) {
+                    const columnsHint = item.validation.missingColumns.join(', ');
+                    statusHtml = `<span title="❌ ไม่พบคอลัมน์หลัก: ${columnsHint}\n💡 วิธีแก้: ตรวจสอบว่าไฟล์มีหัวตารางที่ถูกต้อง (เช่น รหัส, ชื่อบัญชี, ยอดยกมา, เดบิต, เครดิต)" style="color:#ef4444; cursor:help; font-size: 1.2rem;">❌</span>`;
+                } else if (isDuplicateInBatch) {
+                    statusHtml = `<span title="⚠️ เดือน/ปี นี้ซ้ำกันภายในรายการที่จะนำเข้า\nระบบจะใช้ข้อมูลจากไฟล์ล่าสุดที่ประมวลผล" style="color:#f59e0b; cursor:help; font-size: 1.2rem;">⚠️ (ซ้ำ)</span>`;
+                } else if (isDuplicateInSystem) {
+                    statusHtml = `<span title="ℹ️ มีข้อมูลเดือนนี้ในระบบแล้ว\nการนำเข้าจะเขียนทับข้อมูลเดิม" style="color:#0ea5e9; cursor:help; font-size: 1.2rem;">ℹ️ (ทับ)</span>`;
+                } else if (hasMissingCodes) {
+                    const count = item.validation.missingCodes.length;
+                    const examples = item.validation.missingCodes.slice(0, 5).join(', ');
+                    statusHtml = `<span title="⚠️ ไม่พบรหัสบัญชี ${count} รายการ\n(ตัวอย่าง: ${examples}...)\n💡 วิธีแก้: ข้อมูลอาจไม่ครบถ้วน หรือรหัสบัญชีในไฟล์ไม่ตรงกับระบบ" style="color:#f59e0b; cursor:help; font-size: 1.2rem;">⚠️</span>`;
+                } else {
+                    statusHtml = `<span title="✅ ข้อมูลสมบูรณ์พร้อมนำเข้า" style="color:#10b981; font-size: 1.2rem;">✅</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">${index + 1}</td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-color); word-break: break-all;">${item.filename}</td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">
+                        <select onchange="updateBatchItem(${index}, 'month', this.value)" style="width:100%; padding:6px; border-radius:4px; border:1px solid var(--border-color);">
+                            ${[...Array(12)].map((_, i) => `<option value="${i + 1}" ${item.month == i + 1 ? 'selected' : ''}>${getMonthName(i + 1)}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">
+                        <select onchange="updateBatchItem(${index}, 'year', this.value)" style="width:100%; padding:6px; border-radius:4px; border:1px solid var(--border-color);">
+                            ${[...Array(6)].map((_, i) => {
+                    const y = new Date().getFullYear() + 543 - 4 + i;
+                    return `<option value="${y}" ${item.year == y ? 'selected' : ''}>${y}</option>`;
+                }).join('')}
+                        </select>
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid var(--border-color);">
+                        ${statusHtml}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid var(--border-color);">
+                        <button onclick="removeFromBatch(${index})" style="background:none; border:none; cursor:pointer; font-size: 1rem; opacity: 0.6; transition: 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">🗑️</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+
+            if (warning) {
+                warning.style.display = hasWarning ? 'block' : 'none';
+                if (hasWarning) {
+                    let msg = `⚠️ <b>พบข้อควรตรวจสอบ:</b> นำเมาส์ไปชี้ที่สัญลักษณ์เพื่อดูรายละเอียด`;
+                    if (hasBatchDuplicate) msg += `<br><span style="color:#ea580c;">🛑 มีข้อมูลเดือนที่ซ้ำกันภายในรายการ กรุณาตรวจสอบก่อนกดยืนยัน</span>`;
+                    warning.innerHTML = msg;
+                }
+            }
+            document.getElementById('confirmImportModal').style.display = 'flex';
+        }
+
+        function updateBatchItem(index, field, value) {
+            batchQueue[index][field] = parseInt(value);
+        }
+
+        function removeFromBatch(index) {
+            batchQueue.splice(index, 1);
+            if (batchQueue.length === 0) {
+                closeImportModal();
+            } else {
+                renderBatchModal();
+            }
+        }
+
+        function executeBatchImport() {
+            loadingOverlay.style.display = 'flex';
+            setTimeout(() => {
+                batchQueue.forEach(item => {
+                    // Always overwrite in batch mode to keep it simple and clean
+                    monthlySnapshots = monthlySnapshots.filter(s => !(s.month === item.month && s.year === item.year));
+                    processData(item.data, item.filename, item.month, item.year);
+                });
+                closeImportModal();
+                loadingOverlay.style.display = 'none';
+            }, 50);
+        }
+
+        function closeImportModal() {
+            document.getElementById('confirmImportModal').style.display = 'none';
+            batchQueue = [];
+            document.getElementById('fileInput').value = '';
+        }
+
+        function parseFileName(filename) {
+            const months = [
+                ['มกราคม', 'ม.ค.', 'มค', 'january', 'jan'],
+                ['กุมภาพันธ์', 'ก.พ.', 'กพ', 'february', 'feb'],
+                ['มีนาคม', 'มี.ค.', 'มีค', 'march', 'mar'],
+                ['เมษายน', 'เม.ย.', 'เมย', 'april', 'apr'],
+                ['พฤษภาคม', 'พ.ค.', 'พค', 'may', 'may'],
+                ['มิถุนายน', 'มิ.ย.', 'มิย', 'june', 'jun'],
+                ['กรกฎาคม', 'ก.ค.', 'กค', 'july', 'jul'],
+                ['สิงหาคม', 'ส.ค.', 'สค', 'august', 'aug'],
+                ['กันยายน', 'ก.ย.', 'กย', 'september', 'sep'],
+                ['ตุลาคม', 'ต.ค.', 'ตค', 'october', 'oct'],
+                ['พฤศจิกายน', 'พ.ย.', 'พย', 'november', 'nov'],
+                ['ธันวาคม', 'ธ.ค.', 'ธค', 'december', 'dec']
+            ];
+
+            let foundMonth = null;
+            let foundYear = null;
+
+            const name = filename.toLowerCase();
+
+            // 1. Try to find numeric pattern at the beginning (e.g. 2567_1, 2567.10)
+            const startPattern = name.match(/^(25\d{2})[_.](\d{1,2})/);
+            if (startPattern) {
+                foundYear = parseInt(startPattern[1]);
+                foundMonth = parseInt(startPattern[2]);
+            }
+
+            // 2. Try to find Thai/English Month names if not found yet
+            if (!foundMonth) {
+                months.forEach((variants, index) => {
+                    if (variants.some(v => name.includes(v.toLowerCase()))) {
+                        foundMonth = index + 1;
+                    }
+                });
+            }
+
+            // 3. Try to find 4-digit year if not found yet
+            if (!foundYear) {
+                const yearMatch = name.match(/(25\d{2}|20\d{2})/);
+                if (yearMatch) {
+                    foundYear = parseInt(yearMatch[0]);
+                }
+            }
+
+            // 4. Handle short Thai year (e.g. "กย.67") if 4-digit year not found
+            if (!foundYear) {
+                const shortYearMatch = name.match(/[.\s](\d{2})(\.xlsx|\.xls|$)/);
+                if (shortYearMatch) {
+                    foundYear = parseInt(shortYearMatch[1]) + 2500;
+                }
+            }
+
+            // Convert AD to BE if foundYear is < 2400
+            if (foundYear && foundYear < 2400) {
+                foundYear += 543;
+            }
+
+            return { month: foundMonth, year: foundYear };
+        }
+
+        function validateFileContent(data) {
+            const firstRow = data[0] || {};
+            const keys = Object.keys(firstRow).map(k => k.trim());
+
+            const colVariants = {
+                code: ['รหัส', 'Account Code', 'รหัสบัญชี'],
+                debit: ['เดบิตสุทธิ', 'Debit Net', 'EndDr'],
+                credit: ['เครดิตสุทธิ', 'Credit Net', 'EndCr']
+            };
+
+            const missingColumns = [];
+            if (!colVariants.code.some(v => keys.includes(v))) missingColumns.push('รหัสบัญชี');
+            if (!colVariants.debit.some(v => keys.includes(v))) missingColumns.push('เดบิตสุทธิ');
+            if (!colVariants.credit.some(v => keys.includes(v))) missingColumns.push('เครดิตสุทธิ');
+
+            // Find all codes in our systems that are NOT in the file
+            const fileCodes = new Set(data.map(row => {
+                const c = row['รหัส'] || row['Account Code'] || row['รหัสบัญชี'];
+                return c ? String(c).trim() : null;
+            }).filter(Boolean));
+
+            const allRequiredCodes = new Set([
+                ...REVENUE_CODES_ALL,
+                ...EXPENSE_CODES_ALL,
+                ...TRADE_PAYABLE_CODES,
+                ...UC_RECEIVABLE_CODES,
+                ...UC_REVENUE_NET_CODES,
+                ...CS_RECEIVABLE_CODES,
+                ...CS_REVENUE_NET_CODES,
+                ...SS_RECEIVABLE_CODES,
+                ...SS_REVENUE_CODES,
+                ...INVENTORY_CODES,
+                ...MATERIALS_USED_CODES,
+                ...MAINTENANCE_FUND_CODES,
+                ...LIABILITIES_CODES,
+                ...CURRENT_ASSETS_CODES,
+                ...CASH_EQUIV_RECEIVABLES_CODES,
+                ...CASH_EQUIV_CODES,
+                ...CURRENT_LIABILITIES_CODES
+            ]);
+
+            const missingCodes = [];
+            const fileCodesArray = Array.from(fileCodes);
+            allRequiredCodes.forEach(requiredCode => {
+                if (!fileCodes.has(requiredCode)) {
+                    // ตรวจสอบว่ามีเลขลูก (Sub-account) ของรหัสนี้ในไฟล์หรือไม่
+                    // เช่น ถ้าระบบต้องการ 1102050101 แต่ในไฟล์มี 1102050101.102 จะถือว่า "พบ" (ไม่ต้องแจ้งเตือน)
+                    const hasSubAccount = fileCodesArray.some(fc => fc.startsWith(requiredCode + '.'));
+                    if (!hasSubAccount) {
+                        missingCodes.push(requiredCode);
+                    }
+                }
+            });
+
+            return { missingColumns, missingCodes };
+        }
+
+        function checkModalDuplicate() {
+            const m = parseInt(document.getElementById('modalSelectMonth').value);
+            const y = parseInt(document.getElementById('modalSelectYear').value);
+            const warning = document.getElementById('modalDuplicateWarning');
+            const dupText = document.getElementById('dupWarningText');
+
+            if (!warning || !dupText) return;
+
+            const existingCount = monthlySnapshots.filter(s => s.month === m && s.year === y).length;
+            if (existingCount > 0) {
+                dupText.innerHTML = `พบข้อมูลของเดือน <b>${getMonthName(m)} ${y}</b> อยู่แล้ว <b>${existingCount}</b> ไฟล์`;
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+
+        function closeImportModal() {
+            document.getElementById('confirmImportModal').style.display = 'none';
+            pendingFileData = null;
+            document.getElementById('fileInput').value = '';
+        }
+
+        function executeImport() {
+            if (!pendingFileData) return;
+
+            const month = parseInt(document.getElementById('modalSelectMonth').value);
+            const year = parseInt(document.getElementById('modalSelectYear').value);
+
+            if (isNaN(month) || isNaN(year)) {
+                alert('กรุณาเลือกเดือนและปีให้ถูกต้อง');
+                return;
+            }
+
+            const isDuplicate = monthlySnapshots.some(s => s.month === month && s.year === year);
+            if (isDuplicate) {
+                const actionSelection = document.querySelector('input[name="modalDupAction"]:checked');
+                const action = actionSelection ? actionSelection.value : 'overwrite';
+                if (action === 'overwrite') {
+                    monthlySnapshots = monthlySnapshots.filter(s => !(s.month === month && s.year === year));
+                }
+            }
+
+            processData(pendingFileData.data, pendingFileData.filename, month, year);
+            closeImportModal();
+        }
+
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(new Uint8Array(e.target.result));
+                reader.onerror = (e) => reject(e);
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function processData(data, filename, month, year) {
+            let totalRev = 0;
+            let totalExp = 0;
+            let totalRevAll = 0;
+            let totalExpAll = 0;
+
+            let totalTradePayable = 0;
+            let totalTradePayableCredit = 0;
+            let totalUCReceivable = 0;
+            let totalUCRevenue = 0;
+            let totalCSReceivable = 0;
+            let totalCSRevenue = 0;
+            let totalSSReceivable = 0;
+            let totalSSRevenue = 0;
+            let totalInventory = 0;
+            let totalMaterialsUsed = 0;
+            let totalMaintenanceFund = 0;
+            let totalLiabilities = 0;
+            let totalCurrentAssets = 0;
+            let totalCashEquivReceivables = 0;
+            let totalCashEquiv = 0;
+            let totalCurrentLiabilities = 0;
+
+            // Mapping columns to find the right keys in the row object
+            const firstRow = data[0] || {};
+            const keys = Object.keys(firstRow);
+
+            const findKey = (variants) => keys.find(k => variants.includes(k.trim())) || variants[0];
+
+            const colCode = findKey(['รหัส', 'Account Code', 'รหัสบัญชี']);
+            const colDebit = findKey(['เดบิตสุทธิ', 'Debit Net', 'EndDr', 'เดบิต']);
+            const colCredit = findKey(['เครดิตสุทธิ', 'Credit Net', 'EndCr']);
+            const colCreditMov = findKey(['เครดิตเดือนนี้', 'เครดิตระหว่างเดือน', 'เครดิต', 'Credit', 'Cr', 'MovementCr']);
+
+            const cleanValue = (val) => {
+                if (typeof val === 'number') return val;
+                if (!val || val === '-') return 0;
+                const str = String(val).replace(/,/g, '').trim();
+                const num = parseFloat(str);
+                return isNaN(num) ? 0 : num;
+            };
+
+            const isMatched = (rowCode, set) => {
+                const cleanRowCode = String(rowCode).trim();
+                if (set.has(cleanRowCode)) return true;
+                // Check if any prefix of rowCode is in the set
+                for (const s of set) {
+                    if (cleanRowCode.startsWith(s + '.')) return true;
+                }
+                return false;
+            };
+
+            data.forEach(row => {
+                const code = String(row[colCode] || '').trim();
+                const debitNet = cleanValue(row[colDebit]);
+                const creditNet = cleanValue(row[colCredit]);
+                const creditMov = row.hasOwnProperty(colCreditMov) ? cleanValue(row[colCreditMov]) : creditNet;
+
+                // EBITDA (Revenue/Expense excluding investment/depreciation)
+                if (isMatched(code, REVENUE_CODES)) {
+                    totalRev += (creditNet - debitNet);
+                } else if (isMatched(code, EXPENSE_CODES)) {
+                    totalExp += debitNet;
+                }
+
+                // Total (All codes)
+                if (isMatched(code, REVENUE_CODES_ALL)) {
+                    totalRevAll += (creditNet - debitNet);
+                } else if (isMatched(code, EXPENSE_CODES_ALL)) {
+                    totalExpAll += debitNet;
+                }
+
+                // Metrics
+                if (isMatched(code, TRADE_PAYABLE_CODES)) {
+                    totalTradePayable += creditNet;
+                    totalTradePayableCredit += creditMov;
+                }
+                if (isMatched(code, UC_RECEIVABLE_CODES)) totalUCReceivable += debitNet;
+                if (isMatched(code, UC_REVENUE_NET_CODES)) totalUCRevenue += (creditNet - debitNet);
+                if (isMatched(code, CS_RECEIVABLE_CODES)) totalCSReceivable += debitNet;
+                if (isMatched(code, CS_REVENUE_NET_CODES)) totalCSRevenue += (creditNet - debitNet);
+                if (isMatched(code, SS_RECEIVABLE_CODES)) totalSSReceivable += debitNet;
+                if (isMatched(code, SS_REVENUE_CODES)) totalSSRevenue += (creditNet - debitNet);
+
+                if (isMatched(code, INVENTORY_CODES)) totalInventory += debitNet;
+                if (isMatched(code, MATERIALS_USED_CODES)) totalMaterialsUsed += debitNet;
+                if (isMatched(code, MAINTENANCE_FUND_CODES)) totalMaintenanceFund += (debitNet - creditNet);
+                if (isMatched(code, LIABILITIES_CODES)) totalLiabilities += creditNet;
+                if (isMatched(code, CURRENT_ASSETS_CODES)) totalCurrentAssets += (debitNet - creditNet);
+                if (isMatched(code, CASH_EQUIV_RECEIVABLES_CODES)) totalCashEquivReceivables += (debitNet - creditNet);
+                if (isMatched(code, CASH_EQUIV_CODES)) totalCashEquiv += (debitNet - creditNet);
+                if (isMatched(code, CURRENT_LIABILITIES_CODES)) totalCurrentLiabilities += creditNet;
+            });
+
+            const snapshot = {
+                id: Date.now().toString(),
+                month: month,
+                year: year,
+                filename: filename,
+                timestamp: new Date(),
+                totalRevAll, totalExpAll,
+                netIncome: totalRevAll - totalExpAll,
+                revenueExclInv: totalRev,
+                expenseExclDep: totalExp,
+                ebitda: totalRev - totalExp,
+                tradePayable: totalTradePayable,
+                tradePayableCredit: totalTradePayableCredit,
+                ucReceivable: totalUCReceivable,
+                ucRevenueNet: totalUCRevenue,
+                csReceivable: totalCSReceivable,
+                csRevenueNet: totalCSRevenue,
+                ssReceivable: totalSSReceivable,
+                ssRevenueNet: totalSSRevenue,
+                inventory: totalInventory,
+                materialsUsed: totalMaterialsUsed,
+                maintenanceFund: totalMaintenanceFund,
+                liabilities: totalLiabilities,
+                currentAssets: totalCurrentAssets,
+                cashEquivReceivables: totalCashEquivReceivables,
+                cashEquiv: totalCashEquiv,
+                currentLiabilities: totalCurrentLiabilities
+            };
+
+            monthlySnapshots.push(snapshot);
+
+            // Sort by Year then Month
+            monthlySnapshots.sort((a, b) => {
+                if (a.year !== b.year) return a.year - b.year;
+                return a.month - b.month;
+            });
+
+
+
+            recalculateAndRender();
+            renderHistoryTable(); // Add this call
+            document.getElementById('fileInput').value = '';
+        }
+
+
+
+        function renderSummaryTable() {
+            const tbody = document.getElementById('summaryBody');
+            const headerRow = document.getElementById('headerRow');
+            const emptyState = document.getElementById('emptyStateMsg');
+
+            if (monthlySnapshots.length === 0) {
+                tbody.innerHTML = '';
+                while (headerRow.children.length > 1) {
+                    headerRow.removeChild(headerRow.lastChild);
+                }
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            // 1. Group snapshots by Month/Year for the table columns
+            const groupedSnapshots = [];
+            monthlySnapshots.forEach(snap => {
+                const key = `${snap.month}-${snap.year}`;
+                let group = groupedSnapshots.find(g => g.key === key);
+                if (!group) {
+                    group = { key, month: snap.month, year: snap.year, items: [] };
+                    groupedSnapshots.push(group);
+                }
+                group.items.push(snap);
+            });
+
+            // Clear existing month headers
+            while (headerRow.children.length > 1) {
+                headerRow.removeChild(headerRow.lastChild);
+            }
+
+            groupedSnapshots.forEach(group => {
+                const th = document.createElement('th');
+                th.className = 'numeric';
+                // th.style.position = 'relative'; // Removed to avoid conflict with sticky
+                th.style.paddingTop = '1.5rem';
+
+                const count = group.items.length;
+
+                // Delete Button Header
+                const deleteBtn = document.createElement('div');
+                deleteBtn.innerHTML = '🗑️';
+                deleteBtn.title = `ลบข้อมูลเดือน ${getMonthName(group.month)} ${group.year} ทั้งหมด`;
+                deleteBtn.style.cssText = `
+                    position: absolute;
+                    top: 4px;
+                    right: 4px;
+                    font-size: 0.7rem;
+                    cursor: pointer;
+                    opacity: 0.5;
+                    transition: opacity 0.2s;
+                    padding: 2px 4px;
+                    border-radius: 4px;
+                `;
+                deleteBtn.onmouseover = () => { deleteBtn.style.opacity = '1'; deleteBtn.style.background = '#fee2e2'; };
+                deleteBtn.onmouseout = () => { deleteBtn.style.opacity = '0.5'; deleteBtn.style.background = 'transparent'; };
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteMonthData(group.month, group.year);
+                };
+
+                th.appendChild(deleteBtn);
+
+                const label = document.createElement('div');
+                label.innerHTML = `${getMonthName(group.month)} ${group.year}${count > 1 ? `<br><small style="text-transform:none; color:var(--primary-color)">(เฉลี่ย ${count} ไฟล์)</small>` : ''}`;
+                th.appendChild(label);
+
+                headerRow.appendChild(th);
+            });
+
+            // 2. Build Body Rows
+            tbody.innerHTML = '';
+
+            METRICS.forEach(metric => {
+                // Check if this row should be visible
+                if (metric.hidden) return; // Skip hidden metrics
+                if (metric.parentId && parentCollapsed[metric.parentId]) {
+                    return; // Skip hidden child rows
+                }
+
+                const tr = document.createElement('tr');
+                if (metric.parentId) {
+                    tr.classList.add('child-row');
+                    tr.style.fontSize = '0.9rem';
+                }
+
+                // Define Groups (for coloring)
+                const groupColors = {
+                    main: { ids: ['totalRevAll', 'totalExpAll', 'netIncome', 'revenueExclInv', 'expenseExclDep', 'ebitda'], color: '#f8fafc', border: 'var(--text-secondary)' },
+                    debt: { ids: ['avgPayablePeriod', 'tradePayable', 'beginningTradePayableValue', 'tradePayableCreditTotal', 'tradePayableTurnover', 'avgCollectionPeriod', 'ucReceivable', 'beginningUCValue', 'ucRevenueNetTotal', 'avgCollectionPeriodCS', 'csReceivable', 'beginningCSValue', 'csRevenueNetTotal', 'avgCollectionPeriodSS', 'ssReceivable', 'beginningSSValue', 'ssRevenueNetTotal'], color: '#fff1f2', border: '#f43f5e' },
+                    inventory: { ids: ['avgInventoryPeriod', 'inventory', 'materialsUsed'], color: '#faf5ff', border: '#a855f7' }
+                };
+
+                let activeColorGroup = null;
+                for (const gKey in groupColors) {
+                    if (groupColors[gKey].ids.includes(metric.id)) {
+                        activeColorGroup = groupColors[gKey];
+                        break;
+                    }
+                }
+
+                if (activeColorGroup) {
+                    tr.style.backgroundColor = activeColorGroup.color;
+                }
+
+                // Label Cell
+                const tdLabel = document.createElement('td');
+                tdLabel.style.fontWeight = metric.isParent ? '700' : '500';
+                tdLabel.style.position = 'sticky';
+                tdLabel.style.left = '0';
+                tdLabel.style.zIndex = '800';
+                tdLabel.style.background = activeColorGroup ? activeColorGroup.color : 'white';
+                tdLabel.style.borderRight = '2px solid var(--border-color)';
+                tdLabel.style.display = 'flex';
+                tdLabel.style.alignItems = 'center';
+                tdLabel.style.gap = '8px';
+                tdLabel.style.paddingLeft = metric.parentId ? '2.5rem' : '1rem';
+
+                if (activeColorGroup) {
+                    tdLabel.style.borderLeft = `4px solid ${activeColorGroup.border}`;
+                    if (!metric.parentId) tdLabel.style.color = activeColorGroup.border;
+                }
+
+                // Add Toggle Icon for Parent
+                if (metric.isParent) {
+                    const toggleSign = document.createElement('span');
+                    toggleSign.innerHTML = parentCollapsed[metric.id] ? '⊕' : '⊖';
+                    toggleSign.style.cursor = 'pointer';
+                    toggleSign.style.fontSize = '1.1rem';
+                    toggleSign.style.color = 'var(--primary-color)';
+                    toggleSign.style.userSelect = 'none';
+                    toggleSign.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleRowGroup(metric.id);
+                    };
+                    tdLabel.prepend(toggleSign);
+                    tr.style.cursor = 'pointer';
+                    tr.onclick = () => toggleRowGroup(metric.id);
+                }
+
+                const labelSpan = document.createElement('span');
+                labelSpan.textContent = metric.label;
+                tdLabel.appendChild(labelSpan);
+
+                // --- Add Graph Button ---
+                const btnGraph = document.createElement('button');
+                btnGraph.innerHTML = '📊';
+                btnGraph.title = 'ดูกราฟแนวโน้ม';
+                if (metric.id === 'netIncome') {
+                    btnGraph.innerHTML = '📊 วิเคราะห์';
+                    btnGraph.title = 'ดูกราฟวิเคราะห์รายได้ vs รายจ่าย';
+                }
+                btnGraph.className = 'glass-btn';
+                btnGraph.style.cssText = `
+                    margin-left: auto;
+                    padding: 2px 6px;
+                    font-size: 0.8rem;
+                    background: rgba(14, 165, 233, 0.1);
+                    color: var(--primary-color);
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    opacity: 0.7;
+                    transition: all 0.2s;
+                `;
+                if (metric.id === 'netIncome') {
+                    btnGraph.style.fontSize = '0.75rem';
+                    btnGraph.style.fontWeight = '600';
+                }
+                btnGraph.onmouseover = () => { btnGraph.style.opacity = '1'; btnGraph.style.transform = 'scale(1.1)'; };
+                btnGraph.onmouseout = () => { btnGraph.style.opacity = '0.7'; btnGraph.style.transform = 'scale(1)'; };
+                btnGraph.onclick = (e) => {
+                    e.stopPropagation();
+                    if (metric.id === 'netIncome') {
+                        // Create a composite metric for Rev vs Exp
+                        openMetricChart({ id: 'revVsExp', label: 'วิเคราะห์รายได้ vs รายจ่าย' });
+                    } else {
+                        openMetricChart(metric);
+                    }
+                };
+                tdLabel.appendChild(btnGraph);
+
+                // --- Add Cumulative Graph Button for Revenue/Expense Section ---
+                if (metric.id === 'netIncome') {
+                    const btnCumGraph = document.createElement('button');
+                    btnCumGraph.innerHTML = '📈 สะสม';
+                    btnCumGraph.title = 'ดูกราฟรายได้ vs รายจ่าย (สะสมรวม)';
+                    btnCumGraph.className = 'glass-btn';
+                    btnCumGraph.style.cssText = `
+                        margin-left: 4px;
+                        padding: 2px 6px;
+                        font-size: 0.75rem;
+                        background: rgba(99, 102, 241, 0.1);
+                        color: #6366f1;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        opacity: 0.7;
+                        transition: all 0.2s;
+                        font-family: inherit;
+                        font-weight: 600;
+                    `;
+                    btnCumGraph.onmouseover = () => { btnCumGraph.style.opacity = '1'; btnCumGraph.style.transform = 'scale(1.05)'; };
+                    btnCumGraph.onmouseout = () => { btnCumGraph.style.opacity = '0.7'; btnCumGraph.style.transform = 'scale(1)'; };
+                    btnCumGraph.onclick = (e) => {
+                        e.stopPropagation();
+                        openMetricChart({ id: 'revVsExpCum', label: 'วิเคราะห์รายได้ vs รายจ่าย (สะสมรวม)' });
+                    };
+                    tdLabel.appendChild(btnCumGraph);
+                }
+
+                tr.appendChild(tdLabel);
+
+                // Value Cells
+                groupedSnapshots.forEach(colGroup => {
+                    const tdVal = document.createElement('td');
+                    tdVal.className = 'numeric';
+                    const values = colGroup.items.map(s => s[metric.id]).filter(v => v !== null && v !== undefined);
+                    const avgVal = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : null;
+
+                    if (avgVal === null) {
+                        tdVal.textContent = 'n/a';
+                        tdVal.style.color = 'var(--text-secondary)';
+                        tdVal.style.fontSize = '0.75rem';
+                    } else {
+                        tdVal.textContent = formatNumber(avgVal);
+                        if (metric.isNet) {
+                            if (avgVal > 0) tdVal.style.color = 'var(--success)';
+                            else if (avgVal < 0) tdVal.style.color = 'var(--error)';
+                            tdVal.style.fontWeight = '700';
+                        }
+                    }
+                    tr.appendChild(tdVal);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function downloadTemplate() {
+            const templateData = [
+                {
+                    "รหัส": "4301020105.202",
+                    "ชื่อบัญชี": "รายได้ค่าบริการ - OP-UC",
+                    "ยอดยกมา": 1000000.00,
+                    "เดบิต": 0.00,
+                    "เครดิต": 250000.00,
+                    "ยอดยกไป": 1250000.00
+                },
+                {
+                    "รหัส": "5101010199.101",
+                    "ชื่อบัญชี": "ค่าแรงงาน",
+                    "ยอดยกมา": 500000.00,
+                    "เดบิต": 150000.00,
+                    "เครดิต": 0.00,
+                    "ยอดยกไป": 650000.00
+                }
+            ];
+
+            const ws = XLSX.utils.json_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template_งบทดลอง");
+            XLSX.writeFile(wb, "Template_Trial_Balance.xlsx");
+        }
+
+        function getMonthName(m) {
+            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+            return months[m - 1] || m;
+        }
+
+        function clearAllData() {
+            if (confirm('คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?')) {
+                monthlySnapshots = [];
+                recalculateAndRender();
+                renderHistoryTable();
+            }
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+        }
+
+        function exportSummaryToExcel() {
+            if (monthlySnapshots.length === 0) return;
+
+            // Transpose Logic or simply structured data? 
+            // Let's create a flat array acceptable by XLSX
+
+            const data = [];
+
+            // Header
+            const header = ['รายการ'];
+            monthlySnapshots.forEach(s => header.push(`${getMonthName(s.month)} ${s.year}`));
+            data.push(header);
+
+            // Rows
+            METRICS.forEach(metric => {
+                const row = [metric.label];
+                monthlySnapshots.forEach(s => {
+                    row.push(s[metric.id] ?? '');
+                });
+                data.push(row);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Monthly_Summary");
+            XLSX.writeFile(wb, "TPS_Monthly_Summary.xlsx");
+        }
+
+        let editingIndex = -1;
+
+        function renderHistoryTable() {
+            const historySection = document.getElementById('historySection');
+            const importPanel = document.getElementById('importPanel');
+            const tbody = document.getElementById('historyBody');
+
+            if (monthlySnapshots.length === 0) {
+                historySection.style.display = 'none';
+                importPanel.classList.add('full-width');
+                return;
+            }
+
+            historySection.style.display = 'flex';
+            importPanel.classList.remove('full-width');
+            tbody.innerHTML = '';
+
+            monthlySnapshots.forEach((snap, index) => {
+                const tr = document.createElement('tr');
+
+                if (index === editingIndex) {
+                    // --- EDIT MODE ---
+                    tr.style.background = '#f0f9ff';
+
+                    // Month/Year (Inputs)
+                    const tdMonth = document.createElement('td');
+                    tdMonth.style.display = 'flex';
+                    tdMonth.style.gap = '5px';
+                    tdMonth.style.alignItems = 'center';
+
+                    // Month Select
+                    const monthSelect = document.createElement('select');
+                    monthSelect.id = `edit-month-${index}`;
+                    monthSelect.className = 'edit-select';
+                    monthSelect.style.padding = '4px 8px';
+                    monthSelect.style.borderRadius = 'var(--radius-md)';
+                    monthSelect.style.border = '1px solid var(--border-color)';
+                    monthSelect.style.fontFamily = 'var(--font-th)';
+
+                    const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                    months.forEach((m, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = i + 1;
+                        opt.textContent = m;
+                        if (i + 1 === snap.month) opt.selected = true;
+                        monthSelect.appendChild(opt);
+                    });
+
+                    // Year Select
+                    const yearSelect = document.createElement('select');
+                    yearSelect.id = `edit-year-${index}`;
+                    yearSelect.className = 'edit-select';
+                    yearSelect.style.padding = '4px 8px';
+                    yearSelect.style.borderRadius = 'var(--radius-md)';
+                    yearSelect.style.border = '1px solid var(--border-color)';
+                    yearSelect.style.fontFamily = 'var(--font-th)';
+
+                    const currentYear = new Date().getFullYear() + 543;
+                    for (let y = currentYear - 5; y <= currentYear + 1; y++) {
+                        const opt = document.createElement('option');
+                        opt.value = y;
+                        opt.textContent = y;
+                        if (y === snap.year) opt.selected = true;
+                        yearSelect.appendChild(opt);
+                    }
+
+                    tdMonth.appendChild(monthSelect);
+                    tdMonth.appendChild(yearSelect);
+                    tr.appendChild(tdMonth);
+
+                    // Filename (Static)
+                    const tdFile = document.createElement('td');
+                    tdFile.textContent = snap.filename || '-';
+                    tdFile.style.color = 'var(--text-secondary)';
+                    tr.appendChild(tdFile);
+
+                    // Actions (Save/Cancel)
+                    const tdActions = document.createElement('td');
+                    tdActions.style.display = 'flex';
+                    tdActions.style.gap = '0.5rem';
+
+                    const btnSave = document.createElement('button');
+                    btnSave.className = 'glass-btn';
+                    btnSave.style.backgroundColor = '#10b981'; // Green
+                    btnSave.style.fontSize = '0.8rem';
+                    btnSave.style.padding = '0.4rem 0.8rem';
+                    btnSave.innerHTML = '💾 บันทึก';
+                    btnSave.onclick = () => saveInlineEdit(index);
+
+                    const btnCancel = document.createElement('button');
+                    btnCancel.className = 'glass-btn';
+                    btnCancel.style.backgroundColor = '#94a3b8'; // Gray
+                    btnCancel.style.fontSize = '0.8rem';
+                    btnCancel.style.padding = '0.4rem 0.8rem';
+                    btnCancel.innerHTML = '❌ ยกเลิก';
+                    btnCancel.onclick = () => cancelEdit();
+
+                    tdActions.appendChild(btnSave);
+                    tdActions.appendChild(btnCancel);
+                    tr.appendChild(tdActions);
+
+                } else {
+                    // --- VIEW MODE ---
+
+                    // Month/Year
+                    const tdMonth = document.createElement('td');
+                    tdMonth.style.fontWeight = '500';
+                    tdMonth.innerHTML = `
+                        <div style="display: flex; gap: 8px;">
+                            <span style="display: inline-block; min-width: 80px;">${getMonthName(snap.month)}</span>
+                            <span>${snap.year}</span>
+                        </div>
+                    `;
+                    tr.appendChild(tdMonth);
+
+                    // Filename
+                    const tdFile = document.createElement('td');
+                    tdFile.textContent = snap.filename || '-';
+                    tdFile.style.color = 'var(--text-secondary)';
+                    tr.appendChild(tdFile);
+
+                    // Actions
+                    const tdActions = document.createElement('td');
+                    tdActions.style.display = 'flex';
+                    tdActions.style.gap = '0.5rem';
+
+                    const btnEdit = document.createElement('button');
+                    btnEdit.className = 'glass-btn';
+                    btnEdit.style.fontSize = '0.8rem';
+                    btnEdit.style.padding = '0.4rem 0.8rem';
+                    btnEdit.style.backgroundColor = '#f59e0b'; // Amber
+                    btnEdit.innerHTML = '✏️ แก้ไข';
+                    btnEdit.onclick = () => startEdit(index);
+
+                    const btnDelete = document.createElement('button');
+                    btnDelete.className = 'glass-btn';
+                    btnDelete.style.fontSize = '0.8rem';
+                    btnDelete.style.padding = '0.4rem 0.8rem';
+                    btnDelete.style.backgroundColor = '#ef4444'; // Red
+                    btnDelete.innerHTML = '🗑️ ลบ';
+                    btnDelete.onclick = () => deleteSnapshot(index);
+
+                    tdActions.appendChild(btnEdit);
+                    tdActions.appendChild(btnDelete);
+                    tr.appendChild(tdActions);
+                }
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteMonthData(month, year) {
+            if (confirm(`คุณต้องการลบข้อมูลเดือน ${getMonthName(month)} ${year} ทั้งหมดใช่หรือไม่?`)) {
+                monthlySnapshots = monthlySnapshots.filter(s => !(s.month === month && s.year === year));
+                recalculateAndRender();
+                renderHistoryTable();
+            }
+        }
+
+        function deleteSnapshot(index) {
+            if (confirm('คุณต้องการลบข้อมูลนี้ใช่หรือไม่?')) {
+                monthlySnapshots.splice(index, 1);
+                recalculateAndRender();
+                renderHistoryTable();
+            }
+        }
+
+        function startEdit(index) {
+            editingIndex = index;
+            renderHistoryTable();
+        }
+
+        function cancelEdit() {
+            editingIndex = -1;
+            renderHistoryTable();
+        }
+
+        function saveInlineEdit(index) {
+            const newMonth = parseInt(document.getElementById(`edit-month-${index}`).value);
+            const newYear = parseInt(document.getElementById(`edit-year-${index}`).value);
+
+            // Validate Duplicate
+            if (monthlySnapshots.some((s, i) => i !== index && s.month === newMonth && s.year === newYear)) {
+                alert(`มีข้อมูลเดือน ${newMonth}/${newYear} อยู่แล้ว ไม่สามารถแก้ไขได้`);
+                return;
+            }
+
+            monthlySnapshots[index].month = newMonth;
+            monthlySnapshots[index].year = newYear;
+
+            // Re-sort
+            monthlySnapshots.sort((a, b) => {
+                if (a.year !== b.year) return a.year - b.year;
+                return a.month - b.month;
+            });
+
+            editingIndex = -1;
+            recalculateAndRender();
+            renderHistoryTable();
+        }
+
+
+    </script>
+    <!-- Metric Chart Modal -->
+    <div id="metricChartModal" class="modal" onclick="if(event.target === this) closeMetricChartModal()">
+        <div class="modal-content" style="max-width: 1200px; height: 90vh; border-radius: 16px; overflow: hidden;">
+            <div class="modal-header"
+                style="padding: 1.25rem 2rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 1.5rem;">📊</span>
+                    <h2 id="metricChartTitle" style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">กราฟแนวโน้ม
+                    </h2>
+                </div>
+                <div
+                    style="display: flex; gap: 12px; align-items: center; margin-left: auto; margin-right: 20px; flex-wrap: wrap;">
+                    <!-- Show Values Toggle -->
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: white; border-radius: 100px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-left:4px;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #64748b; white-space: nowrap;">แสดงค่า</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showChartValues" onchange="toggleChartValues()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Compact Numbers Toggle -->
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: white; border-radius: 100px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-left:4px;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #64748b; white-space: nowrap;">ย่อตัวเลข</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="useCompactNumbers" checked onchange="toggleCompactNumbers()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Show Gap Toggle (Only for Liquidity Chart) -->
+                    <div id="gapToggleContainer" style="display: none; align-items: center; gap: 10px; padding: 6px 16px; background: white; border-radius: 100px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-left:4px;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #64748b; white-space: nowrap;">แสดงค่าต่าง</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showGapValues" onchange="toggleGapValues()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <span class="close-modal" onclick="closeMetricChartModal()"
+                    style="font-size:24px; cursor:pointer; padding:5px; color:#94a3b8;">&times;</span>
+            </div>
+            <div class="modal-body"
+                style="padding: 1.5rem 2.5rem 2.5rem 2.5rem; display: flex; flex-direction: column; height: 100%; background: #ffffff;">
+                <div id="customLegendContainer" class="chart-custom-legend"></div>
+                <div
+                    style="flex: 1; position: relative; min-height: 0; background: #fdfdfd; border-radius: 12px; padding: 1rem; border: 1px solid #f1f5f9;">
+                    <canvas id="metricChartCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (typeof Chart !== 'undefined' && typeof ChartZoom !== 'undefined') {
+            Chart.register(ChartZoom);
+        }
+        
+        let metricChartInstance = null;
+        let currentMetric = null;
+        
+        const monthlyMonthsNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+        const monthlyShortMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+        function getMonthName(m) {
+            return monthlyMonthsNames[m - 1] || '';
+        }
+
+        let chartFilters = {
+            quarter: 'all',
+            startMonth: 1,
+            startYear: 0,
+            endMonth: 12,
+            endYear: 0,
+            showValues: false,
+            showGapValues: true,
+            useCompact: true,
+            hiddenDatasetLabels: []
+        };
+
+        function toggleCustomDropdown(id) {
+            const dropdown = document.getElementById(id);
+            if (!dropdown) return;
+            const isShowing = dropdown.classList.contains('show');
+
+            // Close all first
+            document.querySelectorAll('.custom-options').forEach(opt => opt.classList.remove('show'));
+            document.querySelectorAll('.custom-select-container').forEach(cont => cont.classList.remove('open'));
+
+            if (!isShowing) {
+                dropdown.classList.add('show');
+                dropdown.parentElement.classList.add('open');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-options').forEach(opt => opt.classList.remove('show'));
+                document.querySelectorAll('.custom-select-container').forEach(cont => cont.classList.remove('open'));
+            }
+        });
+
+        function selectCustomOption(type, value, text) {
+            chartFilters[type] = value;
+
+            // Update UI text
+            const textId = `selected${type.charAt(0).toUpperCase() + type.slice(1)}Text`;
+            const textElement = document.getElementById(textId);
+            if (textElement) textElement.textContent = text;
+
+            // Update selected class in dropdown
+            const dropdownId = `${type}Dropdown`;
+            const container = document.getElementById(dropdownId);
+            if (container) {
+                const options = container.querySelectorAll('.custom-option');
+                options.forEach(opt => {
+                    opt.classList.toggle('selected', opt.textContent === text);
+                });
+
+                // Close the dropdown
+                container.classList.remove('show');
+                container.parentElement.classList.remove('open');
+            }
+
+            updateMetricChart();
+        }
+
+        function toggleChartValues() {
+            const cb = document.getElementById('showChartValues');
+            if (cb) {
+                chartFilters.showValues = cb.checked;
+                updateMetricChart();
+            }
+        }
+
+        function toggleGapValues() {
+            const cb = document.getElementById('showGapValues');
+            if (cb) {
+                chartFilters.showGapValues = cb.checked;
+                updateMetricChart();
+            }
+        }
+
+        function toggleCompactNumbers() {
+            const cb = document.getElementById('useCompactNumbers');
+            if (cb) {
+                chartFilters.useCompact = cb.checked;
+                updateMetricChart();
+            }
+        }
+
+        function openMetricChart(metric) {
+            currentMetric = metric;
+            chartFilters.hiddenDatasetLabels = []; // Reset hidden states for new chart view
+            const modal = document.getElementById('metricChartModal');
+            const title = document.getElementById('metricChartTitle');
+
+            if (!modal) return;
+
+            title.textContent = metric.label;
+            modal.style.display = 'block';
+
+            // Sync Toggles with filter state
+            const vcb = document.getElementById('showChartValues'); if (vcb) vcb.checked = chartFilters.showValues;
+            const ccb = document.getElementById('useCompactNumbers'); if (ccb) ccb.checked = chartFilters.useCompact;
+            const gcb = document.getElementById('showGapValues'); if (gcb) gcb.checked = chartFilters.showGapValues;
+
+            // Show gap toggle only for relevant charts
+            const isDiffChart = ['cashVsCL', 'revVsExp', 'revVsExpCum'].includes(metric.id);
+            const gapToggle = document.getElementById('gapToggleContainer');
+            if (gapToggle) {
+                gapToggle.style.display = isDiffChart ? 'flex' : 'none';
+            }
+
+            if (typeof Chart === 'undefined') {
+                alert('ไม่สามารถโหลดไลบรารีกราฟได้ (Chart.js) กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+                return;
+            }
+
+            if (monthlySnapshots.length === 0) return;
+
+            // Set Defaults to full range
+            const firstSnap = monthlySnapshots[0];
+            const lastSnap = monthlySnapshots[monthlySnapshots.length - 1];
+
+            chartFilters.startMonth = firstSnap.month;
+            chartFilters.startYear = firstSnap.year;
+            chartFilters.endMonth = lastSnap.month;
+            chartFilters.endYear = lastSnap.year;
+            chartFilters.quarter = 'all';
+
+            updateMetricChart();
+        }
+
+        function updateMetricChart() {
+            if (!currentMetric || monthlySnapshots.length === 0) return;
+
+            const mid = currentMetric.id;
+            const { startMonth, startYear, endMonth, endYear, quarter: filterQuarter } = chartFilters;
+            const canvas = document.getElementById('metricChartCanvas');
+            if (!canvas) return;
+
+            const qToM = { '1': [10, 11, 12], '2': [1, 2, 3], '3': [4, 5, 6], '4': [7, 8, 9] };
+            const startVal = startYear * 12 + startMonth;
+            const endVal = endYear * 12 + endMonth;
+            if (startVal > endVal) return;
+
+            const fullLabels = [];
+            const fullDataCash = [];
+            const fullDataRec = [];
+            const fullDataCL = [];
+            const fullDataRev = [];
+            const fullDataExp = [];
+            const fullData = [];
+
+            let curM = startMonth, curY = startYear;
+            while (true) {
+                const curVal = curY * 12 + curM;
+                if (curVal > endVal) break;
+                if (filterQuarter === 'all' || qToM[filterQuarter].includes(curM)) {
+                    const snap = monthlySnapshots.find(s => s.month === curM && s.year === curY);
+                    fullLabels.push(`${getMonthName(curM)} ${curY}`);
+                    if (mid === 'cashVsCL') {
+                        const cash = snap ? (snap.cashEquiv || 0) : 0;
+                        const cashRec = snap ? (snap.cashEquivReceivables || 0) : 0;
+                        fullDataCash.push(snap ? cash : null);
+                        fullDataRec.push(snap ? Math.max(0, cashRec - cash) : null);
+                        fullDataCL.push(snap ? (snap.currentLiabilities || 0) : null);
+                    } else if (mid === 'revVsExp') {
+                        fullDataRev.push(snap ? (snap.totalRevAll || 0) : null);
+                        fullDataExp.push(snap ? (snap.totalExpAll || 0) : null);
+                    } else if (mid === 'revVsExpCum') {
+                        fullDataRev.push(snap ? (snap.totalRevAllCum || 0) : null);
+                        fullDataExp.push(snap ? (snap.totalExpAllCum || 0) : null);
+                    } else {
+                        fullData.push(snap ? (snap[mid] !== undefined ? snap[mid] : 0) : null);
+                    }
+                }
+                curM++; if (curM > 12) { curM = 1; curY++; }
+                if (curY > endYear + 1) break; 
+            }
+
+            if (metricChartInstance) {
+                // Save hidden datasets labels to preserve state across toggles (Compact/Gap/Values)
+                chartFilters.hiddenDatasetLabels = [];
+                metricChartInstance.data.datasets.forEach((ds, i) => {
+                    if (!metricChartInstance.isDatasetVisible(i)) {
+                        chartFilters.hiddenDatasetLabels.push(ds.label);
+                    }
+                });
+                metricChartInstance.destroy();
+            }
+            const ctx = canvas.getContext('2d');
+            let datasets = [], optionsOverride = { plugins: {}, scales: {} };
+            
+            const isHidden = (label) => chartFilters.hiddenDatasetLabels.includes(label);
+
+            if (mid === 'cashVsCL') {
+                datasets = [
+                    { label: 'เงินสดและรายการเทียบเท่าเงินสด', data: fullDataCash, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.4)', borderWidth: 2, pointBackgroundColor: '#0ea5e9', pointBorderColor: '#ffffff', pointBorderWidth: 1, pointRadius: 3, tension: 0.35, fill: true, spanGaps: true, stack: 'assets', hidden: isHidden('เงินสดและรายการเทียบเท่าเงินสด') },
+                    { label: 'ลูกหนี้ (ส่วนเพิ่มจากเงินสด)', data: fullDataRec, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.3)', borderWidth: 2, pointBackgroundColor: '#06b6d4', pointBorderColor: '#ffffff', pointBorderWidth: 1, pointRadius: 3, tension: 0.35, fill: true, spanGaps: true, stack: 'assets', hidden: isHidden('ลูกหนี้ (ส่วนเพิ่มจากเงินสด)') },
+                    { label: 'หนี้สินหมุนเวียน', data: fullDataCL, borderColor: '#f43f5e', backgroundColor: 'transparent', borderWidth: 4, pointBackgroundColor: '#f43f5e', pointBorderColor: '#ffffff', pointBorderWidth: 2, pointRadius: 5, tension: 0.2, fill: false, spanGaps: true, order: 0, hidden: isHidden('หนี้สินหมุนเวียน') }
+                ];
+                optionsOverride.scales.y = { stacked: true };
+                optionsOverride.plugins.tooltip = {
+                    callbacks: {
+                        footer: (items) => {
+                            let a = 0, c = 0;
+                            items.forEach(i => { if(i.dataset.stack === 'assets') a += i.parsed.y; if(i.dataset.label === 'หนี้สินหมุนเวียน') c = i.parsed.y; });
+                            return `รวมสินทรัพย์สภาพคล่อง: ${new Intl.NumberFormat('th-TH').format(a)}\nส่วนต่าง: ${new Intl.NumberFormat('th-TH').format(a - c)}`;
+                        }
+                    }
+                };
+            } else if (mid === 'revVsExp') {
+                datasets = [
+                    { label: 'รวมรายได้', data: fullDataRev, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 3, pointBackgroundColor: '#10b981', pointRadius: 4, tension: 0.35, fill: true, spanGaps: true, hidden: isHidden('รวมรายได้') },
+                    { label: 'รวมรายจ่าย', data: fullDataExp, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 3, pointBackgroundColor: '#f43f5e', pointRadius: 4, tension: 0.35, fill: true, spanGaps: true, hidden: isHidden('รวมรายจ่าย') }
+                ];
+                optionsOverride.plugins.tooltip = {
+                    callbacks: {
+                        footer: (items) => {
+                            let r = 0, e = 0;
+                            items.forEach(i => { if(i.dataset.label === 'รวมรายได้') r = i.parsed.y; if(i.dataset.label === 'รวมรายจ่าย') e = i.parsed.y; });
+                            return `${mid === 'revVsExpCum' ? 'กำไร/ขาดทุนสะสม: ' : 'กำไร/ขาดทุนสุทธิ: '}${new Intl.NumberFormat('th-TH').format(r - e)}`;
+                        }
+                    }
+                };
+            } else if (mid === 'revVsExpCum') {
+                datasets = [
+                    { label: 'รวมรายได้ (สะสม)', data: fullDataRev, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 3, pointBackgroundColor: '#10b981', pointRadius: 4, tension: 0.35, fill: true, spanGaps: true, hidden: isHidden('รวมรายได้ (สะสม)') },
+                    { label: 'รวมรายจ่าย (สะสม)', data: fullDataExp, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', borderWidth: 3, pointBackgroundColor: '#f43f5e', pointRadius: 4, tension: 0.35, fill: true, spanGaps: true, hidden: isHidden('รวมรายจ่าย (สะสม)') }
+                ];
+                optionsOverride.plugins.tooltip = {
+                    callbacks: {
+                        footer: (items) => {
+                            let r = 0, e = 0;
+                            items.forEach(i => { if(i.dataset.label === 'รวมรายได้ (สะสม)') r = i.parsed.y; if(i.dataset.label === 'รวมรายจ่าย (สะสม)') e = i.parsed.y; });
+                            return `กำไร/ขาดทุนสะสม: ${new Intl.NumberFormat('th-TH').format(r - e)}`;
+                        }
+                    }
+                };
+            } else {
+                const isEbitda = mid === 'ebitda', isPayable = mid === 'avgPayablePeriod', isColl = ['avgCollectionPeriod', 'avgCollectionPeriodCS', 'avgCollectionPeriodSS'].includes(mid), isInv = mid === 'avgInventoryPeriod';
+                let color = isEbitda ? '#6366f1' : (isPayable ? '#f43f5e' : (isColl ? '#0891b2' : (isInv ? '#8b5cf6' : '#0ea5e9')));
+                datasets = [{
+                    label: currentMetric.label, data: fullData, borderColor: color,
+                    backgroundColor: (isPayable || isColl || isInv) ? 'rgba(16, 185, 129, 0.1)' : color + '1A',
+                    borderWidth: 3, pointBackgroundColor: color, pointBorderColor: '#ffffff', pointBorderWidth: 2, pointRadius: 4, tension: 0.35, fill: (isPayable || isColl || isInv), spanGaps: true, hidden: isHidden(currentMetric.label)
+                }];
+            }
+
+            const isEbitda = mid === 'ebitda', isPayable = mid === 'avgPayablePeriod', isColl = ['avgCollectionPeriod', 'avgCollectionPeriodCS', 'avgCollectionPeriodSS'].includes(mid), isInv = mid === 'avgInventoryPeriod';
+
+            metricChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels: fullLabels, datasets: datasets },
+                options: {
+                    layout: { padding: { left: 15, right: 60, top: 30, bottom: 10 } },
+                    animation: { duration: 300 },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: Object.assign({
+                        zoom: {
+                            pan: { enabled: true, mode: 'x', threshold: 10 },
+                            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                        },
+                        legend: { display: false },
+                        tooltip: Object.assign({
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', titleColor: '#1e293b', bodyColor: '#475569', borderColor: '#e2e8f0', borderWidth: 1, padding: 12, displayColors: true,
+                            callbacks: { 
+                                label: (c) => {
+                                    const fmt = { notation: chartFilters.useCompact ? 'compact' : 'standard', maximumFractionDigits: 1 };
+                                    return (c.dataset.label || '') + ': ' + new Intl.NumberFormat('en-US', fmt).format(c.parsed.y);
+                                }
+                            }
+                        }, optionsOverride.plugins.tooltip || {})
+                    }, optionsOverride.plugins || {}),
+                    scales: {
+                        y: Object.assign({
+                            beginAtZero: true, grace: '10%',
+                            grid: { color: (c) => (c.tick && c.tick.value === 0 && isEbitda) ? '#ef4444' : '#f1f5f9', lineWidth: (c) => (c.tick && c.tick.value === 0 && isEbitda) ? 2 : 1, drawBorder: false },
+                            ticks: { 
+                                color: '#64748b', 
+                                font: { size: 11 }, 
+                                callback: (v) => {
+                                    const fmt = { notation: chartFilters.useCompact ? 'compact' : 'standard' };
+                                    return new Intl.NumberFormat('en-US', fmt).format(v);
+                                }
+                            }
+                        }, optionsOverride.scales.y || {}),
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: "'Sarabun', sans-serif", size: 11 } } }
+                    }
+                },
+                plugins: [
+                    {
+                        id: 'thresholdBackground',
+                        beforeDraw: (chart) => {
+                            if (mid === 'cashVsCL') return;
+                            const { ctx, chartArea: { top, bottom, left, right }, scales: { y } } = chart;
+                            ctx.save();
+                            if (isEbitda) {
+                                const z = y.getPixelForValue(0);
+                                if (z < bottom) { ctx.fillStyle = 'rgba(239, 68, 68, 0.08)'; ctx.fillRect(left, Math.max(top, z), right-left, bottom-Math.max(top,z)); }
+                            } else if (isPayable || isColl || isInv) {
+                                const t = isPayable ? 90 : 60, tp = y.getPixelForValue(t);
+                                if (tp < bottom) {
+                                    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)'; ctx.fillRect(left, Math.max(top, tp), right-left, bottom-Math.max(top,tp));
+                                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)'; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(left, tp); ctx.lineTo(right, tp); ctx.stroke();
+                                    ctx.fillStyle = '#059669'; ctx.font = 'bold 10px Sarabun'; ctx.textAlign = 'right';
+                                    ctx.fillText(`เป้าหมาย < ${t} วัน`, right - 10, tp - 5);
+                                }
+                            }
+                            ctx.restore();
+                        }
+                    },
+                    {
+                        id: 'liquidityGapLabels',
+                        afterDatasetsDraw: (chart) => {
+                            const isCashVsCL = mid === 'cashVsCL';
+                            const isRevVsExp = mid === 'revVsExp';
+                            const isRevVsExpCum = mid === 'revVsExpCum';
+                            if (!isCashVsCL && !isRevVsExp && !isRevVsExpCum) return;
+                            
+                            const { ctx, scales: { y } } = chart;
+                            
+                            if (isCashVsCL) {
+                                if (!chart.isDatasetVisible(2)) return;
+                                const m0 = chart.getDatasetMeta(0), m1 = chart.getDatasetMeta(1), m2 = chart.getDatasetMeta(2);
+                                const v0 = chart.isDatasetVisible(0), v1 = chart.isDatasetVisible(1);
+                                ctx.save(); ctx.textAlign = 'center'; ctx.font = 'bold 10px Sarabun';
+                                chart.data.labels.forEach((_, i) => {
+                                    let aY = y.getPixelForValue(0), aV = 0;
+                                    if (v0 && v1) { aY = m1.data[i].y; aV = (chart.data.datasets[0].data[i]||0)+(chart.data.datasets[1].data[i]||0); }
+                                    else if (v0) { aY = m0.data[i].y; aV = (chart.data.datasets[0].data[i]||0); }
+                                    else if (v1) { aY = m1.data[i].y; aV = (chart.data.datasets[1].data[i]||0); }
+                                    const cY = m2.data[i].y, cV = chart.data.datasets[2].data[i]||0, gap = aV - cV;
+                                    if (chartFilters.showGapValues && Math.abs(aY - cY) > 5) {
+                                        // Draw subtle vertical line
+                                        ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+                                        ctx.moveTo(m2.data[i].x, aY); ctx.lineTo(m2.data[i].x, cY); ctx.stroke(); ctx.setLineDash([]);
+                                        ctx.fillStyle = gap >= 0 ? '#10b981' : '#ef4444';
+                                        const fmt = { notation: chartFilters.useCompact ? 'compact' : 'standard', maximumFractionDigits: 1 };
+                                        const formatted = (gap > 0 ? '+' : '') + new Intl.NumberFormat('en-US', fmt).format(gap);
+                                        ctx.textAlign = (i === 0) ? 'left' : (i === chart.data.labels.length - 1 ? 'right' : 'center');
+                                        ctx.fillText(formatted, m2.data[i].x, (aY + cY) / 2 + 4);
+                                    }
+                                });
+                                ctx.restore();
+                            } else if (isRevVsExp || isRevVsExpCum) {
+                                const m0 = chart.getDatasetMeta(0), m1 = chart.getDatasetMeta(1);
+                                const v0 = chart.isDatasetVisible(0), v1 = chart.isDatasetVisible(1);
+                                if (!v0 || !v1) return;
+                                ctx.save(); ctx.textAlign = 'center'; ctx.font = 'bold 10px Sarabun';
+                                chart.data.labels.forEach((_, i) => {
+                                    const rY = m0.data[i].y, eY = m1.data[i].y;
+                                    const rV = chart.data.datasets[0].data[i]||0, eV = chart.data.datasets[1].data[i]||0;
+                                    const gap = rV - eV;
+                                    if (chartFilters.showGapValues && Math.abs(rY - eY) > 5) {
+                                        ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+                                        ctx.moveTo(m0.data[i].x, rY); ctx.lineTo(m0.data[i].x, eY); ctx.stroke(); ctx.setLineDash([]);
+                                        ctx.fillStyle = gap >= 0 ? '#10b981' : '#ef4444';
+                                        const fmt = { notation: chartFilters.useCompact ? 'compact' : 'standard', maximumFractionDigits: 1 };
+                                        const formatted = (gap > 0 ? '+' : '') + new Intl.NumberFormat('en-US', fmt).format(gap);
+                                        ctx.textAlign = (i === 0) ? 'left' : (i === chart.data.labels.length - 1 ? 'right' : 'center');
+                                        ctx.fillText(formatted, m0.data[i].x, (rY + eY) / 2 + 4);
+                                    }
+                                });
+                                ctx.restore();
+                            }
+                        }
+                    },
+                    {
+                        id: 'customDataLabel',
+                        afterDatasetsDraw: (chart) => {
+                            if (!chartFilters.showValues) return;
+                            const { ctx: c } = chart;
+                            chart.data.datasets.forEach((dataset, i) => {
+                                if (!chart.isDatasetVisible(i)) return;
+                                const meta = chart.getDatasetMeta(i);
+                                meta.data.forEach((element, index) => {
+                                    const val = dataset.data[index];
+                                    if (val === null || val === undefined) return;
+                                    c.save(); 
+                                    const isFirst = index === 0, isLast = index === meta.data.length - 1;
+                                    c.textAlign = isFirst ? 'left' : (isLast ? 'right' : 'center');
+                                    c.textBaseline = 'bottom'; c.font = 'bold 10px sans-serif';
+                                    c.fillStyle = dataset.borderColor || '#334155';
+                                    const fmt = { notation: chartFilters.useCompact ? 'compact' : 'standard', maximumFractionDigits: 1 };
+                                    c.fillText(new Intl.NumberFormat('en-US', fmt).format(val), element.x, element.y - 8);
+                                    c.restore();
+                                });
+                            });
+                        }
+                    }
+                ]
+            });
+            renderCustomChartLegend(metricChartInstance);
+        }
+
+        function renderCustomChartLegend(chart) {
+            const container = document.getElementById('customLegendContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const dsCount = chart.data.datasets.length;
+
+            chart.data.datasets.forEach((dataset, i) => {
+                const pill = document.createElement('div');
+                pill.className = `legend-pill ${!chart.isDatasetVisible(i) ? 'hidden' : ''}`;
+                if (dsCount <= 1) pill.style.cursor = 'default';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color-box';
+                colorBox.style.backgroundColor = dataset.borderColor;
+                
+                const label = document.createElement('div');
+                label.className = 'legend-label';
+                label.textContent = dataset.label;
+
+                pill.appendChild(colorBox);
+                pill.appendChild(label);
+
+                // Click Handler
+                if (dsCount > 1) {
+                    pill.onclick = () => {
+                        const isVisible = chart.isDatasetVisible(i);
+                        if (isVisible) {
+                            chart.hide(i);
+                            pill.classList.add('hidden');
+                        } else {
+                            chart.show(i);
+                            pill.classList.remove('hidden');
+                        }
+                        
+                        // Dynamic Gap Calculation for Liquidity Chart
+                        if (currentMetric.id === 'cashVsCL' && (i === 0 || i === 1)) {
+                            updateLiquidityGapData(chart);
+                        }
+                        
+                        chart.update('none');
+                    };
+
+                    // Hover Handlers
+                    pill.onmouseenter = () => {
+                        if (!chart.isDatasetVisible(i)) return;
+                        
+                        chart.data.datasets.forEach((ds, idx) => {
+                            if (idx === i) {
+                                ds.borderDash = [10, 5];
+                                if (!ds._dashAnim) {
+                                    let offset = 0;
+                                    ds._dashAnim = setInterval(() => {
+                                        if (!chart.isDatasetVisible(i)) {
+                                            clearInterval(ds._dashAnim);
+                                            delete ds._dashAnim;
+                                            return;
+                                        }
+                                        offset = (offset - 1) % 15;
+                                        ds.borderDashOffset = offset;
+                                        chart.update('none');
+                                    }, 30);
+                                }
+                            } else {
+                                ds.borderDash = [];
+                                if (ds._dashAnim) {
+                                    clearInterval(ds._dashAnim);
+                                    delete ds._dashAnim;
+                                    ds.borderDashOffset = 0;
+                                }
+                            }
+                        });
+                        chart.update('none');
+                    };
+
+                    pill.onmouseleave = () => {
+                        chart.data.datasets.forEach((ds) => {
+                            ds.borderDash = [];
+                            if (ds._dashAnim) {
+                                clearInterval(ds._dashAnim);
+                                delete ds._dashAnim;
+                                ds.borderDashOffset = 0;
+                            }
+                        });
+                        chart.update('none');
+                    };
+                }
+
+                container.appendChild(pill);
+            });
+        }
+
+        function updateLiquidityGapData(chart) {
+            // No longer needed as gap line is removed and labels are drawn via plugin
+        }
+
+        function closeMetricChartModal() {
+            const modal = document.getElementById('metricChartModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function resetChartZoom() {
+            // Deprecated - user requested removal
+        }
+    </script>
+</body>
+
+</html>
