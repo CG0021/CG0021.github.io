@@ -1,0 +1,323 @@
+// --- Main Entry Point ---
+
+function doGet(e) {
+  const callback = e.parameter.callback || 'callback';
+  const action = e.parameter.action || 'list';
+  const spreadsheetId = '1YloJHWs873g_Z66w7v4oPAqGoENFehksbdZF3Owc_Kw'; // Spreadsheet ID
+
+  try {
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    let result;
+
+    // Route actions
+    if (action === 'getHospitalsFromLatestYear') {
+      result = getHospitalsFromLatestYear(spreadsheet);
+    } else if (action === 'getYearlyData') {
+      const code = e.parameter.code;
+      const targetYear = e.parameter.year;
+      if (!code) throw new Error('ไม่พบรหัสโรงพยาบาล (Missing code parameter)');
+      result = getYearlyData(spreadsheet, code, targetYear);
+    } else if (action === 'getAllYearlyData') {
+      const code = e.parameter.code;
+      if (!code) throw new Error('ไม่พบรหัสโรงพยาบาล');
+      result = getYearlyData(spreadsheet, code, null);
+    } else if (action === 'getMgmtData') {
+      const code = e.parameter.code;
+      const targetYear = e.parameter.year;
+      if (!code) throw new Error('ไม่พบรหัสโรงพยาบาล');
+      result = getMgmtData(spreadsheet, code, targetYear);
+    } else if (action === 'getYears') {
+      result = getYears(spreadsheet);
+    } else if (action === 'getHospitals') {
+      result = getUniqueHospitalList(spreadsheet);
+    } else if (action === 'analysis') {
+      result = getAnalysisData(spreadsheet);
+    } else if (action === 'list_old') {
+      result = getHospitalList(spreadsheet);
+    } else if (action === 'data_old') {
+      const code = e.parameter.code;
+      if (!code) throw new Error('ไม่พบรหัสโรงพยาบาล');
+      result = getHospitalDetails(spreadsheet, code);
+    } else {
+      throw new Error('Invalid action: ' + action);
+    }
+
+    // Return JSONP response
+    const jsonp = `${callback}(${JSON.stringify(result)});`;
+    return ContentService.createTextOutput(jsonp).setMimeType(ContentService.MimeType.JAVASCRIPT);
+
+  } catch (error) {
+    const errorResponse = {
+      error: true,
+      message: error.toString() 
+    };
+    const jsonp = `${callback}(${JSON.stringify(errorResponse)});`;
+    return ContentService.createTextOutput(jsonp).setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+}
+
+function doOptions() {
+  return ContentService.createTextOutput('').setMimeType(ContentService.MimeType.TEXT);
+}
+
+// --- Key Business Functions ---
+
+/**
+ * ดึงข้อมูลจากชีท งบบริหาร แบบแยกตามปี (งบบริหาร2568, งบบริหาร2567, etc.)
+ */
+function getMgmtData(spreadsheet, code, targetYear) {
+  const MGMT_SPREADSHEET_ID = '1O4Xiv12ERoCrKXiE6Uhx1p7RoOkvqGsrJxDvPm0ArGk';
+  var mgmtSs = spreadsheet;
+  
+  // ค้นหาชีท งบบริหาร ที่มีชื่อ "งบบริหาร" + ปี (เช่น "งบบริหาร2568")
+  var allSheets = mgmtSs.getSheets();
+  var mgmtSheets = [];
+  
+  // ค้นหาชีท งบบริหาร ในชีทปัจจุบันก่อน
+  allSheets.forEach(function(sheet) {
+    var sheetName = sheet.getName();
+    // ค้นหาชีทที่ชื่อขึ้นต้นด้วย "งบบริหาร"
+    if (/^งบบริหาร/.test(sheetName)) {
+      mgmtSheets.push(sheet);
+    }
+  });
+  
+  // ถ้าไม่พบ ให้ลองจากชีทอื่น
+  if (mgmtSheets.length === 0) {
+    try {
+      mgmtSs = SpreadsheetApp.openById(MGMT_SPREADSHEET_ID);
+      var allMgmtSheets = mgmtSs.getSheets();
+      allMgmtSheets.forEach(function(sheet) {
+        var sheetName = sheet.getName();
+        if (/^งบบริหาร/.test(sheetName)) {
+          mgmtSheets.push(sheet);
+        }
+      });
+    } catch (e) { }
+  }
+
+  if (mgmtSheets.length === 0) return { error: true, message: "ไม่พบชีทงบบริหารในระบบ" };
+  
+  var resultData = {};
+  var headers = null;
+  var cleanCode = String(code).trim();
+  
+  // วนลูปผ่านทุกชีท งบบริหาร
+  mgmtSheets.forEach(function(sheet) {
+    var data = sheet.getDataRange().getValues();
+    if (data.length < 2) return;
+    
+    var currentHeaders = data[0];
+    if (!headers) headers = currentHeaders;
+    
+    var codeIdx = currentHeaders.findIndex(h => /รหัส(หน่วยงาน|โรงพยาบาล|รพ|หน่วยบริการ)/.test(String(h)));
+    if (codeIdx === -1) codeIdx = currentHeaders.indexOf('รหัส');
+    if (codeIdx === -1) codeIdx = 1;
+    
+    var yearIdx = currentHeaders.findIndex(h => String(h).trim() === 'ปี');
+    if (yearIdx === -1) yearIdx = 2;
+    var quarterIdx = currentHeaders.findIndex(h => String(h).trim() === 'ไตรมาส');
+    if (quarterIdx === -1) quarterIdx = 3;
+
+    var codeRowIdx = 0;
+    if (data.length > 2 && data[1].some(val => /^A\d+/.test(String(val)))) {
+      codeRowIdx = 1;
+    }
+    
+    // วนลูปผ่านแถวข้อมูล
+    for (var i = codeRowIdx + 1; i < data.length; i++) {
+      var row = data[i];
+      var rowCode = String(row[codeIdx] || "").trim();
+      
+      // ตรวจสอบว่าเป็นรหัสโรงพยาบาลที่ตรงกับที่ต้องการ
+      var isMatch = (rowCode === cleanCode) || 
+                    (rowCode.replace(/^0+/, '') === cleanCode.replace(/^0+/, ''));
+      
+      if (isMatch) {
+        var year = String(row[yearIdx] || "");
+        var quarter = String(row[quarterIdx] || "4");
+        
+        var uniqueKey = rowCode + "_" + year + "_" + quarter;
+        if (row[0] && String(row[0]).includes(rowCode)) uniqueKey = row[0];
+
+        resultData[uniqueKey] = row;
+      }
+    }
+  });
+  
+  if (!headers) return { error: true, message: "ไม่พบข้อมูลโครงสร้าง" };
+  
+  return {
+    headers: headers,
+    data: resultData,
+    sheetCount: mgmtSheets.length
+  };
+}
+
+function getYearlyData(spreadsheet, code, targetYear) { 
+  var sheets = spreadsheet.getSheets();
+  var resultData = {};
+  var headers = null;
+  
+  sheets.forEach(function(sheet) {
+      var sheetName = sheet.getName();
+      if (/^\d{4}$/.test(sheetName) && parseInt(sheetName) >= 2563) {
+          if (targetYear && String(sheetName) !== String(targetYear)) return;
+
+          var data = sheet.getDataRange().getValues();
+          if (data.length < 2) return; 
+          
+          if (!headers) headers = data[0]; 
+          
+          var currentHeaders = data[0];
+          var codeIdx = currentHeaders.indexOf('รหัส'); 
+          var yearIdx = currentHeaders.indexOf('ปี');
+          var quarterIdx = currentHeaders.indexOf('ไตรมาส');
+          
+          if (codeIdx === -1) codeIdx = 1;
+          
+          for (var i = 1; i < data.length; i++) {
+               if (String(data[i][codeIdx]) === String(code)) {
+                   var year = (yearIdx !== -1) ? data[i][yearIdx] : sheetName;
+                   var quarter = (quarterIdx !== -1) ? data[i][quarterIdx] : "4";
+                   var uniqueKey = String(year) + "_" + String(quarter);
+                   if(data[i][0]) uniqueKey = data[i][0];
+
+                   resultData[uniqueKey] = data[i];
+               }
+          }
+      }
+  });
+
+  if (!headers) return { error: true, message: "No valid year data sheets found." };
+  
+  return {
+    headers: headers,
+    data: resultData
+  };
+}
+
+function getHospitalsFromLatestYear(spreadsheet) {
+  const sheets = spreadsheet.getSheets();
+  const years = sheets
+    .map(sheet => sheet.getName())
+    .filter(name => /^\d{4}$/.test(name) && parseInt(name) > 2500)
+    .sort((a, b) => b - a);
+
+  if (years.length === 0) {
+    return { list: [], latestYear: null };
+  }
+
+  const latestYear = years[0];
+  const latestYearSheet = spreadsheet.getSheetByName(years[0]);
+  const data = latestYearSheet.getDataRange().getValues();
+  if (data.length < 2) return { list: [], latestYear: latestYear };
+
+  const headers = data[0];
+  const codeIdx = headers.indexOf('รหัส');
+  const nameIdx = headers.indexOf('หน่วยบริการ');
+  const provinceIdx = headers.indexOf('จังหวัด');
+  const regionIdx = headers.indexOf('เขต');
+
+  if (codeIdx === -1 || nameIdx === -1) return { list: [], latestYear: latestYear };
+
+  const list = data.slice(1).map(row => ({
+    c: row[codeIdx], n: row[nameIdx],
+    p: provinceIdx !== -1 ? row[provinceIdx] : '', r: regionIdx !== -1 ? row[regionIdx] : ''
+  })).filter(item => item.c && item.n);
+
+  return { list: list, latestYear: latestYear };
+}
+
+function getYears(spreadsheet) {
+  const sheets = spreadsheet.getSheets();
+  const years = sheets
+    .map(sheet => sheet.getName())
+    .filter(name => /^\d{4}$/.test(name) && parseInt(name) > 2500)
+    .sort((a, b) => b - a);
+  return { years: years };
+}
+
+function getUniqueHospitalList(spreadsheet) {
+  const sheets = spreadsheet.getSheets();
+  const hospitalMap = new Map();
+
+  sheets.forEach(sheet => {
+    const sheetName = sheet.getName();
+    if (/^\d{4}$/.test(sheetName) && parseInt(sheetName) > 2500) {
+      const data = sheet.getDataRange().getValues();
+      if (data.length < 2) return;
+
+      const headers = data[0];
+      const codeIdx = headers.indexOf('รหัส');
+      const nameIdx = headers.indexOf('หน่วยบริการ');
+      const provinceIdx = headers.indexOf('จังหวัด');
+      const regionIdx = headers.indexOf('เขต');
+
+      if (codeIdx === -1 || nameIdx === -1) return;
+
+      data.slice(1).forEach(row => {
+        const code = row[codeIdx];
+        if (code && !hospitalMap.has(code)) {
+          hospitalMap.set(code, {
+            c: code,
+            n: row[nameIdx],
+            p: provinceIdx !== -1 ? row[provinceIdx] : '',
+            r: regionIdx !== -1 ? row[regionIdx] : ''
+          });
+        }
+      });
+    }
+  });
+
+  return { list: Array.from(hospitalMap.values()) };
+}
+
+function getHospitalList(spreadsheet) {
+  const sheet = spreadsheet.getSheetByName('ตารางคะแนนV3');
+  if (!sheet) return { error: 'ไม่พบชีท ตารางคะแนนV3' };
+  const data = sheet.getDataRange().getValues();
+  if (data.length < 2) return { list: [] };
+  const headers = data[0];
+  const nameIdx = headers.findIndex(h => String(h).includes('โรงพยาบาล'));
+  const codeIdx = headers.findIndex(h => String(h).includes('รหัส'));
+  const provinceIdx = headers.findIndex(h => String(h).includes('จังหวัด'));
+  if (nameIdx === -1 || codeIdx === -1) return { error: 'ไม่พบคอลัมน์โรงพยาบาลหรือรหัส' };
+  const list = data.slice(1).map((row) => ({
+    n: row[nameIdx],
+    c: row[codeIdx],
+    p: provinceIdx !== -1 ? row[provinceIdx] : ''
+  })).filter(item => item.n && item.c);
+  return { list: list };
+}
+
+function getHospitalDetails(spreadsheet, code) {
+  const sheets = {
+    main: 'ตารางคะแนนV3', qm: 'QM', hgr: 'HGR',
+    occupancy: 'SumAdjRw/อัตราการครองเตียง', ratio: 'Ratio'
+  };
+  const result = {};
+  for (const [key, sheetName] of Object.entries(sheets)) {
+    const sheet = spreadsheet.getSheetByName(sheetName);
+    if (!sheet) { result[key] = { error: `ไม่พบชีท ${sheetName}` }; continue; }
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const codeIdx = headers.findIndex(h => String(h).includes('รหัส'));
+    if (codeIdx === -1) { result[key] = [headers]; continue; }
+    const row = data.find((r, i) => i > 0 && String(r[codeIdx]) === String(code));
+    result[key] = row ? [headers, row] : [headers];
+  }
+  return result;
+}
+
+function getAnalysisData(spreadsheet) {
+  const sheet = spreadsheet.getSheetByName('วิเคราะห์TPS');
+  if (!sheet) return { error: 'ไม่พบชีท วิเคราะห์TPS' };
+  const data = sheet.getDataRange().getValues();
+  if (data.length < 2) return { list: [] };
+  const list = data.slice(1).map(row => ({
+    id: row[0], name: row[1], criteria: row[2],
+    solution: row[3], responsible: row[4]
+  }));
+  return { list: list };
+}
