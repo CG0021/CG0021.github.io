@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Income & Expense Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <span class="logo-box">SYS</span>
+                <span class="logo-text">Hospital Income Plan</span>
+            </div>
+            <div class="nav-credit">ออกแบบและพัฒนาโดย ดร.นพ.ชุมพล นุชผ่อง</div>
+        </div>
+        <div class="nav-right"></div>
+    </nav>
+
+    <!-- Upload Screen -->
+    <main class="upload-container" id="upload-screen">
+        <div class="upload-header">
+            <h1>วิเคราะห์ข้อมูล แผนรายรับ-รายจ่ายเงินบำรุง</h1>
+            <p>อัปโหลดไฟล์ Excel ของคุณเพื่อดูแผนภูมิวิเคราะห์แบบอัตโนมัติ</p>
+        </div>
+        <div class="drop-zone" id="drop-zone">
+            <div class="drop-icon">📁</div>
+            <h2>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h2>
+            <p>รองรับไฟล์ .xlsx, .xls (เลือกได้หลายไฟล์)</p>
+            <input type="file" id="file-input" accept=".xlsx, .xls" hidden multiple>
+        </div>
+        <div class="info-box">
+            <div class="info-title"><span>🔒</span> ข้อแนะนำการเตรียมไฟล์</div>
+            <ul>
+                <li>ข้อมูลจะต้องอยู่ ในชีทชื่อ <strong>"แผนรายรับ-รายจ่ายเงินบำรุง"</strong></li>
+                <li>ตรวจสอบให้แน่ใจว่าแบบฟอร์มตรงตามมาตรฐานของกระทรวงสาธารณสุข</li>
+            </ul>
+        </div>
+    </main>
+
+    <!-- Dashboard Screen -->
+    <main class="dashboard-container" id="dashboard-screen" style="display: none;">
+
+        <!-- Hospital Sidebar -->
+        <aside class="hospital-sidebar" id="hospital-sidebar">
+            <div class="sidebar-header">
+                <h3>🏥 รายชื่อ รพ.</h3>
+                <span class="sidebar-count" id="hospital-count">0</span>
+            </div>
+            <div class="sidebar-list" id="hospital-list">
+                <!-- Populated dynamically including add button -->
+            </div>
+        </aside>
+
+        <!-- Dashboard Main Content -->
+        <div class="dashboard-main" id="dashboard-main">
+
+            <!-- Dashboard Top Bar -->
+            <div class="dashboard-topbar">
+                <div class="hospital-info">
+                    <span class="hospital-icon">🏥</span>
+                    <h1 id="hospital-name">ผลการวิเคราะห์: โรงพยาบาล...</h1>
+                </div>
+                <div class="summary-pills">
+                    <div class="pill income-pill">
+                        <span class="pill-label">รวมรายรับ</span>
+                        <span id="total-income-2569" class="pill-value">-</span>
+                    </div>
+                    <div class="pill expense-pill">
+                        <span class="pill-label">รวมรายจ่าย</span>
+                        <span id="total-expense-2569" class="pill-value">-</span>
+                    </div>
+                    <div class="pill net-pill">
+                        <span class="pill-label">รายรับสูง(ต่ำกว่า)รายจ่าย</span>
+                        <span id="net-2569" class="pill-value">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="overview">📊 ภาพรวม 6 ปี</button>
+                <button class="tab-btn" data-tab="breakdown">🥧 สัดส่วนรายหมวด</button>
+                <button class="tab-btn" data-tab="detail">📈 รายละเอียดรายการ</button>
+                <button class="tab-btn" data-tab="table">📋 ตารางรายงาน</button>
+                <button class="tab-btn" data-tab="performance">📅 ผลดำเนินงาน</button>
+                <button class="tab-btn" data-tab="compare" id="tab-btn-compare" style="display:none;">⚖️
+                    เปรียบเทียบ</button>
+            </div>
+
+            <!-- Tab: Overview -->
+            <div class="tab-content active" id="tab-overview">
+                <div class="chart-card main-chart">
+                    <div class="card-header">
+                        <h3>เปรียบเทียบรวมรายรับและรายจ่าย (6 ปี)</h3>
+                        <div class="chart-toggles">
+                            <button id="toggle-line" class="toggle-btn active" title="กราฟเส้น">📈 เส้น</button>
+                            <button id="toggle-bar" class="toggle-btn" title="กราฟแท่ง">📊 แท่ง</button>
+                            <span class="toggle-sep"></span>
+                            <button id="toggle-pct" class="toggle-btn pct-btn" title="แสดง % ของแผน">🎯 % แผน</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="income-expense-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Breakdown -->
+            <div class="tab-content" id="tab-breakdown">
+                <div class="breakdown-row">
+
+                    <!-- Income: Donut LEFT, Legend RIGHT -->
+                    <div class="breakdown-chart-card">
+                        <div class="breakdown-card-title">🟢 สัดส่วนรายรับแยกตามหมวดหมู่ (ปีแผน)</div>
+                        <div class="donut-canvas-wrap">
+                            <canvas id="income-breakdown-chart"></canvas>
+                        </div>
+                        <div id="income-legend" class="custom-legend"></div>
+                    </div>
+
+                    <!-- Expense: Donut LEFT, Legend RIGHT -->
+                    <div class="breakdown-chart-card">
+                        <div class="breakdown-card-title">🔴 สัดส่วนรายจ่ายแยกตามหมวดหมู่ (ปีแผน)</div>
+                        <div class="donut-canvas-wrap">
+                            <canvas id="expense-breakdown-chart"></canvas>
+                        </div>
+                        <div id="expense-legend" class="custom-legend"></div>
+                    </div>
+
+                </div>
+
+                <!-- Comparison Section in Breakdown Tab -->
+                <div id="breakdown-compare-section" style="display: none; margin-top: 2rem; width: 100%;">
+                    <!-- Income Comparison -->
+                    <div class="chart-card main-chart" style="width: 100%; margin-bottom: 2rem;">
+                        <div class="card-header">
+                            <h2 style="font-size: 1.1rem; color: var(--text-main);">⚖️ เปรียบเทียบสัดส่วนรายรับระหว่างโรงพยาบาล (ปีแผน)</h2>
+                            <div class="compare-toggles-row">
+                                <label class="modern-switch">
+                                    <input type="checkbox" id="toggle-breakdown-income-sort">
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">เรียงลำดับ</span>
+                                </label>
+                                <label class="modern-switch">
+                                    <input type="checkbox" id="toggle-breakdown-income-100">
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">สัดส่วน 100%</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="breakdown-compare-layout">
+                            <div class="chart-wrapper" style="height: 500px; flex: 1;">
+                                <canvas id="breakdown-compare-income-bar"></canvas>
+                            </div>
+                            <div id="breakdown-compare-income-legend" class="compare-custom-legend"></div>
+                        </div>
+                    </div>
+
+                    <!-- Expense Comparison -->
+                    <div class="chart-card main-chart" style="width: 100%;">
+                        <div class="card-header">
+                            <h2 style="font-size: 1.1rem; color: var(--text-main);">⚖️ เปรียบเทียบสัดส่วนรายจ่ายระหว่างโรงพยาบาล (ปีแผน)</h2>
+                            <div class="compare-toggles-row">
+                                <label class="modern-switch">
+                                    <input type="checkbox" id="toggle-breakdown-expense-sort">
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">เรียงลำดับ</span>
+                                </label>
+                                <label class="modern-switch">
+                                    <input type="checkbox" id="toggle-breakdown-expense-100">
+                                    <span class="switch-slider"></span>
+                                    <span class="switch-text">สัดส่วน 100%</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="breakdown-compare-layout">
+                            <div class="chart-wrapper" style="height: 500px; flex: 1;">
+                                <canvas id="breakdown-compare-expense-bar"></canvas>
+                            </div>
+                            <div id="breakdown-compare-expense-legend" class="compare-custom-legend"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Tab: Detail Sub-Charts -->
+            <div class="tab-content" id="tab-detail">
+                <div id="grouped-charts-container"></div>
+            </div>
+
+            <!-- Tab: Report Table -->
+            <div class="tab-content" id="tab-table">
+                <div id="report-table-container"></div>
+            </div>
+
+            <!-- Tab: Performance Results -->
+            <div class="tab-content" id="tab-performance">
+                <div id="performance-table-container"></div>
+            </div>
+
+            <!-- Tab: Compare -->
+            <div class="tab-content" id="tab-compare">
+                <div class="compare-container" id="compare-container">
+                    <div class="compare-header">
+                        <h2>⚖️ เปรียบเทียบข้อมูลระหว่างโรงพยาบาล</h2>
+                        <p class="compare-sub">เลือก รพ. ที่ต้องการเปรียบเทียบ</p>
+                    </div>
+                    <!-- Unified Comparison Area -->
+                    <div class="chart-card" style="margin-bottom:1.5rem">
+                        <div class="compare-item-header">
+                            <h3 id="compare-chart-title">กราฟเปรียบเทียบ</h3>
+                            <div class="perf-controls" style="margin:0; padding:0.4rem 1rem; border-radius:8px">
+                                <div class="compare-toggles-row" style="gap:1rem">
+                                    <label class="modern-switch">
+                                        <input type="checkbox" id="toggle-compare-values" checked>
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-text">แสดงค่า</span>
+                                    </label>
+                                    <label class="modern-switch">
+                                        <input type="checkbox" id="toggle-compare-growth">
+                                        <span class="switch-slider"></span>
+                                        <span class="switch-text">%</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Hospital Selection (Under Title) -->
+                            <div class="compare-selector" id="compare-selector"></div>
+                        </div>
+                        <div class="compare-main-layout">
+                            <div class="chart-wrapper" style="height: 520px; flex: 1;">
+                                <canvas id="compare-main-chart"></canvas>
+                            </div>
+                            <div id="compare-category-selector" class="compare-category-panel"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div><!-- /.dashboard-main -->
+    </main>
+
+    <!-- Modal -->
+    <div id="chart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <div class="modal-header-flex">
+                <h2 id="modal-chart-title">รายละเอียด</h2>
+                <div id="modal-toggles" class="chart-toggles" style="display:none;">
+                    <div class="toggle-group">
+                        <button id="modal-type-performance" class="toggle-btn active">รายเดือน</button>
+                        <button id="modal-type-trend" class="toggle-btn">แผน/ผล 6 ปี</button>
+                    </div>
+                    <span class="toggle-sep"></span>
+                    <div id="modal-perf-subtoggles" class="toggle-group">
+                        <button id="modal-mode-monthly" class="toggle-btn active">รายเดือน</button>
+                        <button id="modal-mode-cumulative" class="toggle-btn">สะสม</button>
+                    </div>
+                    <span class="toggle-sep"></span>
+                    <button id="modal-show-percent" class="toggle-btn pct-btn">🎯 % แผน</button>
+                </div>
+            </div>
+            <div class="modal-chart-container">
+                <canvas id="modal-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="definitions.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
