@@ -1,0 +1,762 @@
+/* ==========================================================
+   สไตล์การตกแต่งและออกแบบส่วนติดต่อผู้ใช้ (Monthly GL Style System)
+   ========================================================== */
+
+/* Set general body mesh gradient & typography rules */
+body {
+    font-family: 'Outfit', 'Sarabun', sans-serif;
+    background: radial-gradient(at 0% 0%, rgba(204, 251, 241, 0.4) 0, transparent 40%), /* Mint Teal */
+                radial-gradient(at 30% 20%, rgba(224, 242, 254, 0.55) 0, transparent 50%), /* Sky Blue */
+                radial-gradient(at 80% 0%, rgba(224, 231, 255, 0.45) 0, transparent 40%), /* Light Indigo */
+                radial-gradient(at 0% 100%, rgba(240, 253, 244, 0.5) 0, transparent 50%), /* Light Emerald */
+                radial-gradient(at 50% 100%, rgba(224, 242, 254, 0.4) 0, transparent 45%), /* Clean Light Cyan */
+                radial-gradient(at 100% 100%, rgba(209, 250, 229, 0.35) 0, transparent 40%), /* Soft Aqua */
+                linear-gradient(135deg, #f0fdfa, #f1f5f9); /* Mint Teal & Slate base */
+    background-attachment: fixed;
+    background-size: cover;
+    color: #1e293b;
+}
+
+/* Premium Scrollbars matching the theme */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+/* Glassmorphism sidebar & header */
+aside#mainSidebar {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 4px 0 24px rgba(31, 41, 55, 0.02) !important;
+}
+
+aside#mainSidebar > div {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Glassy container panel for top header and bottom footer inside sidebar */
+aside#mainSidebar > div:first-child,
+aside#mainSidebar > div:last-child {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    color: #64748b !important; /* text-slate-500 grey color */
+}
+
+/* Ensure the header text Monthly GL is grey */
+aside#mainSidebar h1 {
+    color: #64748b !important;
+}
+
+header {
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 4px 20px rgba(31, 41, 55, 0.01) !important;
+}
+
+/* Make main content wrapper background transparent so body mesh shows */
+main.bg-slate-50 {
+    background: transparent !important;
+}
+
+/* Glassmorphism cards inside main */
+/* Solid white cards inside main for professional and clean look */
+main .bg-white, 
+.stat-card, 
+#reviewFilesContainer,
+#workingCapitalExtraSection {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    border-radius: 1.25rem !important;
+    transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                background-color 0.25s ease,
+                border-color 0.25s ease,
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.bg-gradient-to-r.from-sky-50.to-indigo-50 {
+    background: linear-gradient(to right, rgba(240, 253, 254, 0.6), rgba(238, 242, 255, 0.6)) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+    border-radius: 1.25rem !important;
+}
+
+/* Cards hover effect */
+.stat-card:hover, 
+main .bg-white:hover, 
+#workingCapitalExtraSection:hover {
+    background: #ffffff !important;
+    box-shadow: 0 10px 15px -3px rgba(148, 163, 184, 0.12), 0 4px 6px -2px rgba(148, 163, 184, 0.06) !important;
+    border-color: rgba(203, 213, 225, 0.9) !important;
+}
+
+/* Stat card specific formatting and spacing - optimized for compactness and UX height */
+.stat-card {
+    padding: 1rem 1.25rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.35rem !important;
+    min-height: 115px !important;
+    justify-content: space-between !important;
+}
+
+.stat-card .text-2xl {
+    font-size: 1.75rem !important;
+    line-height: 1.25 !important;
+    margin-top: 0.1rem !important;
+    margin-bottom: 0.1rem !important;
+}
+
+/* Disable pointer events on dropZone children to prevent glitchy drag-leave events */
+#dropZone * {
+    pointer-events: none;
+}
+
+#dropZone button,
+#dropZone button * {
+    pointer-events: auto;
+}
+
+/* Dropzone styling */
+#dropZone {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 2px dashed rgba(14, 165, 233, 0.3) !important;
+    border-radius: 1.5rem !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 8px 32px 0 rgba(148, 163, 184, 0.03) !important;
+}
+
+#dropZone:hover {
+    background: rgba(255, 255, 255, 0.75) !important;
+    border-color: rgba(14, 165, 233, 0.6) !important;
+    box-shadow: 0 12px 40px 0 rgba(14, 165, 233, 0.08) !important;
+    transform: scale(1.005);
+}
+
+/* Collapsible accordion animation system */
+.accordion-content {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.accordion-content.open {
+    max-height: 2000px;
+    opacity: 1;
+}
+
+/* Hide utility */
+.hidden {
+    display: none !important;
+}
+
+/* Active & Inactive Tabs in Header (Folder Style, docked at bottom) */
+.tab-active {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-bottom: 1px solid transparent !important;
+    color: #0284c7 !important;
+    font-weight: 700 !important;
+    border-top-left-radius: 0.75rem !important;
+    border-top-right-radius: 0.75rem !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-bottom: -1px !important;
+    position: relative !important;
+    z-index: 10 !important;
+    transition: color 0.15s ease, background-color 0.15s ease !important;
+}
+
+.tab-inactive {
+    color: #64748b !important;
+    background: transparent !important;
+    border-top: 1px solid transparent !important;
+    border-left: 1px solid transparent !important;
+    border-right: 1px solid transparent !important;
+    border-bottom: 1px solid transparent !important;
+    border-top-left-radius: 0.75rem !important;
+    border-top-right-radius: 0.75rem !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin-bottom: -1px !important;
+    position: relative !important;
+    z-index: 5 !important;
+    transition: color 0.15s ease, background-color 0.15s ease !important;
+}
+
+.tab-inactive:hover {
+    color: #334155 !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-bottom: 1px solid transparent !important;
+}
+
+/* Active/Inactive Sidebar buttons */
+#sidebarMenu button {
+    border-radius: 0.75rem !important;
+    margin-bottom: 0.25rem;
+    padding: 0.75rem 1rem !important;
+    font-weight: 500;
+    border: 1px solid transparent !important;
+    transition: all 0.2s ease !important;
+}
+
+#sidebarMenu button:not(.sidebar-item):hover {
+    background: rgba(255, 255, 255, 0.4) !important;
+    color: #0f172a !important;
+}
+
+/* Accordion sub-items inside sidebarMenu */
+#sidebarMenu .sidebar-item {
+    background: transparent !important;
+    color: #475569 !important;
+    border: 1px solid transparent !important;
+    transition: all 0.2s ease !important;
+    font-weight: 500 !important;
+}
+
+#sidebarMenu .sidebar-item span.truncate,
+#mgtSelectionChecklist span.truncate {
+    display: inline-block !important;
+    line-height: 1.3 !important;
+    padding-top: 3px !important;
+    padding-bottom: 3px !important;
+}
+
+#sidebarMenu .sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.45) !important;
+    color: #0f172a !important;
+}
+
+/* Selected Active sidebar sub-item button */
+#sidebarMenu .sidebar-item.bg-sky-50 {
+    background: rgba(14, 165, 233, 0.1) !important;
+    border-color: rgba(14, 165, 233, 0.25) !important;
+    color: #0284c7 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px 0 rgba(14, 165, 233, 0.04) !important;
+}
+
+#sidebarMenu .sidebar-item.bg-sky-50 span {
+    color: #0284c7 !important;
+    font-weight: 700 !important;
+}
+
+/* Badges inside sidebar list */
+#sidebarMenu .sidebar-item .bg-sky-500 {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border: 1px solid transparent !important;
+}
+
+#sidebarMenu .sidebar-item .bg-emerald-100 {
+    background-color: rgba(209, 250, 229, 0.85) !important;
+    color: #065f46 !important;
+    border: 1px solid rgba(167, 243, 208, 0.6) !important;
+}
+
+#sidebarMenu .sidebar-item .bg-red-100 {
+    background-color: rgba(254, 226, 226, 0.85) !important;
+    color: #991b1b !important;
+    border: 1px solid rgba(252, 165, 165, 0.6) !important;
+}
+
+#sidebarMenu .sidebar-item .bg-orange-100 {
+    background-color: rgba(255, 237, 213, 0.85) !important;
+    color: #c2410c !important;
+    border: 1px solid rgba(253, 186, 116, 0.6) !important;
+}
+
+#sidebarMenu .sidebar-item .bg-slate-100 {
+    background-color: rgba(241, 245, 249, 0.85) !important;
+    color: #475569 !important;
+    border: 1px solid rgba(203, 213, 225, 0.6) !important;
+}
+
+/* Table styling */
+table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+thead th {
+    background: rgba(248, 250, 252, 0.6) !important;
+    backdrop-filter: blur(5px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.7) !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+}
+
+tbody tr {
+    background: transparent !important;
+    transition: background-color 0.15s ease !important;
+}
+
+tbody tr:hover {
+    background: rgba(241, 245, 249, 0.5) !important;
+}
+
+td {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+}
+
+/* Glassy inputs, selects, and text fields */
+input[type="text"], 
+select {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(5px) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: 0.75rem !important;
+    padding: 0.5rem 0.875rem !important;
+    color: #1e293b !important;
+    transition: all 0.2s ease !important;
+}
+
+input[type="text"]:focus, 
+select:focus {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: #0ea5e9 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+/* Glassy buttons */
+button:not(#sidebarMenu button):not(.tab-active):not(.tab-inactive) {
+    border-radius: 0.75rem !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Accent Buttons */
+#btnProcessUpload,
+#btnNewUpload,
+#mgtChartTypeLineBtn,
+#mgtChartTypeBarBtn,
+#btnAnalysisSelectAll,
+#btnAnalysisClear {
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12) !important;
+}
+
+#btnProcessUpload:hover {
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.2) !important;
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* Sub-Tab headers and pill selectors */
+.bg-slate-100 {
+    background: rgba(255, 255, 255, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: 0.875rem !important;
+}
+
+/* Progress bar redesign */
+.bg-slate-100.rounded-full {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: 1px solid rgba(226, 232, 240, 0.5) !important;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02) !important;
+    height: 10px !important;
+}
+
+.h-full.rounded-full {
+    border-radius: 9999px !important;
+    position: relative;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.bg-emerald-500 {
+    background: linear-gradient(90deg, #34d399, #059669) !important;
+}
+
+.bg-rose-500 {
+    background: linear-gradient(90deg, #f87171, #dc2626) !important;
+}
+
+.bg-sky-500 {
+    background: linear-gradient(90deg, #38bdf8, #0284c7) !important;
+}
+
+/* Glowing targets inside progress bars */
+.absolute.top-\[-3px\] {
+    background: #64748b !important;
+    box-shadow: 0 0 6px rgba(100, 116, 139, 0.4) !important;
+}
+
+/* Stat row list alignment (removes individual boxed frames inside liquidity/working capital) */
+/* Stat row list alignment (removes individual boxed frames inside liquidity/working capital) */
+[data-dashmetric]:not(.stat-card) {
+    background: transparent !important;
+    border: 2px solid transparent !important;
+    box-shadow: none !important;
+    border-radius: 0.75rem !important;
+    margin-bottom: 0.25rem;
+    padding: 0.625rem 0.875rem !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+[data-dashmetric]:not(.stat-card):hover {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(14, 165, 233, 0.4) !important;
+    box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.1), 0 4px 6px -2px rgba(14, 165, 233, 0.05) !important;
+    transform: translateY(-2px) scale(1.01);
+}
+
+.stat-card[data-dashmetric] {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.stat-card[data-dashmetric]:hover {
+    border-color: rgba(14, 165, 233, 0.5) !important;
+    box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.15), 0 10px 10px -5px rgba(14, 165, 233, 0.08) !important;
+    transform: translateY(-4px) scale(1.025);
+    background: #ffffff !important;
+}
+
+[data-dashmetric].border-sky-500 {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 2px solid rgba(14, 165, 233, 0.45) !important;
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.05) !important;
+}
+
+/* Styling alert cards */
+#dashAlertsList > div {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border-radius: 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+#dashAlertsList > div.border-emerald-200 {
+    border-left: 5px solid #10b981 !important;
+    background: rgba(240, 253, 244, 0.5) !important;
+}
+
+#dashAlertsList > div.border-amber-200 {
+    border-left: 5px solid #f59e0b !important;
+    background: rgba(255, 251, 235, 0.5) !important;
+}
+
+#dashAlertsList > div.border-red-200 {
+    border-left: 5px solid #ef4444 !important;
+    background: rgba(254, 242, 242, 0.5) !important;
+}
+
+/* Caret system and custom animations */
+.mgt-caret {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: rotate(0deg);
+    will-change: transform;
+}
+
+.mgt-caret.open {
+    transform: rotate(90deg);
+}
+
+.mgt-parent-row > td:first-child {
+    border-left: 3px solid transparent;
+    transition: border-color 0.15s ease;
+}
+
+.mgt-parent-row:hover > td:first-child,
+.mgt-parent-row.expanded > td:first-child {
+    border-left-color: #0284c7;
+}
+
+/* Pulse animation */
+@keyframes attentionPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.4), 0 2px 4px -1px rgba(2, 132, 199, 0.2);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 10px 20px -3px rgba(2, 132, 199, 0.5), 0 4px 6px -2px rgba(2, 132, 199, 0.3);
+    }
+}
+
+.animate-attention {
+    animation: attentionPulse 1.5s infinite ease-in-out;
+}
+
+/* ==========================================================
+   Custom Dropdown Styles & Sidebar Enhancements
+   ========================================================== */
+
+/* Custom Select Dropdown Wrapper */
+.custom-select-wrapper {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Custom Select Trigger Button */
+.custom-select-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: 0.75rem !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    font-size: 0.75rem !important; /* text-xs default */
+    padding: 0.4rem 0.75rem !important; /* more compact padding */
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    user-select: none;
+    outline: none !important;
+    box-sizing: border-box;
+}
+
+.custom-select-btn:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(203, 213, 225, 1) !important;
+}
+
+.custom-select-btn:focus,
+.custom-select-btn.active {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+}
+
+/* Custom Dropdown Options Menu Popup */
+.custom-select-dropdown {
+    position: absolute;
+    top: 100%;
+    margin-top: 0.375rem;
+    left: 0;
+    z-index: 9999;
+    min-width: 100%;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(16px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.15), 0 8px 10px -6px rgba(148, 163, 184, 0.1) !important;
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+    padding: 0.25rem !important;
+    box-sizing: border-box;
+}
+
+/* If dropdown should open upwards */
+.custom-select-dropdown.open-up {
+    top: auto !important;
+    bottom: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.375rem !important;
+}
+
+.custom-select-dropdown.show {
+    display: block;
+    animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom Individual Option Button */
+.custom-select-option {
+    width: 100%;
+    text-align: left;
+    padding: 0.4rem 0.6rem !important; /* more compact padding */
+    font-size: 0.75rem !important; /* text-xs default */
+    font-weight: 600 !important;
+    color: #334155 !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 0.5rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    display: block;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.custom-select-option:hover {
+    background: rgba(14, 165, 233, 0.08) !important;
+    color: #0284c7 !important;
+}
+
+.custom-select-option.selected {
+    background: #0ea5e9 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* Small variant for compact date selectors */
+.custom-select-wrapper.custom-select-sm .custom-select-btn {
+    font-size: 11px !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 0.5rem !important;
+}
+
+.custom-select-wrapper.custom-select-sm .custom-select-option {
+    font-size: 11px !important;
+    padding: 0.3rem 0.5rem !important;
+    border-radius: 0.375rem !important;
+}
+
+/* Chevron arrow rotation */
+.custom-select-btn.active .custom-select-arrow {
+    transform: rotate(180deg);
+}
+
+/* Custom scrollbar for dropdown menu */
+.custom-select-dropdown::-webkit-scrollbar {
+    width: 5px;
+}
+.custom-select-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-select-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 10px;
+}
+
+/* Sidebar Glass & Theme Color Enhancements */
+#mainSidebar {
+    background: rgba(255, 255, 255, 0.6) !important; /* Richer glassmorphism */
+    backdrop-filter: blur(24px) saturate(180%) !important;
+}
+
+#mainSidebar h1 {
+    background: linear-gradient(135deg, #0284c7, #06b6d4) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+    font-size: 1.25rem !important;
+}
+
+#sidebarHeader h2 {
+    color: #0284c7 !important; /* Sky Blue instead of grey */
+}
+
+/* Accordion header button overrides (avoiding ugly bg-slate-50 gray) */
+#sidebarMenu button.bg-slate-50 {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 1px solid rgba(226, 232, 240, 0.6) !important;
+    color: #475569 !important;
+    border-radius: 0.75rem !important;
+}
+
+#sidebarMenu button.bg-slate-50:hover {
+    background: rgba(14, 165, 233, 0.05) !important;
+    color: #0284c7 !important;
+    border-color: rgba(14, 165, 233, 0.15) !important;
+}
+
+#sidebarMenu button.bg-sky-50 {
+    background: rgba(14, 165, 233, 0.08) !important;
+    border: 1px solid rgba(14, 165, 233, 0.15) !important;
+    color: #0284c7 !important;
+    border-radius: 0.75rem !important;
+}
+
+/* Sidebar items styling overrides */
+#sidebarMenu .sidebar-item:not(.bg-sky-50) {
+    color: #475569 !important;
+    background: transparent !important;
+}
+
+#sidebarMenu .sidebar-item:not(.bg-sky-50):hover {
+    background: rgba(14, 165, 233, 0.05) !important;
+    color: #0284c7 !important;
+}
+
+#sidebarMenu .sidebar-item.bg-sky-50 {
+    background: rgba(14, 165, 233, 0.08) !important;
+    border: 1px solid rgba(14, 165, 233, 0.15) !important;
+    color: #0284c7 !important;
+}
+
+/* Date filter widget background glass update */
+.date-filter-widget {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+/* Large variant for primary selectors like Working Capital Category */
+.custom-select-wrapper.custom-select-lg {
+    width: 100%;
+}
+
+.custom-select-wrapper.custom-select-lg .custom-select-btn {
+    font-size: 0.95rem !important; /* Larger font size, matching standard text */
+    padding: 0.75rem 1rem !important; /* Larger padding, matches p-3 of sidebar cards */
+    border-radius: 0.875rem !important;
+    background: linear-gradient(135deg, rgba(240, 249, 255, 0.9), rgba(224, 242, 254, 0.9)) !important; /* Soft Sky Blue Gradient */
+    border: 1px solid rgba(14, 165, 233, 0.4) !important; /* Sky Blue Border */
+    color: #0369a1 !important; /* Deep Sky Blue Text */
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+    font-weight: 800 !important;
+}
+
+.custom-select-wrapper.custom-select-lg .custom-select-btn:hover {
+    background: linear-gradient(135deg, rgba(224, 242, 254, 0.95), rgba(186, 230, 253, 0.95)) !important;
+    border-color: rgba(14, 165, 233, 0.55) !important;
+    color: #0284c7 !important;
+}
+
+.custom-select-wrapper.custom-select-lg .custom-select-btn.active {
+    background: #ffffff !important;
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2) !important;
+    color: #0284c7 !important;
+}
+
+.custom-select-wrapper.custom-select-lg .custom-select-option {
+    font-size: 0.9rem !important;
+    padding: 0.6rem 0.8rem !important;
+    border-radius: 0.625rem !important;
+}
+
