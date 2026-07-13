@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกบริการ - Monthly GL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=2">
+    <script src="js/auth.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex items-center justify-center">
+    <!-- Selection Overlay Screen (Choice Screen) -->
+    <div id="selectionOverlay" class="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-white/10 backdrop-blur-[8px] transition-all duration-500 overflow-hidden">
+        <!-- Canvas for Dynamic Smoke Animation -->
+        <canvas id="selectionSmokeCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+        <!-- Glassmorphism Glowing Background Circles -->
+        <div class="absolute w-[380px] h-[380px] rounded-full bg-sky-400/10 blur-[85px] top-[-60px] left-[-60px] pointer-events-none animate-pulse duration-[7000ms]"></div>
+        <div class="absolute w-[450px] h-[450px] rounded-full bg-blue-600/8 blur-[100px] bottom-[-120px] right-[-60px] pointer-events-none animate-pulse duration-[9000ms]"></div>
+        <div class="absolute w-[280px] h-[280px] rounded-full bg-emerald-400/10 blur-[80px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+
+        <div class="relative w-full max-w-4xl bg-white/80 backdrop-blur-3xl rounded-3xl shadow-[0_30px_80px_rgba(15,23,42,0.18)] border border-white/60 p-8 md:p-12 z-10 flex flex-col items-center">
+            <!-- User Display Info in Choice Screen -->
+            <div class="absolute top-6 right-6 flex items-center gap-2 bg-white/50 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/60 shadow-sm">
+                <span class="text-xs font-bold text-slate-600">ผู้ใช้งาน:</span>
+                <span id="selectionUserDisplayName" class="text-xs font-black text-slate-800">...</span>
+                <div class="h-4 w-[1px] bg-slate-300 mx-1"></div>
+                <button id="btnSelectionChangePassword" class="text-xs font-bold text-sky-600 hover:text-sky-850 transition-colors flex items-center gap-1">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M443.5-736.5Q467-760 500-760t56.5 23.5Q580-713 580-680t-23.5 56.5Q533-600 500-600t-56.5-23.5Q420-647 420-680t23.5-56.5ZM500 0 320-180l60-80-60-80 60-85v-47q-54-32-87-86.5T260-680q0-100 70-170t170-70q100 0 170 70t70 170q0 67-33 121.5T620-472v352L500 0ZM340-680q0 56 34 98.5t86 56.5v125l-41 58 61 82-55 71 75 75 40-40v-371q52-14 86-56.5t34-98.5q0-66-47-113t-113-47q-66 0-113 47t-47 113Z"/></svg></span>
+                    เปลี่ยนรหัสผ่าน
+                </button>
+                <div class="h-4 w-[1px] bg-slate-300 mx-1"></div>
+                <button id="btnSelectionLogout" class="text-xs font-bold text-red-500 hover:text-red-700 transition-colors flex items-center gap-1">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg></span>
+                    ออกจากระบบ
+                </button>
+            </div>
+
+            <div class="text-center mb-10 select-none mt-4">
+                <img src="pic/logo.png" alt="Logo" class="w-24 h-24 object-contain rounded-full mx-auto mb-4 shadow-[0_8px_25px_rgba(99,102,241,0.15)] border border-white/20 transform hover:scale-105 transition-all duration-300">
+                <h2 class="text-3xl font-black text-slate-800 leading-tight">กรุณาเลือกระบบที่ต้องการใช้งาน</h2>
+                <p class="text-sm text-slate-500 mt-2 font-semibold">ระบบบริหารจัดการและวิเคราะห์ข้อมูลเพื่อการตัดสินใจ</p>
+            </div>
+
+            <!-- Choice Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+                <!-- Option 1: วิเคราะห์งบทดลอง -->
+                <button id="btnSelectTrialBalance" class="group relative flex flex-col items-center text-center p-8 bg-white/50 hover:bg-white rounded-2xl border border-slate-200/60 hover:border-sky-400/50 shadow-sm hover:shadow-[0_20px_40px_rgba(14,165,233,0.12)] transition-all duration-350 transform hover:-translate-y-1.5 focus:outline-none">
+                    <div class="w-16 h-16 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a2 2 0 00-2-2H5a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v8m-6 0a2 2 0 002 2h2a2 2 0 002-2" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-sky-600 transition-colors">วิเคราะห์งบทดลอง</h3>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed max-w-[240px]">ประมวลผลดัชนีทางการเงิน สภาพคล่อง และความเสี่ยงวิกฤตทางการเงิน จากงบทดลอง</p>
+                    <div id="selectionGlQuotaInfo" class="mt-4 text-[10px] text-slate-500 font-bold bg-slate-100/70 px-3 py-1 rounded-full border border-slate-200/50">
+                        โควตาคงเหลือ: <span id="selectionGlRemain" class="font-black text-sky-600 font-mono text-[11px]">...</span>/<span id="selectionGlLimit">...</span> ครั้ง/เดือน
+                    </div>
+                    <div class="mt-6 flex items-center gap-1 text-xs font-bold text-sky-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>เริ่มใช้งาน</span>
+                        <span>➔</span>
+                    </div>
+                </button>
+
+                <!-- Option 2: วิเคราะห์เงินบำรุง -->
+                <a href="PlanInsightV0/PlanInsight.html" target="_self" id="btnSelectMaintenanceFund" class="group relative flex flex-col items-center text-center p-8 bg-white/50 hover:bg-white rounded-2xl border border-slate-200/60 hover:border-indigo-400/50 shadow-sm hover:shadow-[0_20px_40px_rgba(99,102,241,0.12)] transition-all duration-350 transform hover:-translate-y-1.5 focus:outline-none">
+                    <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">วิเคราะห์แผนเงินบำรุง</h3>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed max-w-[240px]">ระบบวิเคราะห์เงินบำรุงเพื่อตรวจสอบงบประมาณและข้อมูลที่เกี่ยวข้องในการจัดสรรเงินบำรุงโรงพยาบาล</p>
+                    <div id="selectionPlanQuotaInfo" class="mt-4 text-[10px] text-slate-500 font-bold bg-slate-100/70 px-3 py-1 rounded-full border border-slate-200/50">
+                        โควตาคงเหลือ: <span id="selectionPlanRemain" class="font-black text-indigo-600 font-mono text-[11px]">...</span>/<span id="selectionPlanLimit">...</span> ครั้ง/เดือน
+                    </div>
+                    <div class="mt-6 flex items-center gap-1 text-xs font-bold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span>เริ่มใช้งาน</span>
+                        <span>➔</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Developer Credit -->
+            <div class="text-center mt-12 text-[10px] text-slate-400 font-bold select-none border-t border-slate-200/20 pt-4 w-full max-w-xs">
+                ออกแบบและพัฒนาโดย ดร.นพ.ชุมพล นุชผ่อง
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal Dialog -->
+    <div id="changePasswordModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col p-6 overflow-hidden transform transition-transform">
+            <div class="border-b pb-4 mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🔑</span>
+                    <h3 class="text-lg font-bold text-slate-800 leading-tight">เปลี่ยนรหัสผ่านผู้ใช้งาน</h3>
+                </div>
+            </div>
+
+            <form id="changePasswordForm" class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">รหัสผ่านเดิม</label>
+                    <input type="password" id="oldPassword" required placeholder="ระบุรหัสเดิม" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 block w-full p-3 font-semibold transition-all" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">รหัสผ่านใหม่</label>
+                    <input type="password" id="newPassword" required placeholder="ระบุรหัสผ่านใหม่" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 block w-full p-3 font-semibold transition-all" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">ยืนยันรหัสผ่านใหม่</label>
+                    <input type="password" id="confirmPassword" required placeholder="ระบุรหัสผ่านใหม่อีกครั้ง" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 block w-full p-3 font-semibold transition-all" />
+                </div>
+
+                <div id="changePassErrorMsg" class="hidden text-xs text-red-650 font-bold bg-red-50 border border-red-200 p-3 rounded-xl"></div>
+                <div id="changePassSuccessMsg" class="hidden text-xs text-emerald-650 font-bold bg-emerald-50 border border-emerald-200 p-3 rounded-xl"></div>
+
+                <div class="flex gap-3 mt-2">
+                    <button type="button" id="btnCancelChangePassword" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-3 rounded-xl transition-all focus:outline-none text-center">ยกเลิก</button>
+                    <button type="submit" id="btnSubmitChangePassword" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white font-bold p-3 rounded-xl transition-all shadow-md flex items-center justify-center focus:outline-none">บันทึกรหัสผ่านใหม่</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
