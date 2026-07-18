@@ -1,0 +1,39 @@
+(function () {
+    // List of pages that don't need authentication
+    const publicPages = ['login.html'];
+    const currentPage = window.location.pathname.split('/').pop().toLowerCase();
+
+    if (publicPages.includes(currentPage)) {
+        return;
+    }
+
+    const isLoggedIn = localStorage.getItem('tps_is_logged_in');
+    const loginTime = localStorage.getItem('tps_login_time');
+    const SESSION_TIMEOUT = 8 * 60 * 60 * 1000; // 8 hours
+    const now = Date.now();
+
+    let needRedirect = false;
+
+    if (isLoggedIn !== 'true') {
+        needRedirect = true;
+    } else if (loginTime && (now - parseInt(loginTime, 10)) > SESSION_TIMEOUT) {
+        needRedirect = true;
+        alert('เซสชั่นของคุณหมดอายุ กรุณาเข้าสู่ระบบใหม่');
+        localStorage.removeItem('tps_is_logged_in');
+        localStorage.removeItem('tps_auth_token');
+        localStorage.removeItem('tps_login_time');
+    }
+
+    if (needRedirect) {
+        // Prevent flashing of protected content before redirect
+        document.documentElement.style.display = 'none';
+        window.location.replace('login.html');
+    }
+})();
+
+function logout() {
+    localStorage.removeItem('tps_is_logged_in');
+    localStorage.removeItem('tps_auth_token');
+    localStorage.removeItem('tps_login_time');
+    window.location.replace('login.html');
+}

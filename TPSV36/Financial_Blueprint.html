@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="auth.js"></script>
+    <title>Financial Blueprint</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Financial_Structure.css">
+    <script src="hospital_data.js"></script>
+    <script src="accounts_mgt.js"></script>
+    <script src="tb_accounts_names.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .chip {
+            display: inline-flex;
+            align-items: center; 
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            gap: 0.4rem;
+            border: 1px solid #bae6fd;
+            transition: all 0.2s;
+        }
+        .chip button {
+            background: transparent;
+            border: none;
+            color: #0369a1;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+        }
+        .chip button:hover {
+            color: #ef4444;
+        }
+        .blueprint-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        @media (min-width: 1024px) {
+            .blueprint-container {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+        .sidebar-card {
+            background: white;
+            border-radius: var(--radius-lg, 12px);
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            height: fit-content;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+        .metric-title {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .metric-sub {
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+        .ratio-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-warning { background: #fef9c3; color: #a16207; }
+        .badge-danger { background: #fee2e2; color: #b91c1c; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+        
+        .textarea-input {
+            width: 100%;
+            height: 150px;
+            padding: 0.8rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+        }
+        .primary-btn {
+            background: var(--primary-color, #0ea5e9);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .primary-btn:hover {
+            background: var(--primary-hover, #0284c7);
+        }
+        .secondary-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .secondary-btn:hover {
+            background: #e2e8f0;
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .alert-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+        .alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+        .alert-danger { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+        
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        .compare-table th {
+            background: #f8fafc;
+            color: #475569;
+            text-align: left;
+            padding: 0.8rem;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .compare-table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .compare-table tr:hover {
+            background: #f8fafc;
+        }
+        .text-right { text-align: right; }
+        .variance-up { color: #16a34a; font-weight: 600; }
+        .variance-down { color: #dc2626; font-weight: 600; }
+        .variance-zero { color: #64748b; }
+        
+        /* Skeleton styling */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .skeleton-text {
+            height: 1.2rem;
+            width: 100%;
+        }
+        .skeleton-title {
+            height: 1.5rem;
+            width: 120px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Sticky table and equal column styles */
+        .compare-table {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .compare-table th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc !important;
+            z-index: 10;
+            box-shadow: inset 0 -2px 0 #e2e8f0;
+            white-space: normal;
+            word-wrap: break-word;
+            word-break: break-all;
+            padding: 10px 8px;
+        }
+
+        /* Collapsible rows styles */
+        .row-parent {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .row-parent:hover {
+            background: #f1f5f9 !important;
+        }
+        .toggle-icon {
+            display: inline-block;
+            width: 14px;
+            margin-right: 6px;
+            transition: transform 0.15s ease;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+        .leaf-row {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .leaf-row:hover {
+            background: #f8fafc !important;
+        }
+        
+        /* Chart icon button on hover (Uses opacity to prevent layout shifts) */
+        .chart-icon-btn {
+            display: inline-block !important;
+            opacity: 0;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #0ea5e9;
+            margin-left: 6px;
+            padding: 1px 3px;
+            border-radius: 4px;
+            transition: opacity 0.15s ease-in-out, background 0.2s, transform 0.2s;
+        }
+        .chart-icon-btn:hover {
+            background: #e0f2fe;
+            transform: scale(1.15);
+        }
+        .compare-table tr:hover .chart-icon-btn {
+            opacity: 1 !important;
+        }
+
+        /* Reusable Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .2s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #0ea5e9;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Pill Tab Switch for Chart Type */
+        .pill-toggle-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 3px;
+            border: 1px solid #e2e8f0;
+            gap: 2px;
+        }
+        .pill-toggle-btn {
+            border: none;
+            background: transparent;
+            padding: 0.35rem 0.85rem;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1.2;
+        }
+        .pill-toggle-btn.active {
+            background: white;
+            color: #0ea5e9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        /* Layout-stable Legend Card with dashed border animation */
+        .legend-card {
+            transition: all 0.2s ease-in-out;
+            border-top: 2px solid transparent !important;
+            border-right: 2px solid transparent !important;
+            border-bottom: 2px solid transparent !important;
+        }
+        .legend-card.active-hover {
+            border-top: 2px dashed var(--hospital-color) !important;
+            border-right: 2px dashed var(--hospital-color) !important;
+            border-bottom: 2px dashed var(--hospital-color) !important;
+            border-left: 4px dashed var(--hospital-color) !important;
+            animation: border-crawl-ants 1.2s linear infinite;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes border-crawl-ants {
+            0% {
+                border-style: dashed;
+            }
+            50% {
+                border-style: dotted;
+            }
+            100% {
+                border-style: dashed;
+            }
+        }
+
+        /* Chart modal overlay */
+        .chart-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .chart-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 95%;
+            max-width: 1200px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            animation: modalSlide 0.25s ease-out;
+        }
+        @keyframes modalSlide {
+            from { transform: translateY(15px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .chart-modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chart-modal-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            gap: 1.5rem;
+            min-height: 0;
+            background: #ffffff;
+        }
+        .chart-canvas-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+        .chart-sidebar {
+            width: 280px;
+            background: #f8fafc;
+            border-left: 1px solid #e2e8f0;
+            padding: 1.25rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .sidebar-legend-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .legend-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #334155;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+        .legend-card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+        }
+        .legend-color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .chart-modal-close {
+            background: #f1f5f9;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .chart-modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .chart-toggle-btn {
+            padding: 0.35rem 0.75rem;
+            border: 1px solid #cbd5e1;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .chart-toggle-btn.active {
+            background: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+        }
+
+        /* Column close styling */
+        .col-close-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            margin-left: 0.35rem;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            padding: 2px 5px;
+            transition: all 0.2s;
+        }
+        .col-close-btn:hover {
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        /* Suggestions dropdown styling override */
+        .suggestions {
+            position: absolute !important;
+            top: 100% !important;
+            left: 0 !important;
+            right: 0 !important;
+            background: white !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+            max-height: 350px !important;
+            overflow-y: auto !important;
+            z-index: 1000 !important;
+            display: none;
+            padding: 0 !important;
+        }
+        .suggestion-header {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            z-index: 10;
+        }
+        .suggestion-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 8px 12px !important;
+            cursor: pointer !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            text-align: left !important;
+        }
+        .suggestion-item:hover {
+            background: #f8fafc !important;
+        }
+        .suggestion-checkbox {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>
+            <span style="background:var(--primary-color); color:white; padding:4px 8px; border-radius:6px; font-size: 1rem;">
+                Financial Blueprint</span>
+            <span>วิเคราะห์และวางแผนงบทดลอง</span>
+        </h1>
+        <div class="nav-buttons">
+            <a href="Financial_Structure.html" class="nav-btn" target="_blank">Financial Structure</a>
+            <a href="TPS_Analysis.html" class="nav-btn" target="_blank">TPS Analysis</a>
+            <a href="Revenue_Analysis.html" class="nav-btn" target="_blank">Revenue Analysis</a>
+            <a href="Financial_Blueprint.html" class="nav-btn active" target="_blank">Financial Blueprint</a>
+            
+            <button onclick="logout()" class="nav-btn" style="color: #ef4444; border: 1px solid #fee2e2;">ออกจากระบบ</button>
+        </div>
+    </div>
+
+    <div class="search-container" style="display: flex; flex-direction: column; align-items: center; padding: 1rem 2rem; gap: 0.75rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-color);">
+        <!-- Unified Search Card -->
+        <div class="search-bar-card" style="display: flex; align-items: center; gap: 0.8rem; background: white; padding: 0.5rem 1.5rem; border-radius: 50px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0; width: 100%; max-width: 1200px; flex-wrap: wrap;">
+
+            <!-- Filters -->
+            <div style="display:flex; align-items:center; gap: 0.8rem;">
+                <div class="filter-group" style="gap: 4px; display: flex; align-items: center;">
+                    <label style="font-size:0.9rem; white-space:nowrap; font-weight: 600; color: #64748b;">เขต:</label>
+                    <select id="regionFilter" onchange="updateRegionDependents()" style="width: 80px; padding: 0.3rem; font-size: 0.9rem; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #f8fafc;">
+                        <option value="">ทั้งหมด</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="gap: 4px; display: flex; align-items: center;">
+                    <label style="font-size:0.9rem; white-space:nowrap; font-weight: 600; color: #64748b;">จังหวัด:</label>
+                    <select id="provinceFilter" onchange="updateProvinceDependents()" style="width: 110px; padding: 0.3rem; font-size: 0.9rem; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #f8fafc;">
+                        <option value="">ทั้งหมด</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="gap: 4px; display: flex; align-items: center;">
+                    <label style="font-size:0.9rem; white-space:nowrap; font-weight: 600; color: #64748b;">กลุ่ม:</label>
+                    <select id="groupFilter" onchange="applyFilters()" style="width: 110px; padding: 0.3rem; font-size: 0.9rem; border: 1px solid #e2e8f0; border-radius: 6px; background-color: #f8fafc;">
+                        <option value="">ทั้งหมด</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="width: 1px; height: 24px; background: #cbd5e1; margin: 0 0.2rem;"></div>
+
+            <!-- Search Input -->
+            <div class="search-input-group" style="flex: 1; padding: 0; min-width: 200px; border:none;">
+                <span class="search-icon" style="font-size: 1rem;">🔍</span>
+                <input type="text" id="searchInput" placeholder="ค้นหาและเลือกโรงพยาบาล..." autocomplete="off" style="font-size: 0.95rem; width: 100%;" onfocus="showSuggestions()" onclick="event.stopPropagation(); showSuggestions()" oninput="applyFilters(); showSuggestions();">
+                <div class="input-spinner" id="searchSpinner" style="display: none;"></div>
+                <div class="suggestions" id="suggestions" onclick="event.stopPropagation()"></div>
+            </div>
+
+        </div>
+
+        <!-- Selected Chips List (Full Width) -->
+        <div id="selectedHospitalsChips" style="display: flex !important; flex-wrap: wrap !important; gap: 0.5rem !important; width: 100% !important; margin: 0.75rem 0 !important; align-items: center; justify-content: flex-start;">
+            <!-- Chips will be added dynamically -->
+        </div>
+
+        <!-- Actions Container -->
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1200px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.75rem 1.25rem; border-radius: 12px; margin-top: 0.5rem; flex-wrap: wrap; gap: 1rem;">
+            <!-- Left Side: Import controls and Sheet selector -->
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; flex: 1;">
+                <!-- Excel Upload Button -->
+                <div style="position: relative; display: inline-block;">
+                    <button class="secondary-btn" style="cursor: pointer; position: relative; padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 6px;">
+                        <span>📂</span> นำเข้างบทดลอง (Excel)
+                        <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                    </button>
+                </div>
+                <!-- Filename (Truncated or inside static container) -->
+                <div id="excelFileNameDisplayContainer" style="display: flex; align-items: center; max-width: 250px;">
+                    <span id="excelFileNameDisplay" style="font-size: 0.85rem; color: #166534; font-weight: 600; display: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                </div>
+
+                <!-- Excel Import Data Type Selector -->
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: #64748b; white-space: nowrap;">รูปแบบข้อมูลงบ:</label>
+                    <select id="excelImportDataType" onchange="changeExcelImportDataType()" style="width: 130px; padding: 0.35rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; background-color: white; font-family: 'Sarabun', sans-serif;">
+                        <option value="quarterly">ข้อมูลรายไตรมาส</option>
+                        <option value="monthly">ข้อมูลรายเดือน</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Right Side: Compare Trigger and Progress State -->
+            <div style="display: flex; align-items: center; gap: 1rem; justify-content: flex-end; min-width: 320px;">
+                <!-- Local Loader -->
+                <div id="localSpinner" style="display: none; align-items: center; gap: 0.5rem; color: #0ea5e9; font-weight: 600; font-size: 0.95rem; white-space: nowrap;">
+                    <div style="width: 18px; height: 18px; border: 3.5px solid #cbd5e1; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 1s linear infinite; flex-shrink: 0;"></div>
+                    <span id="localSpinnerText" style="font-size: 0.85rem;">กำลังโหลดข้อมูล...</span>
+                </div>
+                
+                <!-- Search/Compare Button -->
+                <button id="compareHospitalsBtn" class="primary-btn" onclick="startComparison()" style="display: none; min-width: 200px; justify-content: center; align-items: center;">
+                    <span class="btn-spinner" id="compareBtnSpinner" style="display: none; width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; flex-shrink: 0;"></span>
+                    <span id="compareBtnText">🔍 เริ่มดึงข้อมูลและเปรียบเทียบ</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content" id="mainContent" style="padding: 1rem 2rem;">
+        <!-- Welcome Message -->
+        <div id="welcomeMessage" class="welcome-message" style="display: none;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🗺️</div>
+            <h2>ระบบ Financial Blueprint วิเคราะห์งบทดลอง</h2>
+            <p>กรุณาค้นหาและเลือกโรงพยาบาลด้านบน เพื่อนำเข้าและจำลองข้อมูลงบทดลองในการวิเคราะห์</p>
+        </div>
+
+        <!-- Main Workspace -->
+        <div id="workspaceArea" style="display: none;">
+            <div class="blueprint-container">
+                <!-- Sidebar: Data Import -->
+                <div id="sidebarCardContainer" class="sidebar-card">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.2rem;">📂 นำเข้าข้อมูลงบทดลอง</h3>
+                    <p style="font-size: 0.85rem; color: #64748b;">อัปโหลดไฟล์ Excel (เปรียบเทียบหลาย รพ.) หรือวางข้อมูล</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.8rem; margin-bottom: 0.5rem;">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">ไฟล์งบทดลอง Excel (หลาย รพ.):</label>
+                        <input type="file" id="excelFileInputSidebar" accept=".xlsx, .xls" style="font-size: 0.85rem; border: 1px dashed #cbd5e1; padding: 0.5rem; border-radius: 6px; cursor: pointer; background: #fafafa; width: 100%;">
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">ไฟล์งบทดลองเดี่ยว (CSV):</label>
+                        <input type="file" id="fileInput" accept=".csv" style="font-size: 0.85rem; border: 1px dashed #cbd5e1; padding: 0.5rem; border-radius: 6px; cursor: pointer; background: #fafafa; width: 100%;">
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">หรือวางข้อมูลงบทดลอง (รหัสบัญชี, ชื่อบัญชี, เดบิต, เครดิต):</label>
+                        <textarea id="pasteArea" class="textarea-input" placeholder="ตัวอย่าง:&#10;1101010101   เงินสด   50,000.00   0.00&#10;1101020601   เงินฝากธนาคาร   2,500,000.00   0.00&#10;2101010101   เจ้าหนี้การค้า   0.00   450,000.00"></textarea>
+                    </div>
+
+                    <button class="primary-btn" onclick="analyzeImportedData()">
+                        <span>⚡</span> วิเคราะห์ข้อมูล
+                    </button>
+                    
+                    <button class="secondary-btn" onclick="loadSampleTrialBalance()">
+                        <span>📋</span> โหลดข้อมูลงบทดลองจำลอง
+                    </button>
+                </div>
+
+                <!-- Main Analysis Area -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Verification Alert Placeholder -->
+                    <div id="balanceAlert"></div>
+
+                    <!-- Comparison Table -->
+                    <div style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); overflow-x: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b;">⚖️ ตารางงบบริหาร</h3>
+                            <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+                                <div id="tablePeriodSelectGroup" style="display: none; align-items: center; gap: 0.4rem;">
+                                    <label style="font-size: 0.85rem; font-weight: 600; color: #64748b; white-space: nowrap;">เลือกช่วงเวลา:</label>
+                                    <select id="tablePeriodSelect" onchange="updateTableFromSelectedSheet()" style="padding: 0.35rem 0.6rem; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; background-color: white; font-family: 'Sarabun', sans-serif;"></select>
+                                </div>
+                                <span style="font-size: 0.8rem; color: #64748b; background: #f1f5f9; padding: 0.3rem 0.6rem; border-radius: 4px;" id="compareSourceInfo">เปรียบเทียบกับฐานข้อมูลหลัก</span>
+                            </div>
+                        </div>
+                        <table class="compare-table">
+                            <thead>
+                                <tr>
+                                    <th>รายการวิเคราะห์โครงสร้างงบการเงิน</th>
+                                    <th class="text-right">งบทดลองที่นำเข้า (TB)</th>
+                                    <th class="text-right">ข้อมูลในฐานข้อมูล (Database)</th>
+                                    <th class="text-right">ผลต่าง (Variance)</th>
+                                    <th class="text-right">% ผลต่าง</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonTableBody">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">กรุณานำเข้าข้อมูลงบทดลองเพื่อทำการเปรียบเทียบ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Interactive Monthly Trend Modal -->
+    <div id="chartModal" class="chart-modal-overlay" onclick="closeChartModal(event)">
+        <div class="chart-modal-content" onclick="event.stopPropagation()">
+            <div class="chart-modal-header">
+                <div>
+                    <h3 id="modalChartTitle" style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0;">แนวโน้มรายเดือน</h3>
+                    <p id="modalChartSubtitle" style="font-size: 0.8rem; color: #64748b; margin: 0.2rem 0 0 0;"></p>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <!-- Period Selectors -->
+                    <div id="chartPeriodSelectors" style="display: none; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; color: #475569; border-right: 1px solid #e2e8f0; padding-right: 1rem;">
+                        <span>ช่วงเวลา:</span>
+                        <select id="chartStartPeriod" onchange="changeChartPeriod()" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; border-radius: 6px; border: 1px solid #cbd5e1; background: white; min-width: 100px; font-family: 'Sarabun', sans-serif;"></select>
+                        <span>ถึง</span>
+                        <select id="chartEndPeriod" onchange="changeChartPeriod()" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; border-radius: 6px; border: 1px solid #cbd5e1; background: white; min-width: 100px; font-family: 'Sarabun', sans-serif;"></select>
+                    </div>
+
+                    <!-- Sub-accounts toggle switch -->
+                    <label id="toggleSubAccountsWrapper" style="display: none; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer; user-select: none; border-right: 1px solid #e2e8f0; padding-right: 1rem;">
+                        <span class="switch">
+                            <input type="checkbox" id="btnToggleSubAccounts" onchange="toggleSubAccountsChart(this.checked)">
+                            <span class="slider"></span>
+                        </span>
+                        <span>บัญชีย่อย</span>
+                    </label>
+
+                    <!-- Cumulative toggle switch -->
+                    <label id="toggleCumulativeWrapper" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer; user-select: none; border-right: 1px solid #e2e8f0; padding-right: 1rem;">
+                        <span class="switch">
+                            <input type="checkbox" id="btnToggleCumulative" onchange="toggleCumulativeChart(this.checked)" checked>
+                            <span class="slider"></span>
+                        </span>
+                        <span id="cumulativeLabelText">แสดงค่าสะสม</span>
+                    </label>
+                    
+                    <!-- Chart Type Pill Toggle -->
+                    <div class="pill-toggle-container">
+                        <button id="btnLineChart" class="pill-toggle-btn active" onclick="switchModalChartType('line')">กราฟเส้น</button>
+                        <button id="btnBarChart" class="pill-toggle-btn" onclick="switchModalChartType('bar')">กราฟแท่ง</button>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-modal-body">
+                <div class="chart-canvas-wrapper">
+                    <canvas id="modalChartCanvas"></canvas>
+                </div>
+                <div class="chart-sidebar" id="modalChartSidebar">
+                    <div class="sidebar-legend-title">รายชื่อโรงพยาบาล/ตัวชี้วัด</div>
+                    <!-- Legend cards will be injected dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" onclick="scrollToTop()" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99; border: none; outline: none; background-color: #0284c7; color: white; cursor: pointer; padding: 12px 16px; border-radius: 50px; font-size: 0.9rem; font-family: 'Sarabun', sans-serif; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: opacity 0.3s, background-color 0.3s; align-items: center; gap: 6px;">
+        <span>▲</span> กลับด้านบน
+    </button>
+
+    <script src="Financial_Blueprint.js"></script>
+    <footer class="app-footer">
+        <p>ออกแบบและพัฒนาโดย <span>ดร.นพ.ชุมพล นุชผ่อง</span></p>
+    </footer>
+</body>
+
+</html>
