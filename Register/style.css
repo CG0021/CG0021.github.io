@@ -1,0 +1,183 @@
+/* ----- base ----- */
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* ----- scroll progress bar ----- */
+#scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  width: 0%;
+  z-index: 9999;
+  transition: width 0.08s linear;
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+}
+
+/* ----- fade-in-up animation (intersection observer) ----- */
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1),
+    transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* stagger children */
+.stagger-children>* {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.stagger-children.visible>*:nth-child(1) {
+  transition-delay: 0.05s;
+}
+.stagger-children.visible>*:nth-child(2) {
+  transition-delay: 0.12s;
+}
+.stagger-children.visible>*:nth-child(3) {
+  transition-delay: 0.19s;
+}
+.stagger-children.visible>*:nth-child(4) {
+  transition-delay: 0.26s;
+}
+.stagger-children.visible>*:nth-child(5) {
+  transition-delay: 0.33s;
+}
+.stagger-children.visible>*:nth-child(6) {
+  transition-delay: 0.40s;
+}
+.stagger-children.visible>* {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ----- cards hover lift ----- */
+.card-lift {
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -12px rgba(37, 99, 235, 0.25);
+}
+
+/* ----- button hover scale ----- */
+.btn-scale {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-scale:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}
+
+/* ----- pulse (for payment warning) ----- */
+@keyframes pulse-soft {
+  0%,
+  100% {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+  }
+  50% {
+    background-color: #fde68a;
+    border-color: #d97706;
+  }
+}
+.pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* ----- corner handles (decorative) ----- */
+.corner-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background-color: #2563eb;
+}
+.corner-tl {
+  top: -7px;
+  left: -7px;
+}
+.corner-tr {
+  top: -7px;
+  right: -7px;
+}
+.corner-bl {
+  bottom: -7px;
+  left: -7px;
+}
+.corner-br {
+  bottom: -7px;
+  right: -7px;
+}
+
+/* ----- status badges ----- */
+.badge-confirmed {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+.badge-waiting {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+.badge-other {
+  background: #e2e8f0;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+/* ----- toast container ----- */
+#toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 90vw;
+  pointer-events: none;
+}
+#toast-container>* {
+  pointer-events: auto;
+}
+
+/* ----- misc ----- */
+.font-mono {
+  font-family: 'Sarabun', sans-serif;
+}
+.grid-pattern {
+  background-image: linear-gradient(to right, rgba(37, 99, 235, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* ----- mobile nav toggle icon animation (optional) ----- */
+#menuToggle i {
+  transition: transform 0.2s;
+}
+#menuToggle.active i {
+  transform: rotate(90deg);
+}

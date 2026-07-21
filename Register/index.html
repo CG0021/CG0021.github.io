@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uniquest MSU · สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Sarabun', 'sans-serif'] },
+          colors: { brand: { blue: '#2563eb', light: '#eff6ff' } }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- SCROLL PROGRESS BAR -->
+  <div id="scroll-progress"></div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- ===== HEADER ===== -->
+  <header id="main-header" class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-shadow duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-12 h-12 rounded-full bg-white p-1 flex items-center justify-center border-2 border-brand-blue shadow-md transition-transform group-hover:scale-105">
+          <img src="Logo.png" onerror="this.src='https://placehold.co/100x100/1e3a8a/ffffff?text=MSU'" alt="MSU" class="w-full h-full object-contain" />
+        </div>
+        <div class="flex flex-col">
+          <span class="text-[11px] text-brand-blue tracking-widest font-semibold">// UNIQUEST MSU</span>
+          <span class="text-slate-900 font-bold text-sm sm:text-base leading-tight">ระบบลงทะเบียนอบรม มมส. </span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden lg:flex items-center gap-1 text-xs tracking-wide">
+        <button onclick="showSection('courses-sec', this)" class="nav-btn active px-3 py-2 text-slate-700 hover:text-brand-blue hover:bg-slate-100 rounded transition-all font-semibold flex items-center gap-1.5">
+          <span class="text-brand-blue font-bold">01.</span> หลักสูตร
+        </button>
+        <button onclick="showSection('register-sec', this)" class="nav-btn px-3 py-2 text-slate-700 hover:text-brand-blue hover:bg-slate-100 rounded transition-all font-semibold flex items-center gap-1.5">
+          <span class="text-brand-blue font-bold">02.</span> ลงทะเบียน
+        </button>
+        <button onclick="showSection('lookup-sec', this)" class="nav-btn px-3 py-2 text-slate-700 hover:text-brand-blue hover:bg-slate-100 rounded transition-all font-semibold flex items-center gap-1.5">
+          <span class="text-brand-blue font-bold">03.</span> ตรวจสอบ/ส่งสลิป
+        </button>
+        <button onclick="showSection('payment-sec', this)" class="nav-btn px-3 py-2 text-slate-700 hover:text-brand-blue hover:bg-slate-100 rounded transition-all font-semibold flex items-center gap-1.5">
+          <span class="text-brand-blue font-bold">04.</span> ชำระเงิน
+        </button>
+        <button onclick="showSection('contact-sec', this)" class="nav-btn px-3 py-2 text-slate-700 hover:text-brand-blue hover:bg-slate-100 rounded transition-all font-semibold flex items-center gap-1.5">
+          <span class="text-brand-blue font-bold">05.</span> ติดต่อเรา
+        </button>
+        <button onclick="showSection('hospital-sec', this)" class="nav-btn px-3 py-2 text-brand-blue bg-brand-light border border-brand-blue/30 hover:bg-brand-blue hover:text-white rounded transition-all font-semibold flex items-center gap-1.5">
+          <span class="text-amber-500"><i class="fa-solid fa-hospital"></i></span> 06. สนับสนุนหน่วยงาน
+        </button>
+      </nav>
+
+      <!-- Mobile toggle -->
+      <button id="menuToggle" class="lg:hidden text-slate-700 hover:text-brand-blue p-2 text-xl focus:outline-none">
+        <i class="fa-solid fa-bars-staggered"></i>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden lg:hidden bg-white/95 border-b border-slate-200 px-4 py-4 text-sm flex flex-col gap-1">
+      <button onclick="showSection('courses-sec', this)" class="nav-btn-m text-left px-3 py-2 hover:bg-brand-light hover:text-brand-blue rounded flex items-center gap-2">
+        <span class="text-brand-blue font-bold">01.</span> หลักสูตร
+      </button>
+      <button onclick="showSection('register-sec', this)" class="nav-btn-m text-left px-3 py-2 hover:bg-brand-light hover:text-brand-blue rounded flex items-center gap-2">
+        <span class="text-brand-blue font-bold">02.</span> ลงทะเบียน
+      </button>
+      <button onclick="showSection('lookup-sec', this)" class="nav-btn-m text-left px-3 py-2 hover:bg-brand-light hover:text-brand-blue rounded flex items-center gap-2">
+        <span class="text-brand-blue font-bold">03.</span> ตรวจสอบ/ส่งสลิป
+      </button>
+      <button onclick="showSection('payment-sec', this)" class="nav-btn-m text-left px-3 py-2 hover:bg-brand-light hover:text-brand-blue rounded flex items-center gap-2">
+        <span class="text-brand-blue font-bold">04.</span> ชำระเงิน
+      </button>
+      <button onclick="showSection('contact-sec', this)" class="nav-btn-m text-left px-3 py-2 hover:bg-brand-light hover:text-brand-blue rounded flex items-center gap-2">
+        <span class="text-brand-blue font-bold">05.</span> ติดต่อเรา
+      </button>
+      <button onclick="showSection('hospital-sec', this)" class="nav-btn-m text-left px-3 py-2 text-brand-blue bg-brand-light hover:bg-brand-blue hover:text-white rounded flex items-center gap-2 font-bold">
+        <span class="text-amber-500"><i class="fa-solid fa-hospital"></i></span> 06. ระบบ รพ.
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT (grid background) ===== -->
+  <main class="grid-pattern pt-4 pb-10 px-4 sm:px-6 lg:px-8">
+
+    <!-- ===== HERO ===== -->
+    <div id="hero-section" class="max-w-5xl mx-auto my-6 relative">
+
+      <!-- decorative pixels -->
+      <div class="absolute -top-6 left-10 flex gap-1 z-0 opacity-80">
+        <span class="w-5 h-5 bg-brand-blue inline-block"></span>
+        <span class="w-5 h-5 bg-blue-500 inline-block"></span>
+        <span class="w-5 h-5 bg-blue-400 inline-block"></span>
+      </div>
+
+      <div class="relative bg-white border-2 border-brand-blue shadow-xl p-8 sm:p-14 my-4">
+        <!-- corner handles -->
+        <div class="corner-handle corner-tl"></div>
+        <div class="corner-handle corner-tr"></div>
+        <div class="corner-handle corner-bl"></div>
+        <div class="corner-handle corner-br"></div>
+
+        <div class="text-center font-mono text-xs font-semibold text-brand-blue uppercase tracking-widest mb-6">
+          // ACADEMIC PORTAL · UNIQUEST
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl lg:text-2xl font-extrabold text-center tracking-tight text-slate-950 leading-tight mb-4">
+          โครงการอบรมเชิงปฏิบัติการ<br class="sm:hidden" />
+          <span class="font-bold text-brand-blue bg-brand-light border-2 border-brand-blue px-1 py-0.5 inline-block my-1">
+            "การพัฒนาคุณภาพและประสิทธิภาพการเงินการคลังโรงพยาบาล"
+          </span>
+        </h1>
+
+        <p class="text-center text-slate-600 font-medium text-base sm:text-lg max-w-2xl mx-auto mb-8">
+          ระบบลงทะเบียนอบรม<br class="hidden sm:inline" />
+          สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button onclick="showSection('courses-sec')" class="btn-scale w-full sm:w-auto font-bold text-xs uppercase tracking-wider bg-brand-blue hover:bg-blue-700 text-white px-8 py-4 flex items-center justify-center gap-3 border border-brand-blue shadow-md">
+            <span class="w-2.5 h-2.5 bg-white inline-block"></span>
+            เลือกหลักสูตร
+          </button>
+          <button onclick="showSection('lookup-sec')" class="btn-scale w-full sm:w-auto font-bold text-xs uppercase tracking-wider bg-slate-50 hover:bg-slate-100 text-slate-800 px-6 py-4 flex items-center justify-center gap-2 border border-slate-300">
+            <i class="fa-solid fa-magnifying-glass text-brand-blue"></i>
+            ตรวจสอบสถานะ
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-center gap-1 -mt-2 relative z-0">
+        <span class="w-5 h-5 bg-blue-400 inline-block"></span>
+        <span class="w-5 h-5 bg-blue-500 inline-block"></span>
+        <span class="w-5 h-5 bg-brand-blue inline-block"></span>
+        <span class="w-5 h-5 bg-blue-500 inline-block"></span>
+      </div>
+    </div>
+
+    <!-- ===== SECTIONS ===== -->
+    <div class="max-w-6xl mx-auto mt-4 space-y-12">
+
+      <!-- 01. COURSES -->
+      <section id="courses-sec" class="content-section bg-white border border-slate-200 shadow-xl p-6 sm:p-10 fade-up">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-brand-blue pb-4 mb-8 gap-2">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 flex items-center gap-3">
+            <span class="font-mono text-brand-blue text-xl font-bold">// 01</span>
+            หลักสูตรเปิดรับสมัคร
+          </h2>
+          <span class="font-mono text-xs text-brand-blue bg-brand-light px-3 py-1 border border-brand-blue/30 font-semibold">ACTIVE</span>
+        </div>
+
+        <div id="courses-loading" class="text-center py-16">
+          <i class="fa-solid fa-gear fa-spin text-3xl text-brand-blue mb-3"></i>
+          <p class="text-sm text-slate-600">กำลังโหลดข้อมูลหลักสูตร...</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 stagger-children" id="coursesGrid" style="display:none;">
+          <!-- dynamic -->
+        </div>
+      </section>
+
+      <!-- 02. REGISTER -->
+      <section id="register-sec" class="content-section bg-white border border-slate-200 shadow-xl p-6 sm:p-10 fade-up" style="display:none;">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-brand-blue pb-4 mb-8 gap-2">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 flex items-center gap-3">
+            <span class="font-mono text-brand-blue text-xl font-bold">// 02</span>
+            ลงทะเบียน
+          </h2>
+          <span class="font-mono text-xs text-brand-blue bg-brand-light px-3 py-1 border border-brand-blue/30 font-semibold">REGISTER</span>
+        </div>
+
+        <form id="regForm" onsubmit="submitRegistration(event)" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">เลือกหลักสูตร *</label>
+              <select id="regCourse" required onchange="updateCourseDate(this)" class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none transition">
+                <option value="" disabled selected>-- กรุณาเลือก --</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">เลือกวันที่อบรม *</label>
+              <select id="regDate" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none transition">
+                <option value="" disabled selected>-- เลือกหลักสูตรก่อน --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">เลขบัตรประชาชน *</label>
+              <input type="text" id="citizenId" pattern="\d{13}" maxlength="13" placeholder="13 หลัก" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none font-mono">
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">เบอร์โทร *</label>
+              <input type="tel" id="phone" placeholder="0812345678" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none font-mono">
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">คำนำหน้า *</label>
+              <input type="text" id="prefix" list="prefixList" placeholder="นาย / นาง / ..." required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none">
+              <datalist id="prefixList"><option value="นาย"><option value="นาง"><option value="นางสาว"><option value="นพ."><option value="พญ."></datalist>
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">ชื่อจริง *</label>
+              <input type="text" id="firstName" placeholder="ชื่อ" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">นามสกุล *</label>
+              <input type="text" id="lastName" placeholder="นามสกุล" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">ตำแหน่ง *</label>
+              <input type="text" id="position" placeholder="ตำแหน่ง" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">หน่วยงาน *</label>
+              <input type="text" id="organization" placeholder="รพ., สสอ., ..." required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">จังหวัด *</label>
+              <select id="province" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none">
+                <option value="" disabled selected>-- เลือกจังหวัด --</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">เลขผู้เสียภาษีหน่วยงาน *</label>
+              <input type="text" id="taxId" pattern="\d{13}" maxlength="13" placeholder="13 หลัก" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none font-mono">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">ที่อยู่ใบเสร็จ *</label>
+              <textarea id="taxAddress" rows="3" placeholder="ที่อยู่หน่วยงาน" required class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none"></textarea>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">หมายเหตุ</label>
+              <textarea id="otherNotes" rows="2" placeholder="เพิ่มเติม" class="w-full bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-sm p-3.5 outline-none"></textarea>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-slate-200">
+            <button type="submit" id="submitBtn" class="btn-scale w-full sm:w-auto font-bold text-xs uppercase tracking-wider bg-brand-blue hover:bg-blue-700 text-white px-8 py-4 flex items-center justify-center gap-2 border border-brand-blue shadow-md">
+              <i class="fa-solid fa-paper-plane"></i> บันทึกการลงทะเบียน
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 03. LOOKUP -->
+      <section id="lookup-sec" class="content-section bg-white border border-slate-200 shadow-xl p-6 sm:p-10 fade-up" style="display:none;">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-brand-blue pb-4 mb-8 gap-2">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 flex items-center gap-3">
+            <span class="font-mono text-brand-blue text-xl font-bold">// 03</span>
+            ตรวจสอบ / ส่งสลิป
+          </h2>
+          <span class="font-mono text-xs text-brand-blue bg-brand-light px-3 py-1 border border-brand-blue/30 font-semibold">VERIFY</span>
+        </div>
+
+        <p class="text-slate-600 text-sm mb-6">ป้อน <strong>เลขบัตรประชาชน</strong> หรือ <strong>เบอร์โทร</strong> เพื่อค้นหา</p>
+        <div class="flex flex-col sm:flex-row gap-3 mb-8">
+          <input type="text" id="searchQuery" placeholder="เลขบัตร 13 หลัก หรือ เบอร์โทร" class="flex-grow bg-slate-50 border border-slate-300 focus:border-brand-blue focus:bg-white text-base p-3.5 outline-none font-mono">
+          <button onclick="searchRegistration()" class="btn-scale font-bold text-xs uppercase tracking-wider bg-brand-blue hover:bg-blue-700 text-white px-8 py-3.5 flex items-center justify-center gap-2 border border-brand-blue shrink-0 shadow-sm">
+            <i class="fa-solid fa-search"></i> ค้นหา
+          </button>
+        </div>
+
+        <div id="search-loading" class="text-center py-10" style="display:none;">
+          <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-blue mb-2"></i>
+          <p class="text-xs text-slate-500">กำลังค้นหา...</p>
+        </div>
+
+        <div id="searchResults" style="display:none;"></div>
+      </section>
+
+      <!-- 04. PAYMENT -->
+      <section id="payment-sec" class="content-section bg-white border border-slate-200 shadow-xl p-6 sm:p-10 fade-up" style="display:none;">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-brand-blue pb-4 mb-8 gap-2">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 flex items-center gap-3">
+            <span class="font-mono text-brand-blue text-xl font-bold">// 04</span>
+            ช่องทางชำระเงิน
+          </h2>
+          <span class="font-mono text-xs text-brand-blue bg-brand-light px-3 py-1 border border-brand-blue/30 font-semibold">PAYMENT</span>
+        </div>
+
+        <!-- PAYMENT WARNING (pulse) -->
+        <div class="pulse-soft border-2 border-amber-500 bg-amber-50 p-5 mb-8 flex items-start gap-4 shadow-md rounded-none">
+          <div class="text-3xl text-amber-600 shrink-0 mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="font-mono text-xs font-bold uppercase tracking-wider text-amber-700 mb-1 flex items-center gap-2">
+              <i class="fa-regular fa-clock"></i> ก่อนโอนเงิน โปรดตรวจสอบ
+            </div>
+            <p class="text-amber-800 text-sm font-semibold leading-relaxed">
+              <span class="text-amber-900">⚠️</span>
+              <strong>สอบถามสถานะหลักสูตร</strong> หรือ
+              <strong>ตรวจสอบสถานะการจัดอบรม</strong>
+              ของหลักสูตรที่สนใจก่อนโอน
+              <span class="block text-xs text-amber-700 mt-1 font-medium">
+                <i class="fa-regular fa-circle-check"></i> ดูที่เมนู
+                <button onclick="showSection('courses-sec')" class="text-brand-blue font-bold underline hover:text-blue-800">
+                  01. หลักสูตร
+                </button>
+                — ถ้าสถานะเป็น <span class="bg-amber-200 px-1.5 py-0.5 border border-amber-400 font-bold">รอจำนวนผู้สมัครครบจำนวน</span> กรุณาติดต่อสอบถาม
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <!-- QR + Bank -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          <div class="lg:col-span-5 bg-slate-50 border-2 border-brand-blue p-6 flex flex-col items-center justify-center text-center shadow-md">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">สแกน QR Code ชำระค่าลงทะเบียน</h3>
+            <div class="bg-white p-3 border-2 border-slate-200 shadow-inner inline-block">
+              <img src="Qrcodepayment.png" onerror="this.src='https://placehold.co/300x300/2563eb/ffffff?text=QR+CODE'" alt="QR" class="w-56 h-56 object-contain">
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 text-white p-6 sm:p-8 border-2 border-brand-blue relative overflow-hidden shadow-xl flex flex-col justify-between">
+            <div class="absolute -right-10 -bottom-10 text-white/10 text-9xl pointer-events-none"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="relative z-10 flex flex-col sm:flex-row sm:items-start gap-5">
+              <div class="w-14 h-14 bg-white text-brand-blue text-2xl flex items-center justify-center shrink-0 border border-blue-200 shadow-md"><i class="fa-solid fa-university"></i></div>
+              <div class="flex-grow">
+                <div class="font-mono text-xs text-blue-200 uppercase tracking-widest font-semibold mb-1">// BANK TRANSFER</div>
+                <h3 class="text-xl sm:text-2xl font-bold text-white mb-2">ธนาคารกรุงไทย</h3>
+                <div class="font-mono text-2xl sm:text-3xl font-bold text-blue-200 tracking-wider mb-2">954-0-13891-4</div>
+                <p class="text-blue-50 text-sm">ชื่อบัญชี: <strong>สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</strong></p>
+              </div>
+            </div>
+            <div class="relative z-10 pt-4 mt-6 border-t border-blue-500/40">
+              <p class="text-blue-200/90 text-xs italic">* หลังโอนแล้ว แนบสลิปที่เมนู <strong class="text-white">03. ตรวจสอบ/ส่งสลิป</strong></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="bg-slate-50 border border-slate-200 p-6">
+          <h4 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-900 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-brand-blue"></i> ขั้นตอนยืนยันการชำระเงิน
+          </h4>
+          <ol class="space-y-3 text-slate-700 text-sm list-decimal list-inside font-medium">
+            <li class="pl-2">โอนเงินค่าลงทะเบียน</li>
+            <li class="pl-2">เข้าเมนู <button onclick="showSection('lookup-sec')" class="text-brand-blue font-bold underline font-mono text-xs">03. ตรวจสอบ/ส่งสลิป</button></li>
+            <li class="pl-2">กรอกเลขบัตรหรือเบอร์โทร ค้นหาชื่อ</li>
+            <li class="pl-2">กดปุ่ม <strong>[ + ส่งสลิป ]</strong> อัปโหลดหลักฐาน</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- 05. CONTACT -->
+      <section id="contact-sec" class="content-section bg-white border border-slate-200 shadow-xl p-6 sm:p-10 fade-up" style="display:none;">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-slate-900 pb-4 mb-8 gap-2">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 flex items-center gap-3">
+            <span class="font-mono text-brand-blue text-xl font-bold">// 05</span>
+            ติดต่อเรา
+          </h2>
+          <span class="font-mono text-xs text-slate-500 bg-slate-100 px-3 py-1 border border-slate-300">CONTACT</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-slate-50 border border-slate-200 p-6 card-lift">
+            <span class="font-mono text-xs text-brand-blue font-bold block mb-1">// ACADEMIC DIRECTOR</span>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">ว่าที่ร้อยตรีหญิงเดือนเพ็ญ ดรพิลา</h3>
+            <p class="text-xs text-slate-500 mb-4">ฝ่ายอำนวยการและทะเบียน</p>
+            <div class="space-y-1 font-mono text-sm border-t border-slate-200 pt-3">
+              <a href="tel:0821171663" class="flex items-center gap-2 text-slate-700 hover:text-brand-blue"><i class="fa-solid fa-phone text-brand-blue"></i> 08 2117 1663</a>
+              <a href="tel:0896234223" class="flex items-center gap-2 text-slate-700 hover:text-brand-blue"><i class="fa-solid fa-phone text-brand-blue"></i> 08 9623 4223</a>
+            </div>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 p-6 card-lift">
+            <span class="font-mono text-xs text-brand-blue font-bold block mb-1">// COORDINATION</span>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">คุณทิวากร นุ่มนิ่ม</h3>
+            <p class="text-xs text-slate-500 mb-4">ฝ่ายประสานงานและสิทธิประโยชน์</p>
+            <div class="font-mono text-sm border-t border-slate-200 pt-3">
+              <a href="tel:0956375509" class="flex items-center gap-2 text-slate-700 hover:text-brand-blue"><i class="fa-solid fa-phone text-brand-blue"></i> 09 5637 5509</a>
+            </div>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 p-6 card-lift">
+            <span class="font-mono text-xs text-brand-blue font-bold block mb-1">// ACADEMIC & LOCATION</span>
+            <h3 class="font-bold text-slate-900 text-lg mb-1">คุณสมเกียรติ เจริญธนวุฒิ</h3>
+            <p class="text-xs text-slate-500 mb-4">ฝ่ายวิชาการและสถานที่</p>
+            <div class="font-mono text-sm border-t border-slate-200 pt-3">
+              <a href="tel:0812374585" class="flex items-center gap-2 text-slate-700 hover:text-brand-blue"><i class="fa-solid fa-phone text-brand-blue"></i> 08 1237 4585</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06. HOSPITAL -->
+      <section id="hospital-sec" class="content-section bg-white border border-slate-200 shadow-xl p-6 sm:p-10 fade-up" style="display:none;">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-brand-blue pb-4 mb-8 gap-2">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 flex items-center gap-3">
+            <span class="font-mono text-brand-blue text-xl font-bold">// 06</span>
+            ระบบสนับสนุนโรงพยาบาล
+          </h2>
+          <span class="font-mono text-xs text-amber-800 bg-amber-50 px-3 py-1 border border-amber-300 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid text-amber-600"></i> SUPPORT
+          </span>
+        </div>
+
+        <p class="text-slate-600 text-sm mb-6">
+          ระบบสนับสนุนการเข้าใช้งานสำหรับหน่วยงานโรงพยาบาลและสาธารณสุข
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-slate-50 border-2 border-slate-200 p-6 card-lift hover:border-brand-blue">
+            <div class="w-12 h-12 bg-blue-100 text-brand-blue flex items-center justify-center text-xl font-bold mb-4 border border-blue-300"><i class="fa-solid fa-chart-pie"></i></div>
+            <span class="font-mono text-xs text-brand-blue font-bold block mb-1">// FINANCIAL SYSTEM</span>
+            <h3 class="font-bold text-slate-900 text-lg mb-2">การเงินการคลังโรงพยาบาล</h3>
+            <p class="text-xs text-slate-600 mb-4">ระบบตรวจสอบและบริหารจัดการข้อมูลทางการเงิน การคลังของโรงพยาบาล</p>
+            <a href="#" target="_blank" class="w-full font-bold text-xs uppercase tracking-wider bg-brand-blue hover:bg-blue-700 text-white py-3 transition flex items-center justify-center gap-2">
+              เข้าสู่ระบบ <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </a>
+          </div>
+          <div class="bg-slate-50 border-2 border-slate-200 p-6 card-lift hover:border-brand-blue">
+            <div class="w-12 h-12 bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold mb-4 border border-amber-300"><i class="fa-solid fa-calculator"></i></div>
+            <span class="font-mono text-xs text-amber-600 font-bold block mb-1">// GENERAL LEDGER</span>
+            <h3 class="font-bold text-slate-900 text-lg mb-2">MonthlyGL</h3>
+            <p class="text-xs text-slate-600 mb-4">ระบบรายงานบัญชีแยกประเภททั่วไปรายเดือน และวิเคราะห์งบการเงิน</p>
+            <a href="#" target="_blank" class="w-full font-bold text-xs uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white py-3 transition flex items-center justify-center gap-2">
+              เข้าสู่ระบบ <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </a>
+          </div>
+          <div class="bg-slate-50 border-2 border-slate-200 p-6 card-lift hover:border-brand-blue">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl font-bold mb-4 border border-emerald-300"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <span class="font-mono text-xs text-emerald-600 font-bold block mb-1">// PLAN & INSIGHTS</span>
+            <h3 class="font-bold text-slate-900 text-lg mb-2">PlanInsight</h3>
+            <p class="text-xs text-slate-600 mb-4">ระบบติดตามแผน-ผลเงินบำรุง และวิเคราะห์ประสิทธิภาพแผนเงินบำรุง</p>
+            <a href="#" target="_blank" class="w-full font-bold text-xs uppercase tracking-wider bg-emerald-600 hover:bg-emerald-700 text-white py-3 transition flex items-center justify-center gap-2">
+              เข้าสู่ระบบ <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </a>
+          </div>
+        </div>
+      <!--
+        <div class="bg-slate-50 border border-slate-300 p-6">
+          <h4 class="font-mono text-sm font-bold uppercase tracking-wider text-slate-900 mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-brand-blue"></i> คำแนะนำ
+          </h4>
+          <ul class="space-y-2 text-slate-700 text-xs list-disc list-inside font-medium">
+            <li>ใช้เลขผู้เสียภาษี <strong>954-0-13891-4</strong> สำหรับ e-GP</li>
+            <li>ยกเว้นภาษีมูลค่าเพิ่ม (VAT Exempt)</li>
+            <li>ติดต่อฝ่ายการเงินที่ <strong class="text-brand-blue font-mono">08 1237 4585</strong> เพื่อเอกสารต้นฉบับ</li>
+          </ul>
+        </div>
+        -->
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-slate-100 border-t border-slate-200 text-slate-600 py-4 px-4 font-mono text-xs">
+    <div class="max-w-6xl mx-auto flex justify-end">
+      <div class="text-slate-500 flex flex-col font-medium text-right items-end justify-center">
+        <span>// ว่าที่ร้อยตรีหญิงเดือนเพ็ญ ดรพิลา : ฝ่ายอำนวยการและทะเบียน</span>
+        <span>โทรศัพท์: 08 2117 1663</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== MODALS ===== -->
+
+  <!-- UPLOAD SLIP -->
+  <div id="uploadModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-blue max-w-lg w-full p-6 sm:p-8 relative shadow-2xl">
+      <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      <div class="font-mono text-xs text-brand-blue font-bold mb-1">// UPLOAD SLIP</div>
+      <h3 class="text-xl font-extrabold text-slate-900 mb-4">ส่งหลักฐานการชำระเงิน</h3>
+      <div id="modalInfo" class="bg-slate-50 border border-slate-200 p-3.5 text-xs text-slate-700 font-medium mb-6 space-y-1"></div>
+      <div id="uploadZone" onclick="document.getElementById('slipFile').click()" class="border-2 border-dashed border-slate-300 hover:border-brand-blue bg-slate-50 p-8 text-center cursor-pointer transition">
+        <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
+        <p class="text-sm font-bold text-slate-800">คลิกเพื่อเลือกไฟล์</p>
+        <p class="text-xs text-slate-500 mt-1 font-mono">JPG, PNG, PDF (ไม่เกิน 5MB)</p>
+        <input type="file" id="slipFile" accept="image/*,application/pdf" class="hidden" onchange="handleFileSelect(event)">
+      </div>
+      <div id="filePreview" class="hidden mt-4 text-center">
+        <p id="fileNameDisplay" class="font-mono text-xs text-brand-blue font-bold break-all bg-brand-light p-2 border border-brand-blue/30 mb-4"></p>
+        <button onclick="confirmUpload()" class="w-full font-bold text-xs uppercase tracking-wider bg-brand-blue hover:bg-blue-700 text-white py-3 transition border border-brand-blue shadow-sm">
+          <i class="fa-solid fa-check"></i> ยืนยันอัปโหลด
+        </button>
+      </div>
+      <div id="uploadStatus" class="hidden mt-4 text-center py-4">
+        <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-blue mb-2"></i>
+        <p class="font-mono text-xs text-slate-600">กำลังอัปโหลด...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISBURSEMENT (auto-approve) -->
+  <div id="disbursementModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-blue max-w-3xl w-full p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+      <button onclick="closeDisbursementModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 text-xl print:hidden"><i class="fa-solid fa-xmark"></i></button>
+      <div class="font-mono text-xs text-brand-blue font-bold mb-1 print:hidden">// DISBURSEMENT FORM</div>
+      <h3 class="text-xl font-extrabold text-slate-900 mb-4 print:hidden">เอกสารเบิกจ่าย (อนุมัติอัตโนมัติ)</h3>
+
+      <div id="printableDisbursementArea" class="border border-slate-300 p-8 bg-white text-slate-900 space-y-6">
+        <div class="text-center border-b pb-4 border-slate-300">
+          <h2 class="text-xl font-bold text-slate-900">ใบอนุมัติเข้าร่วมอบรมและเบิกจ่าย</h2>
+          <p class="text-xs text-slate-600 mt-1">สำนักบริการวิชาการ มหาวิทยาลัยมหาสารคาม</p>
+          <div class="mt-2 inline-block bg-emerald-50 border-2 border-emerald-500 px-4 py-1.5 text-emerald-800 font-bold text-sm">
+            <i class="fa-solid fa-circle-check text-emerald-600 mr-1.5"></i> อนุมัติทันที (Auto-Approved)
+          </div>
+        </div>
+
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between font-mono text-xs text-slate-500">
+            <span>อ้างอิง: MSU-ACAD-2026</span>
+            <span id="docCurrentDate">วันที่: -</span>
+          </div>
+          <div class="bg-slate-50 p-4 border border-slate-200 rounded space-y-2 text-xs">
+            <p><strong>เรียน:</strong> ผู้อำนวยการโรงพยาบาล / หัวหน้าหน่วยงาน</p>
+            <p><strong>เรื่อง:</strong> แจ้งอนุมัติส่งบุคลากรเข้าร่วมอบรม</p>
+            <p id="docParticipantName"><strong>ผู้เข้าร่วม:</strong> -</p>
+            <p id="docOrganization"><strong>หน่วยงาน:</strong> -</p>
+            <p id="docCourse"><strong>หลักสูตร:</strong> -</p>
+            <p id="docDate"><strong>วันที่อบรม:</strong> -</p>
+            <p id="docTaxInfo"><strong>เลขผู้เสียภาษีหน่วยงานจัด:</strong> 954-0-13891-4</p>
+          </div>
+          <div class="border-2 border-emerald-500 bg-emerald-50 p-4 text-emerald-900 text-xs font-medium">
+            <div class="flex items-start gap-2">
+              <i class="fa-solid fa-check-circle text-emerald-600 text-base mt-0.5"></i>
+              <div>
+                <strong>ระบบอนุมัติอัตโนมัติ</strong> — เอกสารนี้ถือเป็นหลักฐานการอนุมัติ โดยไม่ต้องลงนาม
+                <span class="block text-emerald-700 mt-1 text-[11px]"><i class="fa-regular fa-clock"></i> วันที่อนุมัติ: <span id="docApprovalDate">-</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="border border-slate-300 p-4 text-xs space-y-2">
+            <p class="font-bold text-slate-900">วัตถุประสงค์:</p>
+            <div class="grid grid-cols-3 gap-2 text-slate-700">
+              <label class="flex items-center gap-1.5"><input type="checkbox" checked disabled> [✓] พัสดุ</label>
+              <label class="flex items-center gap-1.5"><input type="checkbox" checked disabled> [✓] บัญชี/การเงิน</label>
+              <label class="flex items-center gap-1.5"><input type="checkbox" checked disabled> [✓] คลัง / HRD</label>
+            </div>
+          </div>
+        </div>
+        <div class="pt-4 border-t-2 border-emerald-500 text-center text-xs text-slate-600">
+          <div class="inline-block bg-emerald-100 border border-emerald-400 px-6 py-2 text-emerald-800 font-bold">
+            <i class="fa-regular fa-circle-check mr-2"></i> อนุมัติโดยระบบ — ไม่ต้องลงนาม
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-slate-200 print:hidden">
+        <button onclick="closeDisbursementModal()" class="font-bold text-xs uppercase tracking-wider bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3">ปิด</button>
+        <button onclick="window.print()" class="font-bold text-xs uppercase tracking-wider bg-brand-blue hover:bg-blue-700 text-white px-6 py-3 shadow-sm flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> พิมพ์ PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BULK IMPORT -->
+  <div id="bulkImportModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-blue max-w-xl w-full p-6 sm:p-8 relative shadow-2xl">
+      <button onclick="closeBulkImportModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      <div class="font-mono text-xs text-emerald-600 font-bold mb-1">// BULK CSV IMPORT</div>
+      <h3 class="text-xl font-extrabold text-slate-900 mb-4">นำเข้าข้อมูลกลุ่ม (CSV)</h3>
+      <div class="bg-slate-50 border border-slate-200 p-4 text-xs text-slate-700 mb-4 space-y-2">
+        <p><strong>โครงสร้าง CSV:</strong></p>
+        <p class="font-mono bg-white p-2 border text-[11px] overflow-x-auto text-brand-blue">Prefix,FirstName,LastName,CitizenID,Phone,Position,Organization,Province,TaxID</p>
+      </div>
+      <div class="border-2 border-dashed border-slate-300 p-6 text-center bg-slate-50 hover:border-emerald-600 cursor-pointer transition" onclick="document.getElementById('csvFileInput').click()">
+        <i class="fa-solid fa-file-csv text-4xl text-emerald-600 mb-2"></i>
+        <p class="text-sm font-bold text-slate-800">คลิกเลือกไฟล์ CSV</p>
+        <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="processBulkCsv(event)">
+      </div>
+      <div id="bulkCsvPreview" class="hidden mt-4 text-xs font-mono text-emerald-700 bg-emerald-50 p-3 border border-emerald-300"></div>
+      <div class="flex justify-end gap-3 pt-6 border-t border-slate-200 mt-6">
+        <button onclick="closeBulkImportModal()" class="font-bold text-xs uppercase tracking-wider bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3">ยกเลิก</button>
+        <button id="startBulkBtn" onclick="submitBulkRegistration()" disabled class="font-bold text-xs uppercase tracking-wider bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-6 py-3 shadow-sm flex items-center gap-2">
+          <i class="fa-solid fa-upload"></i> นำเข้า
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white border-2 border-brand-blue max-w-2xl w-full p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+      <button onclick="closeEditModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      <div class="font-mono text-xs text-brand-blue font-bold mb-1">// EDIT RECORD</div>
+      <h3 class="text-xl font-extrabold text-slate-900 mb-6">แก้ไขข้อมูล</h3>
+      <form id="editForm" onsubmit="submitEdit(event)" class="space-y-4">
+        <input type="hidden" id="editRowNumber">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">หลักสูตร *</label>
+            <select id="editCourse" required onchange="updateEditCourseDate(this)" class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none focus:border-brand-blue">
+              <option value="" disabled selected>-- เลือก --</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">วันที่อบรม *</label>
+            <select id="editDate" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none focus:border-brand-blue">
+              <option value="" disabled selected>-- เลือกหลักสูตรก่อน --</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">เลขบัตร *</label>
+            <input type="text" id="editCitizenId" pattern="\d{13}" maxlength="13" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none font-mono">
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">เบอร์โทร *</label>
+            <input type="tel" id="editPhone" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none font-mono">
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">คำนำหน้า *</label>
+            <input type="text" id="editPrefix" list="prefixList" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none">
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">ชื่อจริง *</label>
+            <input type="text" id="editFirstName" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none">
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">นามสกุล *</label>
+            <input type="text" id="editLastName" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none">
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">ตำแหน่ง *</label>
+            <input type="text" id="editPosition" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none">
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">หน่วยงาน *</label>
+            <input type="text" id="editOrganization" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none">
+          </div>
+          <div>
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">จังหวัด *</label>
+            <select id="editProvince" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none">
+              <option value="" disabled selected>-- เลือก --</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">เลขผู้เสียภาษี *</label>
+            <input type="text" id="editTaxId" pattern="\d{13}" maxlength="13" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none font-mono">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">ที่อยู่ออกใบเสร็จ *</label>
+            <textarea id="editTaxAddress" rows="2" required class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none"></textarea>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block font-mono text-xs font-semibold text-slate-700 mb-1">หมายเหตุ</label>
+            <textarea id="editOtherNotes" rows="2" class="w-full bg-slate-50 border border-slate-300 text-sm p-3 outline-none"></textarea>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+          <button type="button" onclick="closeEditModal()" class="font-bold text-xs uppercase tracking-wider bg-slate-200 hover:bg-slate-300 text-slate-800 px-6 py-3">ยกเลิก</button>
+          <button type="submit" id="editSubmitBtn" class="font-bold text-xs uppercase tracking-wider bg-brand-blue hover:bg-blue-700 text-white px-6 py-3 shadow-sm">บันทึก</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== JAVASCRIPT ===== -->
+  <script src="script.js"></script>
+
+</body>
+
+</html>
+
+
+
